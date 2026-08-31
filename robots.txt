@@ -1,0 +1,11 @@
+# Agentic Engineering is a public working model and evidence base.
+# Legitimate search and AI agents are welcome to discover and reference it.
+
+User-agent: *
+Allow: /
+
+# Allow Cloudflare AI Search explicitly.
+User-agent: Cloudflare-AI-Search
+Allow: /
+
+Sitemap: https://agenticengineering.science/sitemap.xml
