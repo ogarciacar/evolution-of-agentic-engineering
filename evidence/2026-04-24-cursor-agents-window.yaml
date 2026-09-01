@@ -1,0 +1,29 @@
+source:
+  title: "Agents Window"
+  organization: "Cursor"
+  date: "2026-04-24"
+  url: "https://cursor.com/changelog/04-24-26"
+  source_type: "first-party"
+
+observed:
+  - "Cursor's Agents Window runs many agents across repositories and environments."
+  - "Multitask decomposes work into asynchronous subagents, while worktrees isolate concurrent changes and parallel plans preserve task dependencies."
+  - "Cursor does not publish a credible fleet-wide concurrency number in this source."
+
+mapping:
+  stages: [Selection, Cooperation]
+  conditions: [Execution, Coordination, Context, Verification]
+
+interpretation: >
+  The product surface itself is shifting from a single conversational agent toward supervision, isolation, and composition of parallel work.
+
+model_implication: "SUPPORTS"
+
+what_this_does_not_establish:
+  - "Product support for many agents does not establish fleet-wide organizational operation at comparable scale."
+  - "It does not establish stable Specialization among agents."
+
+open_question: "At what concurrency does isolation and task dependency management become insufficient without stronger orchestration, shared state, and verification mechanisms?"
+
+assessment:
+  assisted_by_ai: true
