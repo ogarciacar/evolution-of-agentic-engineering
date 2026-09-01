@@ -28,6 +28,16 @@ Prefer first-party engineering reports, papers, technical documentation, or othe
 
 Useful analogy from another domain is not evidence for this model.
 
+## Contribution boundaries
+
+The repository has three distinct surfaces:
+
+- **Contributor surface — `evidence/*.yaml`**: evidence proposals are authored here.
+- **Maintainer surface — schema, generator, templates, workflows, protocols, and editorial pages**: changes to the evidence system itself are maintained separately from evidence contributions.
+- **Generated surface — `evidence.html`**: generated from the YAML evidence base and never authored directly.
+
+These ownership boundaries are also expressed in `.github/CODEOWNERS`. CODEOWNERS identifies the maintainer review required for these surfaces; repository merge rules determine whether that review is mandatory.
+
 ## Contribution format
 
 **Contributors only author YAML evidence records. Do not edit `evidence.html` directly.**
