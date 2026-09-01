@@ -1,0 +1,29 @@
+source:
+  title: "Agent Executor: Google's distributed agent runtime"
+  organization: "Google Cloud"
+  date: "2026-05-20"
+  url: "https://cloud.google.com/blog/products/ai-machine-learning/agent-executor-googles-distributed-agent-runtime"
+  source_type: "first-party"
+
+observed:
+  - "Google describes agent workflows lasting hours or days and reliability and efficient production management as an emerging operational problem."
+  - "Google introduced Agent Executor for execution, resumption, and distributed deployment, using event logs and snapshots so long-running agents can survive outages and human-in-the-loop interruptions."
+
+mapping:
+  stages: [Mutation, Selection]
+  conditions: [Execution, Observability, Learning]
+
+interpretation: >
+  Reliability mechanisms that can be tolerated as ad hoc behavior at low scale become infrastructure concerns as autonomy and duration increase.
+
+model_implication: "SUPPORTS"
+
+what_this_does_not_establish:
+  - "It does not establish organization-wide coding-agent adoption at Google."
+  - "It does not establish operation of 1,000 concurrent coding agents."
+  - "Google's first-party description is not independent validation of the model."
+
+open_question: "Which runtime guarantees become necessary as long-running agent workflows move from individual experiments to population-scale engineering systems?"
+
+assessment:
+  assisted_by_ai: true
