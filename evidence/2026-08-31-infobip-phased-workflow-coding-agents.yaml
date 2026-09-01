@@ -5,6 +5,9 @@ source:
   url: "https://arxiv.org/abs/2608.30701"
   source_type: "first-party"
 
+presentation:
+  headline: "Context becomes an engineered workflow"
+
 observed:
   - "Infobip's AI research team reports a four-phase workflow for agent-assisted development: research, planning, task definition, and implementation. Human effort is front-loaded and delegation increases as artifacts mature."
   - "Context management is treated as the central concern. The workflow applies four recurring strategies—write, select, compress, and isolate—to reduce context-related failure modes across phases."
@@ -13,14 +16,27 @@ observed:
   - "The workflow externalizes durable state into artifacts such as Git, task state, and logs so work can be reconstructed across sessions rather than depending on conversational history alone."
   - "The authors identify the absence of established metrics for workflow effectiveness as an open problem; the paper does not provide a controlled comparison showing that the workflow outperforms unstructured delegation."
 
+scale:
+  label: "Evidence boundary"
+  summary: "Practitioner workflow; comparative effectiveness remains unmeasured."
+
 mapping:
   stages: [Selection]
   conditions: [Context, Execution, Verification, Learning]
 
 interpretation: >
-  The report is consistent with Selection because reliable agent operation is treated as a property of the engineering environment around the model: context structure, validated artifacts, bounded tasks, persistent state, and verification practices. It suggests that selection pressure may favor environments that make context bounded, validated, compressible, and reconstructable rather than simply maximizing the amount of context available. Human attention is also concentrated upstream, where errors have greater downstream propagation cost, while delegation increases as uncertainty decreases. The described practice of updating project instructions in response to recurring agent mistakes is an emerging Learning signal because previous failures can change the environment encountered by future executions.
+  Selection may favor environments that make context bounded, validated, compressible
+  and reconstructable rather than simply maximizing available context. Durable state
+  is externalized so fresh sessions can reconstruct sufficient state, while human
+  attention is concentrated where upstream errors have the greatest propagation cost.
 
-model_implication: "SUPPORTS"
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Context, Execution and Verification appear as engineered environmental conditions.
+    Updating project instructions in response to recurring agent mistakes provides an
+    emerging Learning signal, while the paper explicitly leaves workflow effectiveness
+    as an open measurement problem.
 
 what_this_does_not_establish:
   - "The paper does not establish through comparative measurement that the phased workflow produces better engineering outcomes than unstructured agent delegation."
