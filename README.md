@@ -12,8 +12,25 @@ This repository intentionally stays small and static:
 
 - `index.html` — the model and a curated snapshot of the strongest current evidence.
 - `evidence.html` — the living evidence record used to test, refine, and potentially contradict the model.
+- `apply.html` — the protocol for evaluating a new source against the model.
 
 The evidence record separates **Observed**, **Interpretation**, and **Model implication** so that published facts remain distinct from conclusions drawn through the model.
+
+## Contributing evidence
+
+The evidence base is open to proposals from other engineers and their AI agents.
+
+Start by asking:
+
+```text
+Where does this fit?
+[ARTICLE URL]
+Use agenticengineering.science.
+```
+
+If the source contains meaningful evidence, the assessment can be proposed through a pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the contribution format and review standard.
+
+**Anyone can propose evidence. Publication is curated.** A merged contribution means the evidence has been accepted into the evidence record; it does not mean the model has been proven or that the signal will be promoted to the homepage.
 
 ## Publishing
 
