@@ -1,0 +1,19 @@
+# Contributor surface — evidence proposals are authored as YAML records.
+/evidence/*.yaml @ogarciacar
+
+# Maintainer surface — evidence architecture and publication machinery.
+/schema/ @ogarciacar
+/scripts/build-evidence.py @ogarciacar
+/scripts/validate-evidence.py @ogarciacar
+/templates/evidence.html @ogarciacar
+/.github/workflows/evidence.yml @ogarciacar
+
+# Generated surface — never authored directly.
+/evidence.html @ogarciacar
+
+# Editorial and protocol surfaces.
+/index.html @ogarciacar
+/apply.html @ogarciacar
+/contribute.html @ogarciacar
+/CONTRIBUTING.md @ogarciacar
+/.github/CODEOWNERS @ogarciacar
