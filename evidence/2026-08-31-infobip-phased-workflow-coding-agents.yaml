@@ -1,0 +1,35 @@
+source:
+  title: "A Phased Workflow for Operating LLM-Based Coding Agents"
+  organization: "Infobip"
+  date: "2026-08-31"
+  url: "https://arxiv.org/abs/2608.30701"
+  source_type: "first-party"
+
+observed:
+  - "Infobip's AI research team reports a four-phase workflow for agent-assisted development: research, planning, task definition, and implementation. Human effort is front-loaded and delegation increases as artifacts mature."
+  - "Context management is treated as the central concern. The workflow applies four recurring strategies—write, select, compress, and isolate—to reduce context-related failure modes across phases."
+  - "The authors report from practitioner experience that errors in upstream research and planning can compound in later phases, while correcting generated code can introduce bloat and fragility; this motivates earlier human review."
+  - "Research and planning produce validated artifacts before implementation. Tasks carry goals, dependencies, relevant code paths, acceptance criteria, and validation methods, and are intended to be executable in fresh agent sessions."
+  - "The workflow externalizes durable state into artifacts such as Git, task state, and logs so work can be reconstructed across sessions rather than depending on conversational history alone."
+  - "The authors identify the absence of established metrics for workflow effectiveness as an open problem; the paper does not provide a controlled comparison showing that the workflow outperforms unstructured delegation."
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Execution, Verification, Learning]
+
+interpretation: >
+  The report is consistent with Selection because reliable agent operation is treated as a property of the engineering environment around the model: context structure, validated artifacts, bounded tasks, persistent state, and verification practices. It suggests that selection pressure may favor environments that make context bounded, validated, compressible, and reconstructable rather than simply maximizing the amount of context available. Human attention is also concentrated upstream, where errors have greater downstream propagation cost, while delegation increases as uncertainty decreases. The described practice of updating project instructions in response to recurring agent mistakes is an emerging Learning signal because previous failures can change the environment encountered by future executions.
+
+model_implication: "SUPPORTS"
+
+what_this_does_not_establish:
+  - "The paper does not establish through comparative measurement that the phased workflow produces better engineering outcomes than unstructured agent delegation."
+  - "It does not establish organization-wide adoption across Infobip."
+  - "It does not establish large-scale concurrent agent operation or 1,000-agent scale."
+  - "It does not demonstrate Cooperation between coding agents or stable Specialization."
+  - "It does not establish that the four phases are generally optimal or validate the evolutionary sequence proposed by this model."
+
+open_question: "Does structuring agent work around bounded, validated, and reconstructable context measurably reduce the cost and failure rate of acquiring sufficient context compared with unstructured delegation?"
+
+assessment:
+  assisted_by_ai: true
