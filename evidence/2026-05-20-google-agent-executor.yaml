@@ -5,18 +5,34 @@ source:
   url: "https://cloud.google.com/blog/products/ai-machine-learning/agent-executor-googles-distributed-agent-runtime"
   source_type: "first-party"
 
+presentation:
+  headline: "Long-running agents require a runtime"
+
 observed:
   - "Google describes agent workflows lasting hours or days and reliability and efficient production management as an emerging operational problem."
   - "Google introduced Agent Executor for execution, resumption, and distributed deployment, using event logs and snapshots so long-running agents can survive outages and human-in-the-loop interruptions."
 
+scale:
+  label: "Scale signal"
+  summary: >
+    Agent workflows lasting hours or days; Google describes reliability and efficient
+    production management as the emerging operational problem.
+
 mapping:
   stages: [Mutation, Selection]
+  transition:
+    from: Mutation
+    to: Selection
   conditions: [Execution, Observability, Learning]
 
 interpretation: >
   Reliability mechanisms that can be tolerated as ad hoc behavior at low scale become infrastructure concerns as autonomy and duration increase.
 
-model_implication: "SUPPORTS"
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports Selection: the environment increasingly determines which agent
+    configurations remain operationally viable, not merely which model performs best.
 
 what_this_does_not_establish:
   - "It does not establish organization-wide coding-agent adoption at Google."
