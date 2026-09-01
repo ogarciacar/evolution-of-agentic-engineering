@@ -30,9 +30,15 @@ Useful analogy from another domain is not evidence for this model.
 
 ## Contribution format
 
-Create one YAML file under `evidence/` using a descriptive slug, for example:
+Create one YAML file under `evidence/` using the source publication date, organization, and a descriptive source slug:
 
-`evidence/openai-symphony.yaml`
+`evidence/YYYY-MM-DD-<organization>-<source-slug>.yaml`
+
+For example:
+
+`evidence/2026-08-27-uber-efficient-software-factory.yaml`
+
+Use the source publication date, not the contribution date. Keep the date in `source.date` as canonical structured metadata; the filename convention exists to make evidence easier to scan and discover in the repository.
 
 Use this structure:
 
