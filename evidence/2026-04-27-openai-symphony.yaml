@@ -5,19 +5,35 @@ source:
   url: "https://openai.com/index/open-source-codex-orchestration-symphony/"
   source_type: "first-party"
 
+presentation:
+  headline: "Human attention becomes the concurrency ceiling"
+
 observed:
   - "OpenAI reports that engineers could comfortably supervise only three to five Codex sessions at once; beyond that productivity dropped as engineers lost track of work and debugged stalled agents."
   - "Symphony moves coordination to an always-on orchestrator where open tasks receive agents in isolated workspaces and humans review outcomes."
   - "OpenAI reports a 500% increase in landed pull requests on some teams."
 
+scale:
+  label: "Scale signal"
+  summary: >
+    Engineers could comfortably supervise only 3–5 Codex sessions at once;
+    Symphony produced a 500% increase in landed PRs on some teams.
+
 mapping:
   stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
   conditions: [Coordination, Observability, Execution, Verification]
 
 interpretation: >
   Cooperation can begin before rich agent-to-agent collaboration. Independent agents first create a coordination problem; explicit orchestration then allows their work to compose as a system.
 
-model_implication: "REFINES"
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Refines the Selection → Cooperation boundary: coordination infrastructure may be
+    a mechanism through which Selection produces Cooperation.
 
 what_this_does_not_establish:
   - "It does not establish operation of 1,000 concurrent coding agents."

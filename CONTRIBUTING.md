@@ -40,6 +40,8 @@ For example:
 
 Use the source publication date, not the contribution date. Keep the date in `source.date` as canonical structured metadata; the filename convention exists to make evidence easier to scan and discover in the repository.
 
+The YAML record is the canonical source for evidence-specific content displayed in `evidence.html`. Presentation fields preserve editorial labels that should not be inferred by a generator; scale captures a documented scale signal or an important evidence boundary; transitions are explicit when the evidence speaks to movement between stages; and the model implication stores both the verdict and the explanation.
+
 Use this structure:
 
 ```yaml
@@ -50,17 +52,30 @@ source:
   url: ""
   source_type: "first-party"
 
+presentation:
+  headline: ""
+
 observed:
   - ""
 
+scale:
+  label: "Scale signal"
+  summary: ""
+
 mapping:
   stages: []
+  transition:
+    from: Selection
+    to: Cooperation
   conditions: []
 
 interpretation: >
   
 
-model_implication: "SUPPORTS"
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    
 
 what_this_does_not_establish:
   - ""
@@ -71,7 +86,9 @@ assessment:
   assisted_by_ai: true
 ```
 
-`model_implication` must be exactly one of `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`.
+`mapping.transition` is optional. Include it only when the evidence meaningfully informs a transition between stages. Additional transition metadata should be used sparingly and only when it preserves an evidence-specific distinction that the generated view needs to represent.
+
+`model_implication.verdict` must be exactly one of `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`.
 
 Use only the minimum stage and condition mapping supported by the observation. The available stages are Apparition, Mutation, Selection, Cooperation, and Specialization. The Selection conditions are Context, Execution, Verification, Coordination, Observability, Economics, and Learning.
 
@@ -96,7 +113,9 @@ Contradictory evidence is as welcome as supporting evidence.
 
 ## Publication
 
-Accepted evidence may be incorporated into `evidence.html`. Homepage promotion is a separate editorial decision: `index.html` remains a small, curated view of the strongest current signals.
+Accepted evidence may be incorporated into `evidence.html`. The intended architecture is for `evidence.html` to become a generated view of the YAML evidence base. Every evidence-specific statement displayed there should come directly from its YAML record or from deterministic formatting of structured fields; the generator should not invent interpretations or evidence claims.
+
+Homepage promotion is a separate editorial decision: `index.html` remains a small, curated view of the strongest current signals.
 
 **Evidence should accumulate. Attention should not.**
 
