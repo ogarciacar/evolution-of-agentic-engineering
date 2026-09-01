@@ -5,6 +5,9 @@ source:
   url: "https://www.uber.com/gb/en/blog/efficient-software-factory/"
   source_type: "first-party"
 
+presentation:
+  headline: "The software factory selects for complete managed capabilities"
+
 observed:
   - >
     Uber reports that more than 70% of its pull requests are attributed to
@@ -35,24 +38,35 @@ observed:
     of session anti-pattern, each paired with financial impact and a targeted
     remediation.
 
+scale:
+  label: "Scale signal"
+  summary: >
+    More than 70% of PRs attributed to local or cloud agents; 3,600+ agent
+    skills; 30,000+ skill executions/day. Uber reports 7× weekly active users
+    and 9.4× weekly agentic requests from February to August 2026.
+
 mapping:
   stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Selection
+    to: Cooperation
+    adjacent_stage: Specialization
   conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
 
 interpretation: >
-  This is consistent with Selection because Uber evaluates the fitness of a
-  complete managed capability rather than a model alone: the workload,
-  model, context, tools, runtime behavior, verification signals, reliability,
-  and cost are measured together. Outcome-denominated cost makes Economics
-  an explicit selection mechanism alongside quality and reliability. The
-  division of work between primary agents and subagents is a bounded
-  Cooperation signal. Stable managed agents for review, CI repair, visual
-  validation, alert triage, debugging, and maintenance also show operational
-  Specialization through differentiated workloads and evaluation criteria,
-  although the source does not establish that repeated cooperation produced
-  those specializations.
+  Fitness is being evaluated at the level of workload + model + context + tools +
+  runtime + verification + reliability + cost, rather than model quality alone.
+  Economics becomes an explicit selection mechanism, while bounded delegation and
+  stable task-specific managed agents create Cooperation and operational
+  Specialization signals.
 
-model_implication: "REFINES"
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Operational specialization can appear during Selection while Cooperation is still
+    developing. The source does not establish that repeated Cooperation caused those
+    specializations, so it weakens a strictly sequential reading without falsifying
+    the proposed sequence.
 
 what_this_does_not_establish:
   - >
