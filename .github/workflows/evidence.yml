@@ -18,5 +18,10 @@ jobs:
         run: pip install -r requirements.txt
       - name: Build evidence page
         run: python scripts/build-evidence.py
+      - name: Upload generated evidence page
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-evidence-page
+          path: evidence.html
       - name: Verify generated artifact is committed
         run: git diff --exit-code -- evidence.html
