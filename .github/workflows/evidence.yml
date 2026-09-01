@@ -1,0 +1,29 @@
+name: Evidence integrity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Validate evidence records
+        run: python scripts/validate-evidence.py
+      - name: Build evidence page
+        run: python scripts/build-evidence.py
+      - name: Upload generated evidence page
+        uses: actions/upload-artifact@v7
+        with:
+          name: generated-evidence-page
+          path: evidence.html
+      - name: Verify generated artifact is committed
+        run: git diff --exit-code -- evidence.html
