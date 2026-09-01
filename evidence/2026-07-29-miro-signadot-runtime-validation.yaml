@@ -1,0 +1,76 @@
+source:
+  title: "How Miro's AI Team Builds and Tests Agentic Features at Scale with Signadot"
+  organization: "Signadot"
+  date: "2026-07-29"
+  url: "https://www.signadot.com/case-studies/how-miro-builds-and-tests-agentic-features-at-scale/"
+  source_type: "vendor case study"
+
+observed:
+  - >
+    Signadot reports that Miro's coding agents can create on-demand,
+    multi-service test environments, exercise changes end to end against live
+    dependencies and traffic, interact with the product through a browser, and
+    iterate until the change passes before a pull request is opened.
+  - >
+    The case study reports that shared staging previously limited testing to a
+    single agent or developer holding a service at a time. With isolated
+    sandboxes, many agents and engineers can validate changes in parallel
+    without overwriting one another's work.
+  - >
+    Miro's teams built internal skills that teach coding agents to generate an
+    environment specification from a microservice or monolith, integrated
+    sandbox support into an internal administration platform, and wrapped it
+    in an internal CLI for wider engineering use.
+  - >
+    Signadot reports that 50% of Miro teams use sandboxes daily, that roughly
+    fifteen fixed environments are being consolidated to three, and that peak
+    concurrent integration capacity increased approximately tenfold. It also
+    reports projected annual savings of several million dollars from retiring
+    legacy test infrastructure.
+
+mapping:
+  stages: [Selection, Cooperation]
+  conditions: [Execution, Verification, Coordination, Economics]
+
+interpretation: >
+  This is consistent with Selection because the surrounding runtime determines
+  whether agent-generated changes can execute safely, receive realistic
+  end-to-end verification, and scale without proportional growth in shared
+  environments or infrastructure cost. It also provides an early Cooperation
+  signal: isolated execution allows independently operating agents to
+  contribute concurrently through a shared pull-request workflow without
+  interfering with one another. The evidence suggests that runtime isolation
+  and validation can be enabling infrastructure for Cooperation before richer
+  agent-to-agent delegation or state exchange appears.
+
+model_implication: "REFINES"
+
+what_this_does_not_establish:
+  - >
+    The source is a Signadot customer case study containing named Miro quotes;
+    it is not independent validation of the adoption, capacity, or savings
+    claims.
+  - >
+    The reported tenfold integration capacity is not a count of concurrently
+    operating coding agents, and the source does not establish 1,000-agent
+    operation.
+  - >
+    Parallel isolated agents do not establish rich agent-to-agent cooperation,
+    shared reasoning, or delegation.
+  - >
+    The source does not demonstrate stable differentiated agent roles with
+    durable authority and evaluation criteria, or a systematic Learning loop
+    in which failures improve later executions.
+  - >
+    The several-million-dollar annual savings figure is projected rather than
+    reported as realized, and the source does not establish the model's
+    proposed evolutionary sequence.
+
+open_question: >
+  How many coding-agent workflows does Miro operate concurrently, what
+  proportion reach a validated pull request without human correction, and do
+  failures systematically change the skills or environment used by later
+  agents?
+
+assessment:
+  assisted_by_ai: true
