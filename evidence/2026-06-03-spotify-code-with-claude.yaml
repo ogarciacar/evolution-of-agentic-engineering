@@ -5,19 +5,36 @@ source:
   url: "https://engineering.atspotify.com/2026/6/code-with-claude-coding-is-no-longer-the-constraint"
   source_type: "first-party"
 
+presentation:
+  headline: "Coding stops being the constraint"
+
 observed:
   - "Spotify reports operating Honk coding-agent sessions in Kubernetes with trusted tools and CI verification, integrated with fleet orchestration."
   - "Spotify reports more than 2.5 million automated maintenance pull requests merged, with the vast majority auto-merged without human intervention."
   - "Spotify reports a Java migration across backend services completed in three days and describes AI-driven velocity creating 76% more pull requests to review."
 
+scale:
+  label: "Scale signal"
+  summary: >
+    2.5M+ automated maintenance PRs merged; vast majority auto-merged without a human.
+    Honk schedules many agent sessions concurrently in Kubernetes. AI-driven velocity
+    produced 76% more PRs to review.
+
 mapping:
   stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
   conditions: [Execution, Verification, Coordination, Economics]
 
 interpretation: >
-  The evidence is consistent with Selection conditions becoming more important as code production becomes cheaper. Verification, orchestration, platform standardization, and human attention become visible constraints, while concurrent sessions integrated through fleet infrastructure provide an emerging Cooperation signal.
+  Once code production becomes cheap, verification, orchestration and human decision-making become more visible constraints. Existing platform standardization appears to increase agent fitness.
 
-model_implication: "SUPPORTS"
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Strong support for Selection conditions and an emerging Cooperation transition.
+    It also suggests human attention belongs explicitly in the fitness function.
 
 what_this_does_not_establish:
   - "It does not establish operation of 1,000 concurrent coding agents."
