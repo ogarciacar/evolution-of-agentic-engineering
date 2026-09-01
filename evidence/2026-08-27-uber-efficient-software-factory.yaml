@@ -1,0 +1,80 @@
+source:
+  title: "Running a Software Factory Efficiently at Uber Scale"
+  organization: "Uber"
+  date: "2026-08-27"
+  url: "https://www.uber.com/gb/en/blog/efficient-software-factory/"
+  source_type: "first-party"
+
+observed:
+  - >
+    Uber reports that more than 70% of its pull requests are attributed to
+    local or cloud agents, that engineers have created more than 3,600 agent
+    skills, and that those skills execute more than 30,000 times per day.
+    Managed agents perform code review, CI self-healing, end-to-end changes
+    with visual validation, alert triage, debugging, and code maintenance.
+  - >
+    From February to August 2026, Uber reports a sevenfold increase in weekly
+    active users and a 9.4-fold increase in weekly agentic requests. Holding
+    one model fixed, it reports that cost per 1,000 model requests fell nearly
+    34% from its peak and cost per session fell 52% from its June peak.
+  - >
+    Uber decomposes total spend into adoption, engagement, turns, requests,
+    tokens, and token price. For each managed agent it also tracks an
+    outcome-denominated cost, a quality signal such as revert rate, F1, or
+    mean time to recovery, and delivered volume.
+  - >
+    Model selection uses benchmarks assembled from each managed agent's real
+    work and evaluates cost per completed task, output quality, and
+    reliability. Uber reports using an AI Context Graph, tool search,
+    CLI-resolved tool calls, prompt caching, standardized defaults, and code
+    mode to reduce context-search and tool-use overhead.
+  - >
+    Uber reports that a primary model can decompose and evaluate work while
+    lower-cost subagents execute bounded tasks. Live cost counters and a
+    session-analysis dashboard expose spend drivers and identify 16 classes
+    of session anti-pattern, each paired with financial impact and a targeted
+    remediation.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
+
+interpretation: >
+  This is consistent with Selection because Uber evaluates the fitness of a
+  complete managed capability rather than a model alone: the workload,
+  model, context, tools, runtime behavior, verification signals, reliability,
+  and cost are measured together. Outcome-denominated cost makes Economics
+  an explicit selection mechanism alongside quality and reliability. The
+  division of work between primary agents and subagents is a bounded
+  Cooperation signal. Stable managed agents for review, CI repair, visual
+  validation, alert triage, debugging, and maintenance also show operational
+  Specialization through differentiated workloads and evaluation criteria,
+  although the source does not establish that repeated cooperation produced
+  those specializations.
+
+model_implication: "REFINES"
+
+what_this_does_not_establish:
+  - >
+    The source is Uber's own report and does not independently validate its
+    adoption, quality, scale, or cost-reduction claims.
+  - >
+    It does not report 1,000 concurrently operating coding agents or establish
+    that Uber's results generalize to other organizations and codebases.
+  - >
+    It does not demonstrate rich, fleet-wide cooperation among specialized
+    agents or show that repeated cooperation caused specialization.
+  - >
+    It does not establish a mature Learning condition in which failures
+    systematically improve future executions; automated continuous skill
+    improvement is described as work in progress.
+  - >
+    It does not establish the model's proposed evolutionary sequence.
+
+open_question: >
+  Do Uber's task-specialized managed agents repeatedly exchange state and
+  compose outcomes in multi-agent workflows, and does evidence from failed
+  workflows systematically change the environment for subsequent executions?
+
+assessment:
+  assisted_by_ai: true
