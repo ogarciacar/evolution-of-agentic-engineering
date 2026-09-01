@@ -1,0 +1,125 @@
+source:
+  title: "Agentic coding and persistent returns to expertise"
+  organization: "Anthropic"
+  date: "2026-06-16"
+  url: "https://www.anthropic.com/research/claude-code-expertise"
+  source_type: "first-party"
+
+presentation:
+  headline: "Human expertise stays load-bearing while the agent executes"
+
+observed:
+  - >
+    Anthropic analyzed approximately 400,000 interactive Claude Code sessions
+    from approximately 235,000 users between October 2025 and April 2026, using
+    privacy-preserving classifiers built on Claude Sonnet 4.6.
+  - >
+    Users make approximately 70% of planning decisions and Claude makes
+    approximately 80% of execution decisions. A typical session runs about four
+    turns, each prompt triggers about 10 Claude actions and occasionally more
+    than 100, and Claude reads files, edits code, runs commands, and writes
+    about 2,400 words of output per turn.
+  - >
+    Novice sessions average about 5 Claude actions and 600 words per prompt
+    while expert sessions average about 12 actions and 3,200 words. Anthropic
+    reports the difference at p<0.001 and states that it remains significant
+    when controlling for work mode, task value, month, occupation, and model
+    family.
+  - >
+    Verified success, measured from git commits and pull requests matching the
+    work, passing test suites, and explicit confirmation, is 15% for novices and
+    28-33% for intermediate and expert users. At least partial success is 77%
+    versus 91-92%. Most of the gain occurs from novice to intermediate and then
+    flattens. Novices abandon troubled sessions at 19% against 5-7% for
+    intermediate through expert users.
+  - >
+    Domain knowledge matters more than coding background: non-software
+    occupations reach 29% verified success on coding sessions against 34% for
+    software occupations, and all ten largest occupation groups fall within
+    seven percentage points.
+  - >
+    Between October 2025 and April 2026 debugging fell from 33% to 19% of work,
+    operating software rose from 14% to 21%, writing and analysis roughly
+    doubled from about 10% to about 20%, and the estimated value of the average
+    session rose 27%.
+  - >
+    Anthropic excludes headless sessions run as a single prompt via the CLI and
+    describes the excluded non-interactive usage as a substantial share of
+    activity. It states that it cannot measure whether code written in a session
+    is actually used or discarded thereafter, that classifiers remain
+    challenging to validate at scale, that task value estimates are coarse, and
+    that about 30% of sessions lack a classifiable occupation signal.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Approximately 400,000 interactive sessions from approximately 235,000 users
+    over seven months, the largest observation in this record. The unit of
+    observation is a single human-steered session; headless and programmatic
+    usage is excluded and no concurrency figure is reported.
+
+mapping:
+  stages: [Apparition, Selection]
+  conditions: [Context, Execution, Verification, Observability]
+
+interpretation: >
+  Apparition is documented at scale rather than asserted: the agent interprets
+  intent, reads files, edits code, runs commands, and works through errors
+  across chains of about 10 and occasionally more than 100 actions. The
+  Selection content is that the variable separating useful outcomes from
+  abandoned ones is the quality of human direction rather than the agent, and
+  that this gradient did not decay across seven months of model change. Much of
+  the context the agent needs still arrives through the operator, and the
+  verification signal the study itself relies on is git and test evidence.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    The model places human attention in the denominator of agentic-system
+    fitness, as a cost to be reduced. This evidence is consistent with human
+    expertise also acting as an input that raises useful outcome: experts cause
+    roughly double the agent activity per prompt and land verifiable results
+    about twice as often, and the gap persists across model families and months.
+    It also refines the Context condition, since a substantial share of the
+    knowledge an agent uses is supplied by the operator rather than acquired by
+    the agent. This does not falsify the Selection hypothesis; it suggests the
+    human-dependency ceiling described by the 1K forcing function may bind
+    through planning and context supply, not only through verification.
+
+what_this_does_not_establish:
+  - >
+    The source is Anthropic's own study of its own product and does not
+    independently validate its usage, success, or value claims.
+  - >
+    It observes interactive sessions only. Headless and programmatic usage is
+    explicitly excluded and described as substantial, so the source says nothing
+    about orchestrated or non-conversational agent operation.
+  - >
+    It reports no concurrency measurement and establishes nothing about parallel
+    agents, agent fleets, or 1K-agent scale.
+  - >
+    The expertise gradient is correlational. The source does not establish that
+    expertise causes the difference in success.
+  - >
+    Verified success is a lower bound rather than a success rate, since the
+    absence of a git or test signal is not evidence of failure, and Anthropic
+    states it cannot observe whether the resulting code was used or discarded.
+  - >
+    Expertise and occupation are classifier-inferred, the source states that
+    classifiers are challenging to validate at scale, and about 30% of sessions
+    lack a classifiable occupation signal.
+  - >
+    Task value is described as coarse and not intended for literal dollar
+    interpretation, so it does not establish an economics result.
+  - >
+    It does not establish the model's proposed evolutionary sequence.
+
+open_question: >
+  Does the returns-to-expertise gradient survive concurrency? The measured unit
+  is one person steering one agent, so the decisive next observation is whether
+  expert direction still lifts outcomes when a single person supervises many
+  concurrent or headless agents, or whether the supply of expert direction
+  becomes the throughput ceiling the forcing function anticipates.
+
+assessment:
+  assisted_by_ai: true
