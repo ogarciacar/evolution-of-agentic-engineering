@@ -5,19 +5,36 @@ source:
   url: "https://cursor.com/changelog/04-24-26"
   source_type: "first-party"
 
+presentation:
+  headline: "The interface reorganizes around many agents"
+
 observed:
   - "Cursor's Agents Window runs many agents across repositories and environments."
   - "Multitask decomposes work into asynchronous subagents, while worktrees isolate concurrent changes and parallel plans preserve task dependencies."
   - "Cursor does not publish a credible fleet-wide concurrency number in this source."
 
+scale:
+  label: "Scale signal"
+  summary: >
+    Cursor publicly supports many parallel agents and fleets of async subagents;
+    no credible fleet-wide concurrency number is published in these sources.
+
 mapping:
   stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
   conditions: [Execution, Coordination, Context, Verification]
 
 interpretation: >
   The product surface itself is shifting from a single conversational agent toward supervision, isolation, and composition of parallel work.
 
-model_implication: "SUPPORTS"
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports an emerging Cooperation transition, while the absence of public scale
+    numbers is a useful reminder not to equate product capability with demonstrated
+    fleet-scale operation.
 
 what_this_does_not_establish:
   - "Product support for many agents does not establish fleet-wide organizational operation at comparable scale."
