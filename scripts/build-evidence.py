@@ -44,6 +44,8 @@ def render_entry(record: dict) -> str:
     mapping = record["mapping"]
     implication = record["model_implication"]
     published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
+    evidence_id = Path(record["_path"]).stem
+    headline = record["presentation"]["headline"]
 
     chips = []
     transition = transition_label(mapping)
@@ -55,7 +57,7 @@ def render_entry(record: dict) -> str:
 
     observed = "".join(f'<p>{esc(str(item).strip())}</p>' for item in record["observed"])
     scale = record["scale"]
-    return f'''<article class="entry"><div class="date">{esc(published)} · {esc(source["organization"])}</div><div class="evidence"><h3>{esc(record["presentation"]["headline"])}</h3><div class="meta">{"".join(chips)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{observed}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
+    return f'''<article class="entry" id="{esc(evidence_id)}"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["organization"])}</div><button class="copy-signal-link" type="button" aria-label="Copy Scale Signal link" title="Copy Scale Signal link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{"".join(chips)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{observed}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
 
 
 def main() -> None:
