@@ -46,7 +46,6 @@ def render_entry(record: dict) -> str:
     published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
     evidence_id = Path(record["_path"]).stem
     headline = record["presentation"]["headline"]
-    share_text = f'Scale Signal · {source["organization"]} · {published}'
 
     chips = []
     transition = transition_label(mapping)
@@ -58,7 +57,7 @@ def render_entry(record: dict) -> str:
 
     observed = "".join(f'<p>{esc(str(item).strip())}</p>' for item in record["observed"])
     scale = record["scale"]
-    return f'''<article class="entry" id="{esc(evidence_id)}"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["organization"])}</div><button class="share-signal" type="button" aria-label="Share Scale Signal" title="Share Scale Signal" data-share-title="{esc(headline)}" data-share-text="{esc(share_text)}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{"".join(chips)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{observed}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
+    return f'''<article class="entry" id="{esc(evidence_id)}"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["organization"])}</div><button class="copy-signal-link" type="button" aria-label="Copy Scale Signal link" title="Copy Scale Signal link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{"".join(chips)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{observed}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
 
 
 def main() -> None:
