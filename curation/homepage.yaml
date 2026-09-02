@@ -2,12 +2,40 @@
 #
 # Accepted evidence accumulates under evidence/*.yaml. This manifest records the
 # separate editorial decision about which accepted records receive scarce
-# homepage attention. Values are evidence filenames without the .yaml suffix.
-# Order is intentional and represents homepage presentation order. Contributors
-# should not modify this file as part of an evidence proposal.
+# homepage attention. Evidence claims remain canonical in evidence/*.yaml;
+# this file controls only homepage selection, order, labels, and emphasis.
+# Contributors should not modify this file as part of an evidence proposal.
 
 evidence:
-  - 2026-08-31-infobip-phased-workflow-coding-agents
-  - 2026-08-27-uber-efficient-software-factory
-  - 2026-06-03-spotify-code-with-claude
-  - 2026-04-27-openai-symphony
+  - id: 2026-08-31-infobip-phased-workflow-coding-agents
+    signal: "Latest signal · Selection"
+    chips:
+      - {label: Selection, hit: true}
+      - {label: Context, hit: true}
+      - {label: Execution, hit: true}
+      - {label: Verification, hit: true}
+      - {label: "Learning ↗", hit: true}
+  - id: 2026-08-27-uber-efficient-software-factory
+    signal: "Strong signal · model refinement"
+    chips:
+      - {label: Selection, hit: true}
+      - {label: "Cooperation ↗", hit: true}
+      - {label: "Specialization ?", hit: true}
+      - {label: Economics, hit: true}
+  - id: 2026-06-03-spotify-code-with-claude
+    signal: "Strong signal"
+    chips:
+      - {label: Apparition, hit: true}
+      - {label: Mutation, hit: true}
+      - {label: Selection, hit: true}
+      - {label: "Cooperation ↗", hit: true}
+      - {label: "Specialization ?", hit: false}
+  - id: 2026-04-27-openai-symphony
+    title: "OpenAI · Symphony"
+    signal: "Strong signal · boundary refinement"
+    chips:
+      - {label: Apparition, hit: true}
+      - {label: Mutation, hit: true}
+      - {label: Selection, hit: true}
+      - {label: "Cooperation ↗", hit: true}
+      - {label: "Specialization ?", hit: false}
