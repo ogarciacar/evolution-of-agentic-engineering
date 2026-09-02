@@ -12,6 +12,7 @@ This repository intentionally stays small and static:
 
 - `index.html` — the model and a curated snapshot of the strongest current evidence.
 - `evidence.html` — the living evidence record used to test, refine, and potentially contradict the model.
+- `evidence/<signal-id>/` — generated permanent pages for individual Scale Signals.
 - `apply.html` — the protocol for evaluating a new source against the model.
 
 The evidence record separates **Observed**, **Interpretation**, and **Model implication** so that published facts remain distinct from conclusions drawn through the model.
