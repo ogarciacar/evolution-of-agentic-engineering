@@ -28,38 +28,31 @@ def load_record(evidence_id: str) -> dict:
         return yaml.safe_load(handle)
 
 
-def signal_label(record: dict, index: int) -> str:
-    published = date.fromisoformat(str(record["source"]["date"])).strftime("%b %-d, %Y")
-    implication = record["model_implication"]["verdict"]
-    if index == 0:
-        prefix = "Latest signal"
-    elif implication == "REFINES":
-        prefix = "Strong signal · model refinement"
-    else:
-        prefix = "Strong signal"
-    return f"{prefix} · {published}"
+def published_date(record: dict) -> str:
+    published = date.fromisoformat(str(record["source"]["date"]))
+    return f"{published.strftime('%b')} {published.day}, {published.year}"
 
 
-def summary(record: dict) -> str:
-    observed = record["observed"]
-    return " ".join(str(item).strip() for item in observed[:2])
+def render_chip(chip: dict) -> str:
+    css = "phase hit" if chip.get("hit", False) else "phase"
+    return f'<span class="{css}">{esc(chip["label"])}</span>'
 
 
-def chip_labels(record: dict) -> list[str]:
-    mapping = record["mapping"]
-    labels = list(mapping["stages"])
-    for condition in mapping["conditions"]:
-        if condition not in labels:
-            labels.append(condition)
-    return labels
-
-
-def render_card(record: dict, index: int) -> str:
+def render_card(selection: dict) -> str:
+    evidence_id = str(selection["id"])
+    record = load_record(evidence_id)
     source = record["source"]
-    chips = "".join(f'<span class="phase hit">{esc(label)}</span>' for label in chip_labels(record))
+    presentation = record["presentation"]
+    summary = presentation.get("summary")
+    if not summary:
+        raise SystemExit(f"Curated evidence requires presentation.summary: {evidence_id}")
+
+    title = selection.get("title", source["organization"])
+    signal = f'{selection["signal"]} · {published_date(record)}'
+    chips = "".join(render_chip(chip) for chip in selection.get("chips", []))
     return (
-        f'<article class="evidence-card"><div class="signal">{esc(signal_label(record, index))}</div>'
-        f'<h3>{esc(source["organization"])}</h3><p>{esc(summary(record))}</p>'
+        f'<article class="evidence-card"><div class="signal">{esc(signal)}</div>'
+        f'<h3>{esc(title)}</h3><p>{esc(summary)}</p>'
         f'<div class="phase-row">{chips}</div>'
         f'<a class="source-link" href="{esc(source["url"])}" target="_blank" rel="noreferrer">Public evidence ↗</a></article>'
     )
@@ -68,12 +61,11 @@ def render_card(record: dict, index: int) -> str:
 def main() -> None:
     with CURATION.open(encoding="utf-8") as handle:
         curation = yaml.safe_load(handle)
-    evidence_ids = curation.get("evidence", [])
-    if not evidence_ids:
+    selections = curation.get("evidence", [])
+    if not selections:
         raise SystemExit("curation/homepage.yaml must select at least one evidence record")
 
-    records = [load_record(str(evidence_id)) for evidence_id in evidence_ids]
-    cards = "".join(render_card(record, index) for index, record in enumerate(records))
+    cards = "".join(render_card(selection) for selection in selections)
     generated = f'{START}<div class="evidence-grid">{cards}</div>{END}'
 
     index_html = INDEX.read_text(encoding="utf-8")
@@ -82,7 +74,7 @@ def main() -> None:
     before, remainder = index_html.split(START, 1)
     _, after = remainder.split(END, 1)
     INDEX.write_text(before + generated + after, encoding="utf-8")
-    print(f"Built homepage evidence from {len(records)} curated records")
+    print(f"Built homepage evidence from {len(selections)} curated records")
 
 
 if __name__ == "__main__":
