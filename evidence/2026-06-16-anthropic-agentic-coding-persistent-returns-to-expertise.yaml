@@ -7,6 +7,7 @@ source:
 
 presentation:
   headline: "Human expertise stays load-bearing while the agent executes"
+  summary: "Across approximately 400,000 interactive Claude Code sessions, Anthropic reports that experienced users trigger more agent activity and reach higher verified-success rates, suggesting human expertise remains a productive system input as well as a scaling constraint."
 
 observed:
   - >
