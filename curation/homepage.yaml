@@ -2,39 +2,17 @@
 #
 # Accepted evidence accumulates under evidence/*.yaml. This manifest records the
 # separate editorial decision about which accepted records receive scarce
-# homepage attention. Evidence claims remain canonical in evidence/*.yaml;
-# this file controls only homepage selection, order, labels, and emphasis.
+# homepage attention. Evidence claims and model mappings remain canonical in
+# evidence/*.yaml; this file controls only homepage selection, order, and
+# editorial signal labels.
 # Contributors should not modify this file as part of an evidence proposal.
 
 evidence:
   - id: 2026-08-31-infobip-phased-workflow-coding-agents
     signal: "Latest signal · Selection"
-    chips:
-      - {label: Selection, hit: true}
-      - {label: Context, hit: true}
-      - {label: Execution, hit: true}
-      - {label: Verification, hit: true}
-      - {label: "Learning ↗", hit: true}
   - id: 2026-08-27-uber-efficient-software-factory
     signal: "Strong signal · model refinement"
-    chips:
-      - {label: Selection, hit: true}
-      - {label: "Cooperation ↗", hit: true}
-      - {label: "Specialization ?", hit: true}
-      - {label: Economics, hit: true}
   - id: 2026-06-16-anthropic-agentic-coding-persistent-returns-to-expertise
     signal: "Strong signal · human expertise refinement"
-    chips:
-      - {label: Apparition, hit: true}
-      - {label: Selection, hit: true}
-      - {label: Context, hit: true}
-      - {label: Verification, hit: true}
-      - {label: "Human expertise ↗", hit: true}
   - id: 2026-06-03-spotify-code-with-claude
     signal: "Strong signal"
-    chips:
-      - {label: Apparition, hit: true}
-      - {label: Mutation, hit: true}
-      - {label: Selection, hit: true}
-      - {label: "Cooperation ↗", hit: true}
-      - {label: "Specialization ?", hit: false}

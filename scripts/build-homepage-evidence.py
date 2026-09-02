@@ -37,9 +37,32 @@ def published_date(record: dict) -> str:
     return f"{published.strftime('%b')} {published.day}, {published.year}"
 
 
-def render_chip(chip: dict) -> str:
-    css = "phase hit" if chip.get("hit", False) else "phase"
-    return f'<span class="{css}">{text(chip["label"])}</span>'
+def transition_label(mapping: dict) -> str | None:
+    transition = mapping.get("transition")
+    if not transition:
+        return None
+    label = f'{transition["from"]} → {transition["to"]}'
+    adjacent = transition.get("adjacent_stage")
+    if adjacent:
+        label += f" / {adjacent}"
+    return label
+
+
+def render_chip_group(label: str, values: list[str]) -> str:
+    chips = "".join(f'<span class="phase hit">{text(value)}</span>' for value in values)
+    return f'<div class="mapping-group"><div class="mapping-label">{text(label)}</div><div class="phase-row">{chips}</div></div>'
+
+
+def render_mapping(record: dict) -> str:
+    mapping = record["mapping"]
+    transition = transition_label(mapping)
+    stages = [transition] if transition else list(mapping["stages"])
+    stage_label = "STAGE" if len(stages) == 1 else "STAGES"
+    groups = [render_chip_group(stage_label, stages)]
+    conditions = list(mapping["conditions"])
+    if conditions:
+        groups.append(render_chip_group("CONDITIONS", conditions))
+    return '<div class="mapping">' + "".join(groups) + "</div>"
 
 
 def render_card(selection: dict) -> str:
@@ -53,11 +76,11 @@ def render_card(selection: dict) -> str:
 
     title = selection.get("title", source["organization"])
     signal = f'{selection["signal"]} · {published_date(record)}'
-    chips = "".join(render_chip(chip) for chip in selection.get("chips", []))
+    mapping = render_mapping(record)
     return (
         f'<article class="evidence-card"><div class="signal">{text(signal)}</div>'
         f'<h3>{text(title)}</h3><p>{text(summary)}</p>'
-        f'<div class="phase-row">{chips}</div>'
+        f'{mapping}'
         f'<a class="source-link" href="{attr(source["url"])}" target="_blank" rel="noreferrer">Public evidence ↗</a></article>'
     )
 
