@@ -1,0 +1,13 @@
+# Homepage evidence curation.
+#
+# Accepted evidence accumulates under evidence/*.yaml. This manifest records the
+# separate editorial decision about which accepted records receive scarce
+# homepage attention. Values are evidence filenames without the .yaml suffix.
+# Order is intentional and represents homepage presentation order. Contributors
+# should not modify this file as part of an evidence proposal.
+
+evidence:
+  - 2026-08-31-infobip-phased-workflow-coding-agents
+  - 2026-08-27-uber-efficient-software-factory
+  - 2026-06-03-spotify-code-with-claude
+  - 2026-04-27-openai-symphony
