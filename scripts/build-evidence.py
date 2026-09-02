@@ -12,6 +12,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
+SIGNALS_DIR = ROOT / "signals"
 OUTPUT = ROOT / "evidence.html"
 TEMPLATE = ROOT / "templates" / "evidence.html"
 SIGNAL_TEMPLATE = ROOT / "templates" / "scale-signal.html"
@@ -77,7 +78,7 @@ def render_entry(record: dict) -> str:
     signal_id = evidence_id(record)
     headline = record["presentation"]["headline"]
     scale = record["scale"]
-    return f'''<article class="entry" id="{esc(signal_id)}" data-signal-path="/evidence/{esc(signal_id)}/"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["organization"])}</div><button class="copy-signal-link" type="button" aria-label="Copy Scale Signal link" title="Copy Scale Signal link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{rendered_chips(record)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{rendered_observed(record)}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
+    return f'''<article class="entry" id="{esc(signal_id)}" data-signal-path="/signals/{esc(signal_id)}/"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["organization"])}</div><button class="copy-signal-link" type="button" aria-label="Copy Scale Signal link" title="Copy Scale Signal link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{rendered_chips(record)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{rendered_observed(record)}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
 
 
 def render_signal_page(record: dict, template: str) -> str:
@@ -86,7 +87,7 @@ def render_signal_page(record: dict, template: str) -> str:
     signal_id = evidence_id(record)
     headline = record["presentation"]["headline"]
     published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
-    canonical_url = f"{SITE_ORIGIN}/evidence/{signal_id}/"
+    canonical_url = f"{SITE_ORIGIN}/signals/{signal_id}/"
     description = " ".join(str(record["scale"]["summary"]).split())
     boundaries = "".join(f"<li>{esc(str(item).strip())}</li>" for item in record["what_this_does_not_establish"])
     replacements = {
@@ -116,7 +117,9 @@ def render_signal_page(record: dict, template: str) -> str:
 
 
 def clear_generated_signal_pages() -> None:
-    for child in EVIDENCE_DIR.iterdir():
+    if not SIGNALS_DIR.exists():
+        return
+    for child in SIGNALS_DIR.iterdir():
         generated_page = child / "index.html"
         if child.is_dir() and generated_page.exists():
             if GENERATED_MARKER in generated_page.read_text(encoding="utf-8"):
@@ -125,9 +128,10 @@ def clear_generated_signal_pages() -> None:
 
 def build_signal_pages(records: list[dict]) -> None:
     template = SIGNAL_TEMPLATE.read_text(encoding="utf-8")
+    SIGNALS_DIR.mkdir(exist_ok=True)
     clear_generated_signal_pages()
     for record in records:
-        output_dir = EVIDENCE_DIR / evidence_id(record)
+        output_dir = SIGNALS_DIR / evidence_id(record)
         output_dir.mkdir()
         (output_dir / "index.html").write_text(render_signal_page(record, template), encoding="utf-8")
 
@@ -137,7 +141,7 @@ def update_sitemap(records: list[dict]) -> None:
     if sitemap.count(SITEMAP_START) != 1 or sitemap.count(SITEMAP_END) != 1:
         raise SystemExit("sitemap.xml must contain exactly one Scale Signal URL boundary")
     urls = "\n".join(
-        f"  <url>\n    <loc>{SITE_ORIGIN}/evidence/{evidence_id(record)}/</loc>\n  </url>"
+        f"  <url>\n    <loc>{SITE_ORIGIN}/signals/{evidence_id(record)}/</loc>\n  </url>"
         for record in records
     )
     before, remainder = sitemap.split(SITEMAP_START, 1)
