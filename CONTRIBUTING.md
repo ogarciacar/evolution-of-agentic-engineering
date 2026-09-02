@@ -33,7 +33,7 @@ Useful analogy from another domain is not evidence for this model.
 The repository has three distinct surfaces:
 
 - **Contributor surface — `evidence/*.yaml`**: evidence proposals are authored here.
-- **Maintainer surface — schema, generator, templates, workflows, protocols, and editorial pages**: changes to the evidence system itself are maintained separately from evidence contributions.
+- **Maintainer surface — schema, generator, templates, workflows, protocols, editorial pages, and `curation/`**: changes to the evidence system and allocation of homepage attention are maintained separately from evidence contributions.
 - **Generated surface — `evidence.html`**: generated from the YAML evidence base and never authored directly.
 
 These ownership boundaries are also expressed in `.github/CODEOWNERS`. CODEOWNERS identifies the maintainer review required for these surfaces; repository merge rules determine whether that review is mandatory.
@@ -131,7 +131,7 @@ Accepted YAML evidence is automatically represented in the generated `evidence.h
 
 Every evidence-specific statement displayed in `evidence.html` should come directly from its YAML record or from deterministic formatting of structured fields. The generator does not invent interpretations or evidence claims.
 
-Homepage promotion is a separate editorial decision: `index.html` remains a small, curated view of the strongest current signals.
+Homepage promotion is a separate editorial decision. The selected accepted evidence is recorded in `curation/homepage.yaml`; evidence contributors should not modify that manifest as part of an evidence proposal. Promotion does not change whether a record remains accepted evidence.
 
 **Evidence should accumulate. Attention should not.**
 
