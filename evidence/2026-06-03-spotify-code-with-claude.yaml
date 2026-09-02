@@ -7,6 +7,7 @@ source:
 
 presentation:
   headline: "Coding stops being the constraint"
+  summary: "Honk runs many concurrent sessions in Kubernetes, verifies changes in CI, integrates with fleet orchestration, and is evolving toward shared sessions and agent orchestration. Spotify reports 99%+ weekly AI-tool adoption and fleet-wide migrations completed by a single engineer in days."
 
 observed:
   - "Spotify reports operating Honk coding-agent sessions in Kubernetes with trusted tools and CI verification, integrated with fleet orchestration."
