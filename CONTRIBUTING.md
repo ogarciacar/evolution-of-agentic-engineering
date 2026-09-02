@@ -17,14 +17,36 @@ Where does this fit?
 [ARTICLE URL]
 Use agenticengineering.science.
 
-If the source contains meaningful evidence for the model, ask me whether I want to contribute the assessment. If I agree, follow the contribution protocol in ogarciacar/evolution-of-agentic-engineering and prepare a pull request. Do not assume the contribution will be accepted.
+If the source contains meaningful evidence for the model, ask me whether I want to contribute the assessment. If I agree, follow the contribution protocol in ogarciacar/evolution-of-agentic-engineering. Before creating any YAML, branch, commit, or pull request, verify that every claim intended for publication is supported solely by publicly accessible sources. If any claim depends on private, internal, confidential, credential-gated, or otherwise restricted information, stop and do not prepare or push a contribution. Do not reproduce the sensitive information when explaining why you stopped.
 ```
+
+## Public evidence safety gate
+
+**No public source, no contribution.**
+
+This repository is public. Before creating an evidence YAML file, branch, commit, or pull request, verify that every factual observation intended for the contribution is supported by a source that is publicly accessible without company credentials, VPN access, private repository access, internal documents, private Slack or email, or any other restricted access.
+
+Internal, confidential, proprietary, or otherwise non-public information must never be used to supplement a public source, even when it would make the assessment more accurate or complete. Information available to the agent from another conversation, connected system, private repository, internal document, memory, or tool is not publishable evidence unless the same claim is independently supported by the cited public source.
+
+If any proposed claim depends on non-public information, **STOP**. Do not create the YAML file. Do not create, commit, or push a branch. Do not open a pull request. Tell the user that the contribution cannot proceed because it depends on non-public information, without reproducing or summarizing that information.
+
+If it is uncertain whether information is public, treat it as non-public and stop the contribution workflow.
+
+A private assessment may still be useful to the person performing it. **Private assessment is not permission to create public evidence.**
+
+### Pre-publish safety check
+
+Immediately before any push or pull request, inspect the complete proposed diff, including filenames, URLs, metadata, observations, interpretations, comments, and generated content. Confirm that every evidence-specific claim can be derived solely from the cited public source or sources.
+
+If that check cannot be completed confidently, **STOP before push**.
 
 ## What belongs in the evidence base
 
 A useful contribution contains observations about software engineering involving AI or coding agents, agentic engineering systems, or the engineering environments that support them.
 
-Prefer first-party engineering reports, papers, technical documentation, or other sources with concrete observations. Secondary reporting can be useful, but should be identified as secondary.
+Evidence contributions require publicly accessible sources. Prefer first-party public engineering reports, papers, technical documentation, or other public sources with concrete observations. Secondary public reporting can be useful, but should be identified as secondary.
+
+Internal company information is out of scope for this public evidence repository regardless of how relevant it is to the model.
 
 Useful analogy from another domain is not evidence for this model.
 
@@ -108,15 +130,18 @@ Use only the minimum stage and condition mapping supported by the observation. T
 
 ## Review standard
 
-A contribution should make it possible to inspect four things independently:
+A contribution should make it possible to inspect five things independently:
 
-1. **Source** — can the underlying publication be inspected?
-2. **Observed** — does this say only what the source actually reports?
-3. **Interpretation** — is model language clearly separated from observation?
-4. **Model implication** — is the primary verdict justified without overstating what the evidence establishes?
+1. **Public provenance** — is every published claim supported solely by publicly accessible source material?
+2. **Source** — can the underlying publication be inspected without restricted access?
+3. **Observed** — does this say only what the source actually reports?
+4. **Interpretation** — is model language clearly separated from observation?
+5. **Model implication** — is the primary verdict justified without overstating what the evidence establishes?
 
 During review, expect questions such as:
 
+- Is every claim derivable solely from the cited public source?
+- Has any internal or restricted context leaked into the contribution?
 - Is the observation actually supported by the source?
 - Is this the minimum sufficient stage and condition mapping?
 - Are product capabilities being mistaken for demonstrated operation or organizational scale?
