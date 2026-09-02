@@ -116,8 +116,7 @@ def render_chart(records: list[dict]) -> str:
 
     return (
         '<div class="landscape-card"><div class="landscape-card-head"><div>'
-        f'<strong>Scale Signal Landscape</strong><span>{text(subtitle)}</span></div>'
-        '<span>Inspired by D3 dot-plot / matrix patterns</span></div>'
+        f'<strong>Scale Signal Landscape</strong><span>{text(subtitle)}</span></div></div>'
         '<div class="landscape-scroll"><div class="landscape-matrix">'
         '<div class="landscape-groups"><span></span><b class="landscape-model-group">Evolutionary model</b>'
         '<span></span><b class="landscape-conditions-group">Selection conditions</b>'
