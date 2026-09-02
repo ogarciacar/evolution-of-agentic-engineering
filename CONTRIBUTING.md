@@ -2,9 +2,9 @@
 
 Evolution of Agentic Engineering is a working model. Contributions are welcome when they bring evidence that may support, refine, contradict, or leave the model inconclusive.
 
-**Anyone can propose evidence. Publication is curated.**
+**Anyone can propose evidence. Acceptance is reviewed.**
 
-A merged evidence contribution means that the source and assessment have been accepted into the evidence record. It does not mean that the model has been proven, or that the evidence will be promoted to the homepage.
+A merged evidence contribution means that the source and assessment have been accepted into the evidence record. It does not mean that the model has been proven.
 
 ## Start with the assessment
 
@@ -55,8 +55,8 @@ Useful analogy from another domain is not evidence for this model.
 The repository has three distinct surfaces:
 
 - **Contributor surface — `evidence/*.yaml`**: evidence proposals are authored here.
-- **Maintainer surface — schema, generator, templates, workflows, protocols, editorial pages, and `curation/`**: changes to the evidence system and allocation of homepage attention are maintained separately from evidence contributions.
-- **Generated surfaces — `evidence.html` and `evidence/<signal-id>/index.html`**: generated from the YAML evidence base and never authored directly.
+- **Maintainer surface — schema, generators, templates, workflows, protocols, and editorial pages**: changes to the evidence system are maintained separately from evidence contributions.
+- **Generated surfaces — `evidence.html`, `signals/<signal-id>/index.html`, and the bounded Evidence Landscape in `index.html`**: generated from the YAML evidence base and never authored directly.
 
 These ownership boundaries are also expressed in `.github/CODEOWNERS`. CODEOWNERS identifies the maintainer review required for these surfaces; repository merge rules determine whether that review is mandatory.
 
@@ -156,8 +156,8 @@ Accepted YAML evidence is automatically represented in the generated `evidence.h
 
 Every evidence-specific statement displayed on generated evidence pages should come directly from its YAML record or from deterministic formatting of structured fields. The generator does not invent interpretations or evidence claims.
 
-Homepage promotion is a separate editorial decision. The selected accepted evidence is recorded in `curation/homepage.yaml`; evidence contributors should not modify that manifest as part of an evidence proposal. Promotion does not change whether a record remains accepted evidence.
+The homepage Evidence Landscape is a deterministic bounded view of the accepted corpus: it shows up to the newest 24 accepted Scale Signals. Older evidence remains available in the complete living evidence record.
 
-**Evidence should accumulate. Attention should not.**
+**Evidence should accumulate. The homepage should remain legible.**
 
 The evidence format and publication workflow are intentionally simple for now. They can evolve as the evidence base and contributor community grow.

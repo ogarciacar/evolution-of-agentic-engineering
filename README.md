@@ -10,9 +10,9 @@ The model uses 1K-agent scale as a forcing function for examining the engineerin
 
 This repository intentionally stays small and static:
 
-- `index.html` — the model and a curated snapshot of the strongest current evidence.
+- `index.html` — the model and a generated Evidence Landscape showing up to the newest 24 accepted Scale Signals.
 - `evidence.html` — the living evidence record used to test, refine, and potentially contradict the model.
-- `evidence/<signal-id>/` — generated permanent pages for individual Scale Signals.
+- `signals/<signal-id>/` — generated permanent pages for individual Scale Signals.
 - `apply.html` — the protocol for evaluating a new source against the model.
 
 The evidence record separates **Observed**, **Interpretation**, and **Model implication** so that published facts remain distinct from conclusions drawn through the model.
@@ -31,7 +31,7 @@ Use agenticengineering.science.
 
 If the source contains meaningful evidence, the assessment can be proposed through a pull request. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the contribution format and review standard.
 
-**Anyone can propose evidence. Publication is curated.** A merged contribution means the evidence has been accepted into the evidence record; it does not mean the model has been proven or that the signal will be promoted to the homepage.
+**Anyone can propose evidence. Acceptance is reviewed.** A merged contribution means the evidence has been accepted into the evidence record; it does not mean the model has been proven.
 
 ## Publishing
 
@@ -44,10 +44,10 @@ New evidence should be evaluated before it changes the model:
 1. Add meaningful first-party or otherwise credible evidence to the evidence record.
 2. Classify the signal against the relevant stage/transition and engineering conditions.
 3. Keep observation separate from interpretation and model implication.
-4. Promote only the strongest current signals to `index.html`.
+4. Let the homepage Evidence Landscape show up to the newest 24 accepted signals.
 5. Change the model itself only when accumulated evidence warrants it.
 
-Evidence is intended to accumulate; homepage attention remains curated.
+Evidence is intended to accumulate; the complete corpus remains in `evidence.html` while the homepage stays bounded to the newest 24 accepted signals.
 
 ## Origins
 
