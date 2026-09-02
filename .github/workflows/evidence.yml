@@ -20,10 +20,14 @@ jobs:
         run: python scripts/validate-evidence.py
       - name: Build evidence page
         run: python scripts/build-evidence.py
-      - name: Upload generated evidence page
+      - name: Build homepage evidence
+        run: python scripts/build-homepage-evidence.py
+      - name: Upload generated evidence pages
         uses: actions/upload-artifact@v7
         with:
-          name: generated-evidence-page
-          path: evidence.html
-      - name: Verify generated artifact is committed
-        run: git diff --exit-code -- evidence.html
+          name: generated-evidence-pages
+          path: |
+            evidence.html
+            index.html
+      - name: Verify generated artifacts are committed
+        run: git diff --exit-code -- evidence.html index.html
