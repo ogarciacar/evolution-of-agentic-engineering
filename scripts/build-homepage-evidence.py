@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the curated homepage evidence section from canonical YAML records."""
+"""Build the curated homepage evidence grid from canonical YAML records."""
 from __future__ import annotations
 
 import html
@@ -12,11 +12,15 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
 CURATION = ROOT / "curation" / "homepage.yaml"
 INDEX = ROOT / "index.html"
-START = "<!-- HOMEPAGE_EVIDENCE_START -->"
-END = "<!-- HOMEPAGE_EVIDENCE_END -->"
+GRID_START = '<div class="evidence-grid">'
+GRID_AFTER = '<div class="falsify evidence-note">'
 
 
-def esc(value: object) -> str:
+def text(value: object) -> str:
+    return html.escape(str(value), quote=False)
+
+
+def attr(value: object) -> str:
     return html.escape(str(value), quote=True)
 
 
@@ -35,7 +39,7 @@ def published_date(record: dict) -> str:
 
 def render_chip(chip: dict) -> str:
     css = "phase hit" if chip.get("hit", False) else "phase"
-    return f'<span class="{css}">{esc(chip["label"])}</span>'
+    return f'<span class="{css}">{text(chip["label"])}</span>'
 
 
 def render_card(selection: dict) -> str:
@@ -51,10 +55,10 @@ def render_card(selection: dict) -> str:
     signal = f'{selection["signal"]} · {published_date(record)}'
     chips = "".join(render_chip(chip) for chip in selection.get("chips", []))
     return (
-        f'<article class="evidence-card"><div class="signal">{esc(signal)}</div>'
-        f'<h3>{esc(title)}</h3><p>{esc(summary)}</p>'
+        f'<article class="evidence-card"><div class="signal">{text(signal)}</div>'
+        f'<h3>{text(title)}</h3><p>{text(summary)}</p>'
         f'<div class="phase-row">{chips}</div>'
-        f'<a class="source-link" href="{esc(source["url"])}" target="_blank" rel="noreferrer">Public evidence ↗</a></article>'
+        f'<a class="source-link" href="{attr(source["url"])}" target="_blank" rel="noreferrer">Public evidence ↗</a></article>'
     )
 
 
@@ -65,15 +69,14 @@ def main() -> None:
     if not selections:
         raise SystemExit("curation/homepage.yaml must select at least one evidence record")
 
-    cards = "".join(render_card(selection) for selection in selections)
-    generated = f'{START}<div class="evidence-grid">{cards}</div>{END}'
-
+    generated = GRID_START + "".join(render_card(selection) for selection in selections) + "</div>"
     index_html = INDEX.read_text(encoding="utf-8")
-    if START not in index_html or END not in index_html:
-        raise SystemExit("index.html is missing homepage evidence generation markers")
-    before, remainder = index_html.split(START, 1)
-    _, after = remainder.split(END, 1)
-    INDEX.write_text(before + generated + after, encoding="utf-8")
+    if index_html.count(GRID_START) != 1 or index_html.count(GRID_AFTER) != 1:
+        raise SystemExit("index.html must contain exactly one homepage evidence grid and boundary")
+
+    before, remainder = index_html.split(GRID_START, 1)
+    _, after = remainder.split(GRID_AFTER, 1)
+    INDEX.write_text(before + generated + GRID_AFTER + after, encoding="utf-8")
     print(f"Built homepage evidence from {len(selections)} curated records")
 
 
