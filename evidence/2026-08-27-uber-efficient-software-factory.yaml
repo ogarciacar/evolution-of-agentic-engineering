@@ -7,6 +7,7 @@ source:
 
 presentation:
   headline: "The software factory selects for complete managed capabilities"
+  summary: "Uber reports more than 70% of PRs attributed to local or cloud agents, 3,600+ agent skills and 30,000+ skill executions per day. Managed agents are evaluated through outcome cost, quality and reliability, while primary agents can delegate bounded work to lower-cost subagents."
 
 observed:
   - >

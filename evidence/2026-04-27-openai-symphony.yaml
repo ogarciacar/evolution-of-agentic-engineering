@@ -7,6 +7,7 @@ source:
 
 presentation:
   headline: "Human attention becomes the concurrency ceiling"
+  summary: "OpenAI found that engineers could comfortably manage only 3–5 simultaneous Codex sessions before context switching reduced productivity. Symphony moves coordination into an always-on orchestrator where open tasks receive agents in isolated workspaces; OpenAI reports a 500% increase in landed PRs on some teams."
 
 observed:
   - "OpenAI reports that engineers could comfortably supervise only three to five Codex sessions at once; beyond that productivity dropped as engineers lost track of work and debugged stalled agents."

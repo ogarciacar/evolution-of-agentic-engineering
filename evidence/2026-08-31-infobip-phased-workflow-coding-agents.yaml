@@ -7,6 +7,7 @@ source:
 
 presentation:
   headline: "Context becomes an engineered workflow"
+  summary: "Infobip's AI research team describes a phased workflow where context is deliberately written, selected, compressed and isolated. Validated artifacts, bounded tasks and reconstructable state let fresh agent sessions continue work while human attention is concentrated upstream."
 
 observed:
   - "Infobip's AI research team reports a four-phase workflow for agent-assisted development: research, planning, task definition, and implementation. Human effort is front-loaded and delegation increases as artifacts mature."
