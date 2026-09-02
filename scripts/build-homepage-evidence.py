@@ -37,9 +37,27 @@ def published_date(record: dict) -> str:
     return f"{published.strftime('%b')} {published.day}, {published.year}"
 
 
-def render_chip(chip: dict) -> str:
-    css = "phase hit" if chip.get("hit", False) else "phase"
-    return f'<span class="{css}">{text(chip["label"])}</span>'
+def transition_label(mapping: dict) -> str | None:
+    transition = mapping.get("transition")
+    if not transition:
+        return None
+    label = f'{transition["from"]} → {transition["to"]}'
+    adjacent = transition.get("adjacent_stage")
+    if adjacent:
+        label += f" / {adjacent}"
+    return label
+
+
+def render_mapping_chips(record: dict) -> str:
+    mapping = record["mapping"]
+    labels = []
+    transition = transition_label(mapping)
+    if transition:
+        labels.append(transition)
+    else:
+        labels.extend(mapping["stages"])
+    labels.extend(mapping["conditions"])
+    return "".join(f'<span class="phase hit">{text(label)}</span>' for label in labels)
 
 
 def render_card(selection: dict) -> str:
@@ -53,7 +71,7 @@ def render_card(selection: dict) -> str:
 
     title = selection.get("title", source["organization"])
     signal = f'{selection["signal"]} · {published_date(record)}'
-    chips = "".join(render_chip(chip) for chip in selection.get("chips", []))
+    chips = render_mapping_chips(record)
     return (
         f'<article class="evidence-card"><div class="signal">{text(signal)}</div>'
         f'<h3>{text(title)}</h3><p>{text(summary)}</p>'
