@@ -44,6 +44,9 @@ def render_entry(record: dict) -> str:
     mapping = record["mapping"]
     implication = record["model_implication"]
     published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
+    evidence_id = Path(record["_path"]).stem
+    headline = record["presentation"]["headline"]
+    share_text = f'Scale Signal · {source["organization"]} · {published}'
 
     chips = []
     transition = transition_label(mapping)
@@ -55,7 +58,7 @@ def render_entry(record: dict) -> str:
 
     observed = "".join(f'<p>{esc(str(item).strip())}</p>' for item in record["observed"])
     scale = record["scale"]
-    return f'''<article class="entry"><div class="date">{esc(published)} · {esc(source["organization"])}</div><div class="evidence"><h3>{esc(record["presentation"]["headline"])}</h3><div class="meta">{"".join(chips)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{observed}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
+    return f'''<article class="entry" id="{esc(evidence_id)}"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["organization"])}</div><button class="share-signal" type="button" aria-label="Share Scale Signal" title="Share Scale Signal" data-share-title="{esc(headline)}" data-share-text="{esc(share_text)}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{"".join(chips)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{observed}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
 
 
 def main() -> None:
