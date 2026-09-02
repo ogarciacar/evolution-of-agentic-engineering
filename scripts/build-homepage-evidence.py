@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
 CURATION = ROOT / "curation" / "homepage.yaml"
 INDEX = ROOT / "index.html"
-GRID_START = '<div class="evidence-grid">'
-GRID_AFTER = '<div class="falsify evidence-note">'
+GRID_START = "<!-- HOMEPAGE_EVIDENCE_START -->"
+GRID_END = "<!-- HOMEPAGE_EVIDENCE_END -->"
 
 
 def text(value: object) -> str:
@@ -92,14 +92,14 @@ def main() -> None:
     if not selections:
         raise SystemExit("curation/homepage.yaml must select at least one evidence record")
 
-    generated = GRID_START + "".join(render_card(selection) for selection in selections) + "</div>"
+    generated = '<div class="evidence-grid">' + "".join(render_card(selection) for selection in selections) + "</div>"
     index_html = INDEX.read_text(encoding="utf-8")
-    if index_html.count(GRID_START) != 1 or index_html.count(GRID_AFTER) != 1:
+    if index_html.count(GRID_START) != 1 or index_html.count(GRID_END) != 1:
         raise SystemExit("index.html must contain exactly one homepage evidence grid and boundary")
 
     before, remainder = index_html.split(GRID_START, 1)
-    _, after = remainder.split(GRID_AFTER, 1)
-    INDEX.write_text(before + generated + GRID_AFTER + after, encoding="utf-8")
+    _, after = remainder.split(GRID_END, 1)
+    INDEX.write_text(before + GRID_START + generated + GRID_END + after, encoding="utf-8")
     print(f"Built homepage evidence from {len(selections)} curated records")
 
 
