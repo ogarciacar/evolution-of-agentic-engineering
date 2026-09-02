@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Promote Evidence — Evolution of Agentic Engineering</title>
+<style>
+:root{--bg:#f7f7f5;--ink:#171719;--muted:#66666f;--line:#d9d9dc;--card:#fff;--accent:#6c4cff;--soft:#eeeaff;--dark:#202126}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}a{color:inherit}main{max-width:1040px;margin:auto;padding:56px 28px 96px}.eyebrow{font-size:13px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}h1{font-size:clamp(44px,7vw,78px);line-height:.98;letter-spacing:-.05em;margin:18px 0 26px}h2{font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-.035em;margin:0 0 18px}h3{font-size:18px;margin:0 0 8px}.lead{font-size:clamp(19px,2vw,26px);line-height:1.35;color:#35353b;max-width:850px}.topnav{display:flex;justify-content:space-between;gap:20px;padding-bottom:38px}.back{font-size:13px;font-weight:750;text-decoration:none;border-bottom:1px solid #aaa}header{padding-bottom:68px;border-bottom:1px solid var(--line)}section{padding:64px 0;border-bottom:1px solid var(--line)}.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:30px}.step{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}.step b{display:block;color:var(--accent);font-size:12px;letter-spacing:.08em;margin-bottom:7px}.step p{margin:0;color:#505158;font-size:14px}.schema{background:var(--dark);color:#f4f4f5;border-radius:18px;padding:25px;margin-top:26px;white-space:pre-wrap;font:600 13px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}.prompt{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;margin-top:24px;font-size:15px}.rules{padding-left:20px;color:#4f5057}.rules li{margin:10px 0}.dimensions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:28px}.dimension{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px}.dimension p{margin:0;color:#505158;font-size:14px}.source-link{display:inline-block;margin-top:14px;color:var(--ink);font-size:13px;font-weight:700;text-decoration:none;border-bottom:1px solid #aaa}footer{padding-top:34px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:20px}@media(max-width:700px){.steps,.dimensions{grid-template-columns:1fr}.topnav{align-items:flex-start}main{padding-top:34px}}
+</style>
+</head>
+<body><main>
+<nav class="topnav"><span class="eyebrow">Promotion protocol · v0.1</span><a class="back" href="index.html">← Evolution of Agentic Engineering</a></nav>
+<header><h1>Decide what deserves homepage attention</h1><p class="lead">A comparative editorial protocol for deciding whether accepted evidence should replace one of the currently promoted homepage records. Promotion allocates attention; it does not determine whether evidence is true or belongs in the evidence base.</p></header>
+<section><div class="eyebrow">Entry condition</div><h2>Accepted evidence first. Promotion second.</h2><p class="lead">Only evidence already accepted into <strong>evidence/*.yaml</strong> is eligible for promotion. The evidence assessment and the homepage decision remain separate.</p><div class="prompt"><strong>Evidence acceptance asks:</strong> Does this belong in the evidence base?<br><br><strong>Promotion asks:</strong> Does this candidate make the current homepage evidence set better?</div></section>
+<section><div class="eyebrow">The protocol</div><h2>Compare the candidate with every incumbent.</h2><div class="steps">
+<div class="step"><b>01 · ACQUIRE</b><p>Read the candidate evidence record, the current homepage curation manifest and each promoted evidence record.</p></div>
+<div class="step"><b>02 · COMPARE</b><p>Compare the candidate against every incumbent. Do not evaluate it only in isolation.</p></div>
+<div class="step"><b>03 · IDENTIFY</b><p>State the candidate's unique contribution: what does it add that the homepage does not already represent well?</p></div>
+<div class="step"><b>04 · TEST</b><p>Ask whether replacing any incumbent produces a more informative, diverse or challenging representation of the evidence base.</p></div>
+<div class="step"><b>05 · RECOMMEND</b><p>Return exactly one recommendation: PROMOTE or DO NOT PROMOTE. If promoting, name exactly one replacement.</p></div>
+<div class="step"><b>06 · BOUND</b><p>State the caution: what could make the recommendation misleading, unstable or overly influenced by novelty?</p></div>
+</div></section>
+<section><div class="eyebrow">Comparative dimensions</div><h2>Judgment, not a ranking function.</h2><p class="lead">Use these dimensions to structure reasoning. Do not turn them into a numeric score.</p><div class="dimensions">
+<div class="dimension"><h3>Evidence strength</h3><p>How concrete, inspectable and bounded are the observations?</p></div>
+<div class="dimension"><h3>Model significance</h3><p>Does the evidence support, refine, contradict or expose an important boundary in the model?</p></div>
+<div class="dimension"><h3>Distinctiveness</h3><p>Does it add a stage, condition, contradiction or perspective not already represented strongly?</p></div>
+<div class="dimension"><h3>Scale significance</h3><p>Does it reveal consequential behavior or constraints at meaningful engineering scale without inflating capability into demonstrated scale?</p></div>
+</div></section>
+<section><div class="eyebrow">Canonical output</div><h2>One candidate → one editorial recommendation</h2><div class="schema">PROMOTION ASSESSMENT
+
+CANDIDATE
+&lt;evidence id&gt;
+
+CURRENT HOMEPAGE
+&lt;current promoted evidence ids&gt;
+
+RECOMMENDATION
+PROMOTE / DO NOT PROMOTE
+
+RATIONALE
+Why the candidate does or does not improve the homepage evidence set.
+
+UNIQUE CONTRIBUTION
+What the candidate adds that is not already well represented.
+
+INCUMBENT COMPARISON
+Compare the candidate with each currently promoted record.
+
+REPLACEMENT
+&lt;evidence id&gt; / NONE
+
+WHY THIS REPLACEMENT
+Why the homepage becomes stronger by replacing this record rather than another one.
+
+MODEL COVERAGE AFTER CHANGE
+Stages:
+Conditions:
+Implications:
+
+CAUTION
+What could make this recommendation misleading.</div></section>
+<section><div class="eyebrow">Agent instruction</div><h2>A prompt you can use anywhere</h2><div class="prompt">Assess an accepted evidence record for homepage promotion using <strong>https://agenticengineering.science/promote.html</strong>.
+<br><br>Read the candidate YAML record, <strong>curation/homepage.yaml</strong>, and every evidence record currently promoted there. Compare the candidate against each incumbent. Recommend exactly one of PROMOTE or DO NOT PROMOTE. If PROMOTE, identify exactly one incumbent to replace and explain why that replacement improves the homepage evidence set.
+<br><br>Do not use a numeric score. Recency alone is not a reason for promotion. Large numbers alone are not a reason for promotion. Evidence that contradicts or refines the model may deserve promotion over evidence that merely supports it. Do not modify curation or publish the recommendation without explicit maintainer approval.
+<br><br><strong>Candidate:</strong> [EVIDENCE ID]</div></section>
+<section><div class="eyebrow">Authority boundary</div><h2>The agent proposes attention. The maintainer allocates it.</h2><p class="lead">A promotion assessment never changes <strong>curation/homepage.yaml</strong> by itself. If the recommendation is PROMOTE, the agent presents the proposed replacement and waits for explicit maintainer approval. Only then should a curation change be prepared.</p><div class="schema">Contributor proposes truth claims
+        ↓
+Reviewer accepts evidence
+        ↓
+Agent proposes attention
+        ↓
+Maintainer allocates attention
+        ↓
+Generator publishes</div></section>
+<section><div class="eyebrow">Editorial rules</div><h2>Keep attention allocation independent from evidence acceptance.</h2><ul class="rules"><li>Promotion is comparative editorial judgment, not another evidence verdict.</li><li>A candidate should be promoted only when replacing an incumbent produces a more informative, diverse or challenging homepage set.</li><li>Recency alone is not a reason for promotion.</li><li>Large scale numbers alone are not a reason for promotion.</li><li>Contradicting or refining evidence may be more homepage-worthy than additional supporting evidence.</li><li>Do not infer promotion from SUPPORTS, REFINES or any other model implication.</li><li>Do not let an evidence record determine its own homepage publication status.</li><li>Compare the candidate against every incumbent before recommending a replacement.</li><li>The agent must never merge its own promotion recommendation.</li></ul></section>
+<footer><span>Evolution of Agentic Engineering · Promote evidence</span><span>Working protocol · September 2026</span></footer>
+</main></body></html>
