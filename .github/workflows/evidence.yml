@@ -18,6 +18,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
+      - name: Check publication safety
+        run: python scripts/check-publication-safety.py
       - name: Build evidence page
         run: python scripts/build-evidence.py
       - name: Build homepage evidence
