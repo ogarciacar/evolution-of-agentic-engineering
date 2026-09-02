@@ -46,10 +46,9 @@
     if (!button) return;
 
     const entry = button.closest(".entry");
-    if (!entry?.id) return;
+    if (!entry?.dataset.signalPath) return;
 
-    const permalink = new URL(window.location.href);
-    permalink.hash = entry.id;
+    const permalink = new URL(entry.dataset.signalPath, window.location.origin);
     await copyPermalink(permalink.toString());
   });
 })();

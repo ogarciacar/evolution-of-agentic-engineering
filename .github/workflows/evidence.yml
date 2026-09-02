@@ -30,6 +30,10 @@ jobs:
           name: generated-evidence-pages
           path: |
             evidence.html
+            evidence/*/index.html
             index.html
+            sitemap.xml
       - name: Verify generated artifacts are committed
-        run: git diff --exit-code -- evidence.html index.html
+        run: |
+          git diff --exit-code -- evidence.html index.html sitemap.xml evidence
+          test -z "$(git status --porcelain --untracked-files=all -- 'evidence/*/index.html')"

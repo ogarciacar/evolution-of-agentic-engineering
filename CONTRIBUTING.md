@@ -56,13 +56,13 @@ The repository has three distinct surfaces:
 
 - **Contributor surface — `evidence/*.yaml`**: evidence proposals are authored here.
 - **Maintainer surface — schema, generator, templates, workflows, protocols, editorial pages, and `curation/`**: changes to the evidence system and allocation of homepage attention are maintained separately from evidence contributions.
-- **Generated surface — `evidence.html`**: generated from the YAML evidence base and never authored directly.
+- **Generated surfaces — `evidence.html` and `evidence/<signal-id>/index.html`**: generated from the YAML evidence base and never authored directly.
 
 These ownership boundaries are also expressed in `.github/CODEOWNERS`. CODEOWNERS identifies the maintainer review required for these surfaces; repository merge rules determine whether that review is mandatory.
 
 ## Contribution format
 
-**Contributors only author YAML evidence records. Do not edit `evidence.html` directly.**
+**Contributors only author YAML evidence records. Do not edit generated evidence pages directly.**
 
 Create one YAML file under `evidence/` using the source publication date, organization, and a descriptive source slug:
 
@@ -74,7 +74,7 @@ For example:
 
 Use the source publication date, not the contribution date. Keep the date in `source.date` as canonical structured metadata; the filename convention exists to make evidence easier to scan and discover in the repository.
 
-The YAML record is the canonical source for evidence-specific content displayed in `evidence.html`. CI validates evidence records against `schema/evidence.schema.json`, regenerates `evidence.html`, and verifies that the committed generated view matches the YAML evidence base. Manual changes to generated evidence content in `evidence.html` will therefore fail the integrity check unless they are produced from the canonical YAML records.
+The YAML record is the canonical source for evidence-specific content displayed in `evidence.html` and individual Scale Signal pages. CI validates evidence records against `schema/evidence.schema.json`, regenerates every evidence page, and verifies that the committed generated views match the YAML evidence base. Manual changes to generated evidence content will therefore fail the integrity check unless they are produced from the canonical YAML records.
 
 Presentation fields preserve editorial labels that should not be inferred by the generator; scale captures a documented scale signal or an important evidence boundary; transitions are explicit when the evidence speaks to movement between stages; and the model implication stores both the verdict and the explanation.
 
@@ -152,9 +152,9 @@ Contradictory evidence is as welcome as supporting evidence.
 
 ## Publication
 
-Accepted YAML evidence is automatically represented in the generated `evidence.html` view. Contributors should not edit that page to publish or modify an evidence record; change the corresponding YAML record instead and let the generator produce the view.
+Accepted YAML evidence is automatically represented in the generated `evidence.html` view and its own Scale Signal page. Contributors should not edit those pages to publish or modify an evidence record; change the corresponding YAML record instead and let the generator produce the views.
 
-Every evidence-specific statement displayed in `evidence.html` should come directly from its YAML record or from deterministic formatting of structured fields. The generator does not invent interpretations or evidence claims.
+Every evidence-specific statement displayed on generated evidence pages should come directly from its YAML record or from deterministic formatting of structured fields. The generator does not invent interpretations or evidence claims.
 
 Homepage promotion is a separate editorial decision. The selected accepted evidence is recorded in `curation/homepage.yaml`; evidence contributors should not modify that manifest as part of an evidence proposal. Promotion does not change whether a record remains accepted evidence.
 
