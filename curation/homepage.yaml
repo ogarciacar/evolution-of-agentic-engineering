@@ -22,17 +22,16 @@ evidence:
       - {label: "Cooperation ↗", hit: true}
       - {label: "Specialization ?", hit: true}
       - {label: Economics, hit: true}
-  - id: 2026-06-03-spotify-code-with-claude
-    signal: "Strong signal"
+  - id: 2026-06-16-anthropic-agentic-coding-persistent-returns-to-expertise
+    signal: "Strong signal · human expertise refinement"
     chips:
       - {label: Apparition, hit: true}
-      - {label: Mutation, hit: true}
       - {label: Selection, hit: true}
-      - {label: "Cooperation ↗", hit: true}
-      - {label: "Specialization ?", hit: false}
-  - id: 2026-04-27-openai-symphony
-    title: "OpenAI · Symphony"
-    signal: "Strong signal · boundary refinement"
+      - {label: Context, hit: true}
+      - {label: Verification, hit: true}
+      - {label: "Human expertise ↗", hit: true}
+  - id: 2026-06-03-spotify-code-with-claude
+    signal: "Strong signal"
     chips:
       - {label: Apparition, hit: true}
       - {label: Mutation, hit: true}
