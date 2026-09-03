@@ -1,0 +1,116 @@
+source:
+  title: "pstack (repository snapshot)"
+  organization: "Cursor"
+  date: "2026-09-03"
+  url: "https://github.com/cursor/plugins/tree/7314f723a487ec406b6369fe5865ba034cfed166/pstack"
+  source_type: "first-party"
+
+presentation:
+  headline: "Cooperation has to earn its coordination cost"
+  summary: >
+    pstack organizes agent work around verifiable execution, specialized roles,
+    bounded context, and explicit coordination. Its orchestration playbook also
+    documents a small-task case where coordination overhead performed much
+    worse than a plain agent.
+
+observed:
+  - >
+    The pstack plugin manifest identifies Lauren Tan as the author and describes
+    the plugin as rigorous agent workflows that can be parallelized with
+    confidence. The README says the goal is not to maximize throughput or lines
+    of code, but to produce less, higher-quality, verifiable code.
+  - >
+    The README says pstack provides "fearless parallelism": once one agent can
+    be trusted to produce good, verifiable code, multiple agents can be started
+    in parallel. Its main poteto-mode routes work through task-specific
+    playbooks and supporting skills rather than treating every engineering task
+    identically.
+  - >
+    The Orchestrate playbook is intended for multi-day programs with many
+    stacked pull requests and dozens to hundreds of subagents. It defines
+    coordinator, optional sub-coordinator, worker, and verifier roles;
+    externalizes state into structured files; treats completions as queue
+    events; and requires explicit context relays through worker briefs.
+  - >
+    The Orchestrate playbook also states that orchestration ceremony should not
+    be used when one agent can finish inside the task budget. It gives a
+    measured head-to-head example in which, on a half-hour 12-unit job, the
+    orchestration playbook landed 1 unit while a plain agent landed all 12.
+  - >
+    Verification is treated as durable state rather than agent self-report. The
+    Orchestrate playbook records verdicts against a pull request number and
+    head SHA, says a new head SHA voids the previous verdict, and recommends a
+    verifier from a different model family when verification is expensive,
+    judgment-laden, or high-blast-radius.
+  - >
+    The Reflect skill runs three parallel reviewers over a completed task,
+    synthesizes durable learnings, checks whether they should be encoded
+    structurally, and requires explicit user approval before accepted skill
+    edits are applied.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The public orchestration design targets multi-day programs with dozens to
+    hundreds of subagents, but the repository does not establish operation at
+    that scale. It does document a 12-unit half-hour comparison where
+    orchestration landed 1 unit and a plain agent landed all 12.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Selection
+    to: Cooperation
+    adjacent_stage: Specialization
+  conditions: [Context, Verification, Coordination, Economics, Learning]
+
+interpretation: >
+  pstack treats cooperation as something that becomes useful only after agent
+  work is sufficiently bounded and verifiable, and only when the task is large
+  enough to justify coordination machinery. The documented 12-unit
+  counterexample makes coordination cost itself part of Selection: adding more
+  roles, queues, state, and verification can reduce fitness when the workload
+  does not justify them. Stable coordinator, worker, verifier, and skill roles
+  create an adjacent Specialization signal, while the Reflect workflow provides
+  a bounded mechanism for turning completed work into changes to future agent
+  behavior.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Cooperation is not automatically fitter than individual-agent execution.
+    pstack introduces coordination infrastructure only beyond a task-scale
+    threshold and explicitly documents a small-workload case where orchestration
+    overhead sharply reduced delivered output. At larger intended scales it
+    introduces differentiated roles, durable state, bounded context transfer,
+    and independent verification. This suggests that the transition from
+    Selection to Cooperation is itself governed by fitness: coordination
+    mechanisms must earn their cost.
+
+what_this_does_not_establish:
+  - >
+    The repository describes an orchestration design for dozens to hundreds of
+    subagents, but does not provide evidence that such a program has actually
+    operated at that scale.
+  - >
+    The 12-unit comparison is a single self-reported example from the playbook,
+    not a controlled or independently replicated benchmark of orchestration
+    versus a plain agent.
+  - >
+    The source does not independently establish that pstack improves
+    engineering quality, productivity, or cost across teams or repositories.
+  - >
+    Differentiated coordinator, worker, verifier, and skill roles are an
+    operational Specialization signal, but the source does not establish that
+    repeated Cooperation caused those specializations.
+  - >
+    The source does not establish 1,000-agent operation or validate the model's
+    proposed evolutionary sequence.
+
+open_question: >
+  At what task or program scale does the cost of coordination become lower than
+  the execution waste, verification risk, and human attention that coordination
+  prevents?
+
+assessment:
+  assisted_by_ai: true
