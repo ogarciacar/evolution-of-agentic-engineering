@@ -1,9 +1,11 @@
 source:
   title: "Agentic coding and persistent returns to expertise"
-  organization: "Anthropic"
+  producer: "Anthropic"
+  producer_type: organization
   date: "2026-06-16"
   url: "https://www.anthropic.com/research/claude-code-expertise"
-  source_type: "first-party"
+  type: report
+  provenance: primary
 
 presentation:
   headline: "Human expertise stays load-bearing while the agent executes"
