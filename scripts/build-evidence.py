@@ -71,6 +71,10 @@ def rendered_observed(record: dict) -> str:
     return "".join(f'<p>{esc(str(item).strip())}</p>' for item in record["observed"])
 
 
+def source_label(source: dict) -> str:
+    return "Primary source" if source["provenance"] == "primary" else "Secondary source"
+
+
 def render_entry(record: dict) -> str:
     source = record["source"]
     implication = record["model_implication"]
@@ -78,7 +82,7 @@ def render_entry(record: dict) -> str:
     signal_id = evidence_id(record)
     headline = record["presentation"]["headline"]
     scale = record["scale"]
-    return f'''<article class="entry" id="{esc(signal_id)}" data-signal-path="/signals/{esc(signal_id)}/"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["organization"])}</div><button class="copy-signal-link" type="button" aria-label="Copy Scale Signal link" title="Copy Scale Signal link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{rendered_chips(record)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{rendered_observed(record)}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">First-party source ↗</a></div></article>'''
+    return f'''<article class="entry" id="{esc(signal_id)}" data-signal-path="/signals/{esc(signal_id)}/"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["producer"])}</div><button class="copy-signal-link" type="button" aria-label="Copy Scale Signal link" title="Copy Scale Signal link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{rendered_chips(record)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{rendered_observed(record)}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">{esc(source_label(source))} ↗</a></div></article>'''
 
 
 def render_signal_page(record: dict, template: str) -> str:
@@ -96,7 +100,7 @@ def render_signal_page(record: dict, template: str) -> str:
         "{{DESCRIPTION}}": esc(description),
         "{{CANONICAL_URL}}": esc(canonical_url),
         "{{PUBLISHED}}": esc(published),
-        "{{ORGANIZATION}}": esc(source["organization"]),
+        "{{ORGANIZATION}}": esc(source["producer"]),
         "{{CHIPS}}": rendered_chips(record),
         "{{SCALE_LABEL}}": esc(record["scale"]["label"]),
         "{{SCALE_SUMMARY}}": esc(record["scale"]["summary"].strip()),
