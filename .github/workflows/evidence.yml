@@ -20,8 +20,10 @@ jobs:
         run: python scripts/validate-evidence.py
       - name: Check publication safety
         run: python scripts/check-publication-safety.py
-      - name: Check evidence projection
+      - name: Check evidence projection schema
         run: python scripts/check-evidence-projection.py
+      - name: Check canonical corpus projection
+        run: python scripts/test-evidence-projection.py
       - name: Build evidence page
         run: python scripts/build-evidence.py
       - name: Build homepage evidence
