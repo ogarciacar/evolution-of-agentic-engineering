@@ -72,7 +72,7 @@ def rendered_observed(record: dict) -> str:
 
 
 def source_label(source: dict) -> str:
-    return "Primary source" if source["provenance"] == "primary" else "Secondary source"
+    return "First-party source" if source["provenance"] == "primary" else "Secondary source"
 
 
 def render_entry(record: dict) -> str:
