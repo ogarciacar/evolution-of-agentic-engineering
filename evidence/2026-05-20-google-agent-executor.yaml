@@ -1,9 +1,11 @@
 source:
   title: "Agent Executor: Google's distributed agent runtime"
-  organization: "Google Cloud"
+  producer: "Google Cloud"
+  producer_type: organization
   date: "2026-05-20"
   url: "https://cloud.google.com/blog/products/ai-machine-learning/agent-executor-googles-distributed-agent-runtime"
-  source_type: "first-party"
+  type: engineering-blog
+  provenance: primary
 
 presentation:
   headline: "Long-running agents require a runtime"
