@@ -1,9 +1,11 @@
 source:
   title: "Running a Software Factory Efficiently at Uber Scale"
-  organization: "Uber"
+  producer: "Uber"
+  producer_type: organization
   date: "2026-08-27"
   url: "https://www.uber.com/gb/en/blog/efficient-software-factory/"
-  source_type: "first-party"
+  type: engineering-blog
+  provenance: primary
 
 presentation:
   headline: "The software factory selects for complete managed capabilities"
