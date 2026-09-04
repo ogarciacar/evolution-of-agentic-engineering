@@ -1,9 +1,11 @@
 source:
   title: "A Phased Workflow for Operating LLM-Based Coding Agents"
-  organization: "Infobip"
+  producer: "Infobip"
+  producer_type: organization
   date: "2026-08-31"
   url: "https://arxiv.org/abs/2608.30701"
-  source_type: "first-party"
+  type: paper
+  provenance: primary
 
 presentation:
   headline: "Context becomes an engineered workflow"
