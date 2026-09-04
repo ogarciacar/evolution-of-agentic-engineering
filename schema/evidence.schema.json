@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["source", "presentation", "observed", "scale", "mapping", "interpretation", "model_implication", "what_this_does_not_establish", "open_question", "assessment"],
   "properties": {
-    "source": {"type":"object","additionalProperties":false,"required":["title","organization","date","url","source_type"],"properties":{"title":{"type":"string","minLength":1},"organization":{"type":"string","minLength":1},"date":{"type":"string","format":"date"},"url":{"type":"string","format":"uri","pattern":"^https://"},"source_type":{"type":"string","enum":["first-party","secondary"]}}},
+    "source": {"type":"object","additionalProperties":false,"required":["title","producer","producer_type","date","url","type","provenance"],"properties":{"title":{"type":"string","minLength":1},"producer":{"type":"string","minLength":1},"producer_type":{"type":"string","enum":["organization","authors","individual","project"]},"date":{"type":"string","format":"date"},"url":{"type":"string","format":"uri","pattern":"^https://"},"type":{"type":"string","enum":["engineering-blog","paper","repository","documentation","changelog","report","benchmark","talk"]},"provenance":{"type":"string","enum":["primary","secondary"]}}},
     "presentation": {"type":"object","additionalProperties":false,"required":["headline"],"properties":{"headline":{"type":"string","minLength":1},"summary":{"type":"string","minLength":1}}},
     "observed": {"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
     "scale": {"type":"object","additionalProperties":false,"required":["label","summary"],"properties":{"label":{"type":"string","enum":["Scale signal","Evidence boundary"]},"summary":{"type":"string","minLength":1}}},

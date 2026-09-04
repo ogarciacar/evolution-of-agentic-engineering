@@ -1,9 +1,11 @@
 source:
   title: "Open-source Codex orchestration with Symphony"
-  organization: "OpenAI"
+  producer: "OpenAI"
+  producer_type: organization
   date: "2026-04-27"
   url: "https://openai.com/index/open-source-codex-orchestration-symphony/"
-  source_type: "first-party"
+  type: engineering-blog
+  provenance: primary
 
 presentation:
   headline: "Human attention becomes the concurrency ceiling"

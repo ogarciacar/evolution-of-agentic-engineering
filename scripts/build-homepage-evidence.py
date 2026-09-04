@@ -89,7 +89,7 @@ def render_row(record: dict) -> str:
     return (
         f'<a class="landscape-row" href="signals/{attr(signal_id)}/" title="{attr(tooltip)}">'
         f'<span class="landscape-source"><span class="landscape-date">{short_date(source["date"])}</span>'
-        f'<strong>{text(source["organization"])}</strong></span>'
+        f'<strong>{text(source["producer"])}</strong></span>'
         f'{stages}<span class="landscape-divider" aria-hidden="true"></span>{conditions}'
         f'<span class="landscape-verdict {attr(verdict.lower())}">{text(verdict)}</span></a>'
     )

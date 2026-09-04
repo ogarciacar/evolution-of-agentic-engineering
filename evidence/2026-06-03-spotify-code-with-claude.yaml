@@ -1,9 +1,11 @@
 source:
   title: "Coding Is No Longer the Constraint: Scaling Developer Experience to Teams and Agents at Spotify"
-  organization: "Spotify"
+  producer: "Spotify"
+  producer_type: organization
   date: "2026-06-03"
   url: "https://engineering.atspotify.com/2026/6/code-with-claude-coding-is-no-longer-the-constraint"
-  source_type: "first-party"
+  type: engineering-blog
+  provenance: primary
 
 presentation:
   headline: "Coding stops being the constraint"

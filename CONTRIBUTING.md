@@ -44,7 +44,7 @@ If that check cannot be completed confidently, **STOP before push**.
 
 A useful contribution contains observations about software engineering involving AI or coding agents, agentic engineering systems, or the engineering environments that support them.
 
-Evidence contributions require publicly accessible sources. Prefer first-party public engineering reports, papers, technical documentation, or other public sources with concrete observations. Secondary public reporting can be useful, but should be identified as secondary.
+Evidence contributions require publicly accessible sources. Prefer primary public engineering reports, papers, repositories, technical documentation, or other original sources with concrete observations. Secondary public reporting can be useful, but must be identified as secondary.
 
 Internal company information is out of scope for this public evidence repository regardless of how relevant it is to the model.
 
@@ -64,13 +64,15 @@ These ownership boundaries are also expressed in `.github/CODEOWNERS`. CODEOWNER
 
 **Contributors only author YAML evidence records. Do not edit generated evidence pages directly.**
 
-Create one YAML file under `evidence/` using the source publication date, organization, and a descriptive source slug:
+Create one YAML file under `evidence/` using the source publication date, producer, and a descriptive source slug:
 
-`evidence/YYYY-MM-DD-<organization>-<source-slug>.yaml`
+`evidence/YYYY-MM-DD-<producer-slug>-<source-slug>.yaml`
 
 For example:
 
 `evidence/2026-08-27-uber-efficient-software-factory.yaml`
+
+The producer is the person or entity responsible for the source. It may be an organization, a set of authors, an individual, or a project. Existing evidence filenames are stable and are not renamed merely because the source terminology evolves.
 
 Use the source publication date, not the contribution date. Keep the date in `source.date` as canonical structured metadata; the filename convention exists to make evidence easier to scan and discover in the repository.
 
@@ -78,15 +80,26 @@ The YAML record is the canonical source for evidence-specific content displayed 
 
 Presentation fields preserve editorial labels that should not be inferred by the generator; scale captures a documented scale signal or an important evidence boundary; transitions are explicit when the evidence speaks to movement between stages; and the model implication stores both the verdict and the explanation.
 
+### Source metadata
+
+Source kind and provenance are independent dimensions.
+
+- `producer` identifies who is responsible for the source.
+- `producer_type` is one of `organization`, `authors`, `individual`, or `project`.
+- `type` is one of `engineering-blog`, `paper`, `repository`, `documentation`, `changelog`, `report`, `benchmark`, or `talk`.
+- `provenance` is `primary` when the cited source is the original source of the evidence and `secondary` when it reports or analyzes evidence originating elsewhere.
+
 Use this structure:
 
 ```yaml
 source:
   title: ""
-  organization: ""
+  producer: ""
+  producer_type: organization
   date: "YYYY-MM-DD"
   url: ""
-  source_type: "first-party"
+  type: engineering-blog
+  provenance: primary
 
 presentation:
   headline: ""
@@ -127,6 +140,21 @@ assessment:
 `model_implication.verdict` must be exactly one of `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`.
 
 Use only the minimum stage and condition mapping supported by the observation. The available stages are Apparition, Mutation, Selection, Cooperation, and Specialization. The Selection conditions are Context, Execution, Verification, Coordination, Observability, Economics, and Learning.
+
+## Research semantics
+
+The evidence record separates source-grounded observations from analysis of the working model:
+
+1. **Source** records who produced the source, what kind of source it is, its provenance, publication date, and public location.
+2. **Observed** contains only statements directly supported by the cited public source, without Evolution of Agentic Engineering interpretation.
+3. **Scale** records a documented scale signal or an important evidence boundary.
+4. **Mapping** is the researcher's classification of the evidence against stages and Selection conditions; it is not a claim that the source itself uses those concepts.
+5. **Interpretation** explains what the observations may mean in the language of the working model.
+6. **Model implication** states whether the evidence supports, refines, contradicts, or leaves the model inconclusive and explains why.
+7. **What this does not establish** records important evidentiary boundaries.
+8. **Open question** identifies what the evidence suggests should be investigated next.
+
+An evidence YAML is a living assessment of a fixed public source. Source-grounded observations should change only to correct or improve extraction from that source. Mapping, interpretation, model implication, boundaries, and open questions may evolve as the working model evolves. Git history preserves earlier assessments.
 
 ## Review standard
 

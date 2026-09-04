@@ -1,9 +1,11 @@
 source:
   title: "Agents Window"
-  organization: "Cursor"
+  producer: "Cursor"
+  producer_type: organization
   date: "2026-04-24"
   url: "https://cursor.com/changelog/04-24-26"
-  source_type: "first-party"
+  type: changelog
+  provenance: primary
 
 presentation:
   headline: "The interface reorganizes around many agents"

@@ -1,9 +1,11 @@
 source:
   title: "pstack (repository snapshot)"
-  organization: "Cursor"
+  producer: "Cursor"
+  producer_type: organization
   date: "2026-09-03"
   url: "https://github.com/cursor/plugins/tree/7314f723a487ec406b6369fe5865ba034cfed166/pstack"
-  source_type: "first-party"
+  type: repository
+  provenance: primary
 
 presentation:
   headline: "Cooperation has to earn its coordination cost"

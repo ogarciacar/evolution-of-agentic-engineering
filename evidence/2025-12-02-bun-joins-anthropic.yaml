@@ -1,9 +1,11 @@
 source:
   title: "Bun is joining Anthropic"
-  organization: "Bun"
+  producer: "Bun"
+  producer_type: organization
   date: "2025-12-02"
   url: "https://bun.com/blog/bun-joins-anthropic"
-  source_type: "first-party"
+  type: engineering-blog
+  provenance: primary
 
 presentation:
   headline: "Agent infrastructure becomes strategically load-bearing"

@@ -1,9 +1,11 @@
 source:
   title: "Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents?"
-  organization: "Gloaguen et al."
+  producer: "Gloaguen et al."
+  producer_type: authors
   date: "2026-02-12"
   url: "https://arxiv.org/abs/2602.11988"
-  source_type: "first-party"
+  type: paper
+  provenance: primary
 
 presentation:
   headline: "Context files raise cost without significant task-success gains"
