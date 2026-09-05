@@ -1,0 +1,58 @@
+version: 1
+status: superseded
+superseded_by: 2
+
+claims:
+  - id: C01
+    stage: Apparition
+    title: Agents become viable engineering actors
+    claim: >-
+      AI agents can perform meaningful software-engineering work with enough
+      autonomy to be treated as engineering actors rather than only interactive tools.
+    challenged_by: >-
+      Evidence that agents remain dependent on continuous human operation for
+      meaningful engineering work, or cannot reliably complete bounded engineering tasks.
+
+  - id: C02
+    stage: Mutation
+    title: Agent configurations proliferate
+    claim: >-
+      Once agents are viable engineering actors, implementations diversify across
+      models, tools, context strategies, workflows, permissions, and operating patterns.
+    challenged_by: >-
+      Evidence that viable agentic engineering converges rapidly on one materially
+      uniform configuration rather than producing persistent variation.
+
+  - id: C03
+    stage: Selection
+    title: Engineering environments determine what can scale
+    claim: >-
+      At increasing agentic scale, differences in engineering environments materially
+      affect which agent configurations can operate reliably and economically.
+    challenged_by: >-
+      Evidence that context, execution, verification, coordination, observability,
+      economics, and learning conditions do not materially affect agent performance
+      or scalability.
+
+  - id: C04
+    stage: Cooperation
+    title: Fit agents compose into complex workflows
+    claim: >-
+      Agent configurations that fit their engineering environment increasingly compose
+      with other agents, humans, and systems to perform engineering workflows that exceed
+      the useful scope of isolated agents.
+    challenged_by: >-
+      Evidence that increasing engineering capability is achieved primarily through
+      isolated agents and that composition provides no durable advantage or remains
+      systematically less effective.
+
+  - id: C05
+    stage: Specialization
+    title: Repeated cooperation produces differentiated capabilities
+    claim: >-
+      Repeated successful cooperation creates stable, differentiated agentic engineering
+      capabilities optimized for distinct engineering responsibilities.
+    challenged_by: >-
+      Evidence that repeated cooperation does not produce durable specialization, or
+      that general interchangeable agents remain consistently superior to differentiated
+      capabilities.
