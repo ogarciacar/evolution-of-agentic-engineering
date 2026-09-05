@@ -21,9 +21,11 @@ def sql(value: object) -> str:
 
 
 def export() -> str:
+    # D1's remote SQL import path manages atomicity itself and rejects explicit
+    # BEGIN TRANSACTION / COMMIT statements. Keep this export as plain,
+    # deterministic SQL so the same file works with `wrangler d1 execute`.
     lines = [
         "PRAGMA defer_foreign_keys = true;",
-        "BEGIN TRANSACTION;",
         "DELETE FROM evidence_conditions;",
         "DELETE FROM evidence_stages;",
         "DELETE FROM evidence;",
@@ -60,7 +62,7 @@ def export() -> str:
         for condition in sorted(mapping["conditions"]):
             lines.append(f"INSERT INTO evidence_conditions (evidence_id, condition) VALUES ({sql(evidence_id)}, {sql(condition)});")
 
-    lines.extend(["COMMIT;", "PRAGMA defer_foreign_keys = false;"])
+    lines.append("PRAGMA defer_foreign_keys = false;")
     return "\n".join(lines) + "\n"
 
 
