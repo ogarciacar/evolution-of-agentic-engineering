@@ -12,6 +12,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 CLAIMS = ROOT / "model" / "claims.yaml"
 MAPPINGS = ROOT / "model" / "evidence-claims.yaml"
+POLICY = ROOT / "model" / "evaluation-policy.yaml"
 EVIDENCE_DIR = ROOT / "evidence"
 RELATIONSHIPS = ("SUPPORTS", "REFINES", "CONTRADICTS", "INCONCLUSIVE")
 
@@ -22,18 +23,25 @@ def status(counts: Counter[str]) -> str:
         return "UNOBSERVED"
     if counts["CONTRADICTS"]:
         return "CHALLENGED"
-    positive = counts["SUPPORTS"] + counts["REFINES"]
-    if positive and counts["INCONCLUSIVE"]:
+    if counts["INCONCLUSIVE"]:
         return "CONTESTED"
-    if positive:
+    if counts["SUPPORTS"] + counts["REFINES"]:
         return "EMERGING"
     return "CONTESTED"
 
 
 def evaluate() -> dict:
-    claims = yaml.safe_load(CLAIMS.read_text(encoding="utf-8"))["claims"]
-    mappings = yaml.safe_load(MAPPINGS.read_text(encoding="utf-8"))["mappings"]
+    claims_document = yaml.safe_load(CLAIMS.read_text(encoding="utf-8"))
+    mappings_document = yaml.safe_load(MAPPINGS.read_text(encoding="utf-8"))
+    policy = yaml.safe_load(POLICY.read_text(encoding="utf-8"))
+    model_version = claims_document["version"]
+    if mappings_document.get("version") != model_version:
+        raise ValueError("evidence claim mappings do not match the active model version")
+    if policy.get("model_version") != model_version:
+        raise ValueError("evaluation policy does not match the active model version")
 
+    claims = claims_document["claims"]
+    mappings = mappings_document["mappings"]
     evidence_meta = {}
     for path in sorted(EVIDENCE_DIR.glob("*.yaml")):
         record = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -72,7 +80,7 @@ def evaluate() -> dict:
             "evidence": evidence,
         })
 
-    return {"version": 1, "claims": evaluations}
+    return {"version": 2, "model_version": model_version, "claims": evaluations}
 
 
 def main() -> None:
