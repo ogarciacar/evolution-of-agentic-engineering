@@ -1,0 +1,38 @@
+name: Regenerate S6.4 evidence artifact
+
+on:
+  push:
+    branches:
+      - s6-4-research-record-evidence-queue
+    paths:
+      - .github/workflows/regenerate-s6-4-artifact.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Regenerate evidence page
+        run: python scripts/build-evidence.py
+      - name: Commit generated artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- evidence.html; then
+            echo "evidence.html is already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add evidence.html
+          git commit -m "build: regenerate evidence page for S6.4"
+          git push
