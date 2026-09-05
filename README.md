@@ -2,7 +2,9 @@
 
 A working model by Orlando Garcia for reasoning about how agentic software engineering may evolve as agent autonomy and concurrency increase.
 
-**Apparition → Mutation → Selection → Cooperation → Specialization**
+**Apparition → Selection → Cooperation → Specialization**
+
+Variation/mutation is a mechanism rather than an independent stage: once agentic engineering actors appear, different configurations provide the variants upon which engineering environments can exert selection pressure.
 
 The model uses 1K-agent scale as a forcing function for examining the engineering conditions that may become limiting as agent populations grow: Context, Execution, Verification, Coordination, Observability, Economics, and Learning.
 
@@ -12,6 +14,7 @@ This repository intentionally stays small and static:
 
 - `index.html` — the model and a generated Evidence Landscape showing up to the newest 24 accepted Scale Signals.
 - `evidence.html` — the living evidence record used to test, refine, and potentially contradict the model.
+- `evaluate.html` — deterministic evaluation of the active model claims against the mapped corpus.
 - `signals/<signal-id>/` — generated permanent pages for individual Scale Signals.
 - `apply.html` — the protocol for evaluating a new source against the model.
 
@@ -35,7 +38,7 @@ If the source contains meaningful evidence, the assessment can be proposed throu
 
 ## Publishing
 
-The site has no build step or external runtime dependencies. Deploy the repository root as a static site. For Cloudflare Pages, no framework preset or build command is required; the output directory is the repository root.
+Deploy the repository root to Cloudflare Pages. Static research pages are served alongside the read-only evidence API backed by the D1 projection.
 
 ## Evidence workflow
 
@@ -47,8 +50,8 @@ New evidence should be evaluated before it changes the model:
 4. Let the homepage Evidence Landscape show up to the newest 24 accepted signals.
 5. Change the model itself only when accumulated evidence warrants it.
 
-Evidence is intended to accumulate; the complete corpus remains in `evidence.html` while the homepage stays bounded to the newest 24 accepted signals.
+Evidence is intended to accumulate; the complete corpus remains queryable through the Evidence page while the homepage stays bounded to the newest 24 accepted signals.
 
 ## Origins
 
-The model was developed using Daniel San Martín's *Clarity* model as a thinking lens, particularly its progression through Apparition, Mutation, Selection, Cooperation, and Specialization. The application of those ideas to agentic software engineering, including the interpretations and hypotheses presented here, is Orlando Garcia's own.
+The model was developed using Daniel San Martín's *Clarity* model as a thinking lens. In v0.2, its evolutionary structure is interpreted as **Apparition → Selection → Cooperation → Specialization**. Variation/mutation supplies versions of the object on which Selection can operate; it is not treated as an independent stage. The application of this structure to agentic software engineering, including the interpretations and hypotheses presented here, is Orlando Garcia's own.
