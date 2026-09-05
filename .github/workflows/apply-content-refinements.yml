@@ -1,0 +1,48 @@
+name: Apply content refinements
+on: push
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: homepage-refinements-v0-2
+          token: ${{ github.token }}
+      - name: Apply requested refinements
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index = Path('index.html')
+          s = index.read_text()
+          s = s.replace('which engineering conditions allow useful agent variants to operate reliably and economically at scale.', 'which engineering conditions allow agent variants to operate reliably and economically at scale.', 1)
+          s = s.replace('<a href="https://www.linkedin.com/in/ogarciacar">Orlando Garcia</a>', '<a href="https://www.linkedin.com/in/ogarciacar" target="_blank" rel="noopener noreferrer">Orlando Garcia</a>', 1)
+          s = s.replace('<a href="https://www.linkedin.com/in/danielsanmartinsepuveda/">Daniel San Martín\'s</a>', '<a href="https://www.linkedin.com/in/danielsanmartinsepuveda/" target="_blank" rel="noopener noreferrer">Daniel San Martín\'s</a>', 1)
+          index.write_text(s)
+
+          template = Path('templates/evidence.html')
+          s = template.read_text()
+          s = s.replace('<span class="stage mechanism">Variation / mutation · mechanism</span>', '', 1)
+          queue_start = '<section id="evidence-queue">'
+          absence_start = '<section><div class="eyebrow">What we have not observed</div><h2>Absence matters too</h2>'
+          footer = '<footer>Evolution of Agentic Engineering · Evidence · v0.2 · Living research record · September 2026</footer>'
+          if queue_start not in s or absence_start not in s or footer not in s:
+              raise SystemExit('Expected evidence sections not found')
+          before = s.split(queue_start, 1)[0]
+          s = before + footer + s.split(footer, 1)[1]
+          template.write_text(s)
+          PY
+          python3 scripts/build-evidence.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html templates/evidence.html evidence.html sitemap.xml signals
+          git commit -m 'Refine homepage and evidence presentation'
+          git push origin HEAD:homepage-refinements-v0-2
+      - name: Remove temporary workflow
+        run: |
+          git rm .github/workflows/apply-content-refinements.yml
+          git commit -m 'Remove temporary content refinement workflow'
+          git push origin HEAD:homepage-refinements-v0-2
