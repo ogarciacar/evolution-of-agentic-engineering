@@ -1,0 +1,20 @@
+version: 1
+
+statuses:
+  - UNOBSERVED
+  - EMERGING
+  - CONTESTED
+  - CHALLENGED
+
+rules:
+  UNOBSERVED: No evidence is explicitly mapped to the claim.
+  CHALLENGED: At least one mapped evidence record CONTRADICTS the claim.
+  CONTESTED: No record CONTRADICTS the claim, and mapped evidence contains both positive relationships (SUPPORTS or REFINES) and INCONCLUSIVE relationships.
+  EMERGING: No record CONTRADICTS the claim, at least one mapped record SUPPORTS or REFINES it, and no mapped record is INCONCLUSIVE.
+
+notes:
+  - Status is a deterministic description of the current mapped corpus, not a probability or truth score.
+  - SUPPORTS and REFINES are positive evidence relationships but remain distinguishable in the evaluation output.
+  - A contradiction dominates the status so challenging evidence cannot be hidden by a larger number of supporting records.
+  - Evidence counts are descriptive and are never treated as votes.
+  - Provenance, independence, scope, and limitations remain visible properties of the underlying evidence and are not converted into numeric weights.
