@@ -1,0 +1,35 @@
+name: Generate Product Talk evidence surfaces
+
+on:
+  push:
+    branches:
+      - evidence-product-talk-ai-evals
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: evidence-product-talk-ai-evals
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python scripts/build-evidence.py
+      - run: python scripts/build-homepage-evidence.py
+      - name: Commit generated surfaces
+        run: |
+          git add evidence.html index.html sitemap.xml signals
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Regenerate evidence surfaces"
+          git push origin HEAD:evidence-product-talk-ai-evals
