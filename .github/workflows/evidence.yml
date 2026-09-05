@@ -26,6 +26,8 @@ jobs:
         run: python scripts/test-evidence-projection.py
       - name: Check deterministic evidence indexer
         run: python scripts/check-evidence-indexer.py
+      - name: Check D1 synchronization export
+        run: python scripts/check-evidence-sync.py
       - name: Build evidence page
         run: python scripts/build-evidence.py
       - name: Build homepage evidence

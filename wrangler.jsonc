@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "agentic-engineering-evidence",
+  "compatibility_date": "2026-09-05",
+  "d1_databases": [
+    {
+      "binding": "EVIDENCE_DB",
+      "database_name": "agentic-engineering-evidence",
+      "database_id": "4b09d208-aafa-408c-9ae2-55d4abbd8eba",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
