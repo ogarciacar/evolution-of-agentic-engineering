@@ -43,6 +43,7 @@ jobs:
       - name: Build ephemeral Wrangler D1 configuration
         shell: bash
         run: |
+          mkdir -p .artifacts
           python - <<'PY'
           import json, os
           config = {
