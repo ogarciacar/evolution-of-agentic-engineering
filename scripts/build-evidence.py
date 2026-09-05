@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Build the living evidence record and Scale Signal pages from canonical YAML."""
+"""Build the evidence page and Scale Signal pages from canonical YAML."""
 from __future__ import annotations
 
 import html
 import re
 import shutil
-from datetime import date
 from pathlib import Path
 
 import yaml
@@ -71,24 +70,12 @@ def rendered_observed(record: dict) -> str:
     return "".join(f'<p>{esc(str(item).strip())}</p>' for item in record["observed"])
 
 
-def source_label(source: dict) -> str:
-    return "First-party source" if source["provenance"] == "primary" else "Secondary source"
-
-
-def render_entry(record: dict) -> str:
-    source = record["source"]
-    implication = record["model_implication"]
-    published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
-    signal_id = evidence_id(record)
-    headline = record["presentation"]["headline"]
-    return f'''<article class="record-row"><div class="record-date">{esc(published)} · {esc(source["producer"])}</div><a class="record-link" href="/signals/{esc(signal_id)}/"><div class="record-main"><h3>{esc(headline)}</h3><div class="meta">{rendered_chips(record)}<span class="chip verdict">{esc(implication["verdict"])}</span></div></div><span class="record-arrow" aria-hidden="true">→</span></a></article>'''
-
-
 def render_signal_page(record: dict, template: str) -> str:
     source = record["source"]
     implication = record["model_implication"]
     signal_id = evidence_id(record)
     headline = record["presentation"]["headline"]
+    from datetime import date
     published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
     canonical_url = f"{SITE_ORIGIN}/signals/{signal_id}/"
     description = " ".join(str(record["scale"]["summary"]).split())
@@ -154,9 +141,7 @@ def update_sitemap(records: list[dict]) -> None:
 
 def main() -> None:
     records = load_records()
-    template = TEMPLATE.read_text(encoding="utf-8")
-    entries = "\n".join(render_entry(record) for record in records)
-    OUTPUT.write_text(template.replace("{{EVIDENCE_ENTRIES}}", entries).replace("{{EVIDENCE_COUNT}}", str(len(records))), encoding="utf-8")
+    OUTPUT.write_text(TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
     build_signal_pages(records)
     update_sitemap(records)
     print(f"Built {OUTPUT.relative_to(ROOT)} and {len(records)} Scale Signal pages")
