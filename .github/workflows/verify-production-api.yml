@@ -4,8 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/worker.js"
-      - "wrangler.jsonc"
+      - "functions/**"
       - ".github/workflows/verify-production-api.yml"
   workflow_dispatch:
 
@@ -16,11 +15,43 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for production deployment
-        run: sleep 20
-      - name: Verify evidence API returns JSON
+      - name: Wait for production evidence API
+        shell: bash
         run: |
-          RESPONSE=$(curl --fail --silent --show-error --retry 6 --retry-delay 10 \
-            -H 'Accept: application/json' \
-            https://agenticengineering.science/api/evidence)
-          python -c 'import json,sys; data=json.load(sys.stdin); assert isinstance(data.get("evidence"), list); assert data.get("count") == len(data["evidence"]); print(f"Production API returned {data[\"count\"]} evidence records")' <<< "$RESPONSE"
+          set -uo pipefail
+          URL="https://agenticengineering.science/api/evidence"
+          MAX_ATTEMPTS=30
+          INTERVAL_SECONDS=10
+
+          for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
+            STATUS=$(curl --silent --show-error \
+              -H 'Accept: application/json' \
+              --output response.json \
+              --write-out '%{http_code}' \
+              "$URL" || true)
+
+            if [ "$STATUS" = "200" ] && python - <<'PY'
+          import json
+          with open("response.json", encoding="utf-8") as f:
+              data = json.load(f)
+          assert isinstance(data.get("evidence"), list)
+          assert data.get("count") == len(data["evidence"])
+          PY
+            then
+              COUNT=$(python -c 'import json; print(json.load(open("response.json"))["count"])')
+              echo "Production API returned $COUNT evidence records"
+              exit 0
+            fi
+
+            echo "Attempt $attempt/$MAX_ATTEMPTS: production API not ready (HTTP $STATUS)"
+            if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
+              sleep "$INTERVAL_SECONDS"
+            fi
+          done
+
+          echo "Production evidence API did not become ready within 5 minutes"
+          echo "Final HTTP status: $STATUS"
+          echo "Final response body:"
+          head -c 1000 response.json || true
+          echo
+          exit 1
