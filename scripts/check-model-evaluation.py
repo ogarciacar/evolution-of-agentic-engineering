@@ -23,12 +23,10 @@ assert module.status(Counter(SUPPORTS=10, CONTRADICTS=1)) == "CHALLENGED"
 first = module.evaluate()
 second = module.evaluate()
 assert first == second
-assert [claim["id"] for claim in first["claims"]] == ["C01", "C02", "C03", "C04", "C05"]
-assert first["claims"][1]["status"] == "UNOBSERVED"
-assert first["claims"][1]["evidence_count"] == 0
+assert [claim["id"] for claim in first["claims"]] == ["C01", "C03", "C04", "C05"]
 
 for claim in first["claims"]:
     assert sum(claim["relationship_counts"].values()) == claim["evidence_count"]
     assert claim["producer_count"] == len(claim["producers"])
 
-print("Model claim evaluation is deterministic and preserves evidence gaps")
+print("Model claim evaluation is deterministic and aligned with the active claim contract")

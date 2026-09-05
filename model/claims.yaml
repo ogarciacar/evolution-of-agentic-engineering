@@ -1,56 +1,49 @@
-version: 1
+version: 2
 
 claims:
   - id: C01
     stage: Apparition
-    title: Agents become viable engineering actors
+    title: Agentic engineering actors have appeared
     claim: >-
-      AI agents can perform meaningful software-engineering work with enough
-      autonomy to be treated as engineering actors rather than only interactive tools.
+      Models, context, tools, execution, permissions, and feedback can combine into
+      agentic engineering actors capable of meaningful software-engineering action.
+      Once such objects appear, variation can arise among their configurations.
     challenged_by: >-
-      Evidence that agents remain dependent on continuous human operation for
-      meaningful engineering work, or cannot reliably complete bounded engineering tasks.
-
-  - id: C02
-    stage: Mutation
-    title: Agent configurations proliferate
-    claim: >-
-      Once agents are viable engineering actors, implementations diversify across
-      models, tools, context strategies, workflows, permissions, and operating patterns.
-    challenged_by: >-
-      Evidence that viable agentic engineering converges rapidly on one materially
-      uniform configuration rather than producing persistent variation.
+      Evidence that these combinations remain only interactive tools dependent on
+      continuous human operation and cannot act as meaningful engineering objects.
 
   - id: C03
     stage: Selection
-    title: Engineering environments determine what can scale
+    title: Engineering environments select among viable variants
     claim: >-
-      At increasing agentic scale, differences in engineering environments materially
-      affect which agent configurations can operate reliably and economically.
+      Variation among viable agentic engineering objects encounters engineering
+      environments that materially affect which configurations can operate reliably,
+      economically, and persist at increasing scale.
     challenged_by: >-
-      Evidence that context, execution, verification, coordination, observability,
-      economics, and learning conditions do not materially affect agent performance
-      or scalability.
+      Evidence that materially different agentic configurations remain equally viable
+      regardless of context, execution, verification, coordination, observability,
+      economics, and learning conditions in their engineering environment.
 
   - id: C04
     stage: Cooperation
-    title: Fit agents compose into complex workflows
+    title: Cooperation can improve agentic engineering fitness
     claim: >-
-      Agent configurations that fit their engineering environment increasingly compose
-      with other agents, humans, and systems to perform engineering workflows that exceed
-      the useful scope of isolated agents.
+      Cooperation among agentic engineering objects, humans, and systems can increase
+      their ability to succeed or persist in engineering work compared with useful
+      isolated operation.
     challenged_by: >-
-      Evidence that increasing engineering capability is achieved primarily through
-      isolated agents and that composition provides no durable advantage or remains
-      systematically less effective.
+      Evidence that cooperation provides no durable fitness or persistence advantage,
+      or that isolated agentic engineering objects remain systematically more effective
+      as engineering demands increase.
 
   - id: C05
     stage: Specialization
-    title: Repeated cooperation produces differentiated capabilities
+    title: Persistent cooperation can produce higher-order engineering objects
     claim: >-
-      Repeated successful cooperation creates stable, differentiated agentic engineering
-      capabilities optimized for distinct engineering responsibilities.
+      Persistent cooperation can produce differentiated, integrated agentic engineering
+      capabilities such that the cooperating system itself becomes a meaningful
+      higher-order engineering object.
     challenged_by: >-
-      Evidence that repeated cooperation does not produce durable specialization, or
-      that general interchangeable agents remain consistently superior to differentiated
-      capabilities.
+      Evidence that persistent cooperation does not produce durable differentiation or
+      integration, or that cooperating specialized parts never form a meaningful
+      higher-order engineering capability.
