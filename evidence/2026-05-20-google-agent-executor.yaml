@@ -21,10 +21,7 @@ scale:
     production management as the emerging operational problem.
 
 mapping:
-  stages: [Mutation, Selection]
-  transition:
-    from: Mutation
-    to: Selection
+  stages: [Selection]
   conditions: [Execution, Observability, Learning]
 
 interpretation: >
