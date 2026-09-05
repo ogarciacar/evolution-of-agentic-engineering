@@ -1,4 +1,5 @@
-version: 1
+version: 2
+model_version: 2
 
 statuses:
   - UNOBSERVED
@@ -9,7 +10,7 @@ statuses:
 rules:
   UNOBSERVED: No evidence is explicitly mapped to the claim.
   CHALLENGED: At least one mapped evidence record CONTRADICTS the claim.
-  CONTESTED: No record CONTRADICTS the claim, and mapped evidence contains both positive relationships (SUPPORTS or REFINES) and INCONCLUSIVE relationships.
+  CONTESTED: No record CONTRADICTS the claim, and at least one mapped record is INCONCLUSIVE, whether or not positive relationships are also present.
   EMERGING: No record CONTRADICTS the claim, at least one mapped record SUPPORTS or REFINES it, and no mapped record is INCONCLUSIVE.
 
 notes:
