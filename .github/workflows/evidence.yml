@@ -18,6 +18,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Validate model claims
         run: python scripts/validate-model-claims.py
+      - name: Validate research gaps
+        run: python scripts/validate-research-gaps.py
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
       - name: Validate evidence claim mappings
