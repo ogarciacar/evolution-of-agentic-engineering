@@ -11,9 +11,9 @@ presentation:
   headline: "Evals make selection pressure executable"
   summary: >
     Product Talk describes an operational loop in which traces expose failures,
-    evals turn those failures into measurable criteria, and experiment variants
-    are compared against a baseline. The loop connects Mutation to Selection
-    through explicit verification and repeated learning.
+    evals turn those failures into measurable criteria, and configuration variants
+    are compared against a baseline. The loop shows how variation can be subjected
+    to explicit selection pressure through verification and repeated learning.
 
 observed:
   - >
@@ -63,32 +63,27 @@ scale:
     fleet-scale agent operation.
 
 mapping:
-  stages: [Mutation, Selection]
-  transition:
-    from: Mutation
-    to: Selection
+  stages: [Selection]
   conditions: [Verification, Observability, Economics, Learning]
 
 interpretation: >
-  The described eval loop provides a concrete mechanism for turning Mutation
-  into Selection. Traces make behavior observable; error analysis and evals turn
+  The described eval loop provides a concrete mechanism for subjecting variation
+  to Selection. Traces make behavior observable; error analysis and evals turn
   observed failures into explicit fitness criteria; baseline comparisons provide
   verification evidence for choosing among prompt, context, model, decomposition,
   and orchestration variants; evaluation cost influences which checks are run;
   and repeated error analysis feeds new criteria back into later experiments.
-  In this view, Verification, Observability, Economics, and Learning are not only
-  parallel Selection conditions. They can operate together as a control loop that
-  determines which mutations survive.
+  Verification, Observability, Economics, and Learning can therefore operate
+  together as a control loop that determines which variants are retained.
 
 model_implication:
   verdict: "REFINES"
   explanation: >
-    This refines the Mutation → Selection transition by making the selection
-    mechanism more explicit. A mutated agentic configuration is not selected
-    merely because it exists or appears plausible; it can be compared against an
-    executable set of evaluation criteria and a baseline. The source also shows
-    how failures discovered through observation can become new evals for future
-    runs, connecting Verification to Learning as recurring selection pressure.
+    This refines Selection by making one possible filtering mechanism explicit.
+    Variation in an agentic configuration is not a separate evolutionary stage:
+    variants can be compared against executable evaluation criteria and a baseline.
+    Failures discovered through observation can become new evals for future runs,
+    connecting Verification to Learning as recurring selection pressure.
 
 what_this_does_not_establish:
   - >
