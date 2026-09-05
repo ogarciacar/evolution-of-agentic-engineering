@@ -1,0 +1,43 @@
+version: 1
+model_version: 2
+
+research_gaps:
+  - claim_id: C01
+    stage: Apparition
+    question: >-
+      Under what conditions does an AI-enabled engineering configuration become a
+      meaningful agentic engineering actor rather than remain an interactive tool?
+    evidence_needed:
+      - Evidence of meaningful software-engineering action without continuous human operation
+      - Evidence that context, tools, execution, permissions, and feedback form a viable engineering object
+
+  - claim_id: C03
+    stage: Selection
+    question: >-
+      Which engineering-environment conditions materially determine which viable
+      agent variants remain reliable and economical as scale and autonomy increase?
+    evidence_needed:
+      - Comparative outcomes across materially different agent configurations
+      - Evidence connecting Context, Execution, Verification, Coordination, Observability, Economics, or Learning conditions to viability
+      - Evidence of differential persistence or effectiveness as scale increases
+
+  - claim_id: C04
+    stage: Cooperation
+    question: >-
+      Does cooperation among agentic engineering actors, humans, and systems improve
+      engineering fitness relative to useful isolated operation?
+    evidence_needed:
+      - Comparative outcomes between cooperating and isolated operation
+      - Coordination cost alongside the benefit produced by cooperation
+      - Evidence that any cooperation advantage persists across repeated engineering work
+
+  - claim_id: C05
+    stage: Specialization
+    question: >-
+      Does persistent differentiated cooperation produce an engineering system that
+      becomes the meaningful unit of operation?
+    evidence_needed:
+      - Stable differentiated roles or capabilities
+      - Persistent cooperation rather than one-off orchestration
+      - Integration that produces system-level engineering outcomes
+      - Evidence that the cooperating system is treated as a meaningful higher-order engineering object
