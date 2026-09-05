@@ -4,23 +4,21 @@
   "title": "Evolution of Agentic Engineering evidence record",
   "type": "object",
   "additionalProperties": false,
-  "required": ["source", "presentation", "observed", "scale", "mapping", "claims", "interpretation", "model_implication", "what_this_does_not_establish", "open_question", "assessment"],
+  "required": ["source", "presentation", "observed", "scale", "mapping", "interpretation", "model_implication", "what_this_does_not_establish", "open_question", "assessment"],
   "properties": {
     "source": {"type":"object","additionalProperties":false,"required":["title","producer","producer_type","date","url","type","provenance"],"properties":{"title":{"type":"string","minLength":1},"producer":{"type":"string","minLength":1},"producer_type":{"type":"string","enum":["organization","authors","individual","project"]},"date":{"type":"string","format":"date"},"url":{"type":"string","format":"uri","pattern":"^https://"},"type":{"type":"string","enum":["engineering-blog","paper","repository","documentation","changelog","report","benchmark","talk"]},"provenance":{"type":"string","enum":["primary","secondary"]}}},
     "presentation": {"type":"object","additionalProperties":false,"required":["headline"],"properties":{"headline":{"type":"string","minLength":1},"summary":{"type":"string","minLength":1}}},
     "observed": {"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
     "scale": {"type":"object","additionalProperties":false,"required":["label","summary"],"properties":{"label":{"type":"string","enum":["Scale signal","Evidence boundary"]},"summary":{"type":"string","minLength":1}}},
     "mapping": {"type":"object","additionalProperties":false,"required":["stages","conditions"],"properties":{"stages":{"type":"array","minItems":1,"uniqueItems":true,"items":{"$ref":"#/$defs/stage"}},"conditions":{"type":"array","uniqueItems":true,"items":{"$ref":"#/$defs/condition"}},"transition":{"type":"object","additionalProperties":false,"required":["from","to"],"properties":{"from":{"$ref":"#/$defs/stage"},"to":{"$ref":"#/$defs/stage"},"adjacent_stage":{"$ref":"#/$defs/stage"}}}}},
-    "claims": {"type":"array","minItems":1,"items":{"type":"object","additionalProperties":false,"required":["id","relationship"],"properties":{"id":{"type":"string","pattern":"^C[0-9]{2}$"},"relationship":{"$ref":"#/$defs/verdict"}}}},
     "interpretation": {"type":"string","minLength":1},
-    "model_implication": {"type":"object","additionalProperties":false,"required":["verdict","explanation"],"properties":{"verdict":{"$ref":"#/$defs/verdict"},"explanation":{"type":"string","minLength":1}}},
+    "model_implication": {"type":"object","additionalProperties":false,"required":["verdict","explanation"],"properties":{"verdict":{"type":"string","enum":["SUPPORTS","REFINES","CONTRADICTS","INCONCLUSIVE"]},"explanation":{"type":"string","minLength":1}}},
     "what_this_does_not_establish": {"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
     "open_question": {"type":"string","minLength":1},
     "assessment": {"type":"object","additionalProperties":false,"required":["assisted_by_ai"],"properties":{"assisted_by_ai":{"type":"boolean"}}}
   },
   "$defs": {
     "stage": {"type":"string","enum":["Apparition","Mutation","Selection","Cooperation","Specialization"]},
-    "condition": {"type":"string","enum":["Context","Execution","Verification","Coordination","Observability","Economics","Learning"]},
-    "verdict": {"type":"string","enum":["SUPPORTS","REFINES","CONTRADICTS","INCONCLUSIVE"]}
+    "condition": {"type":"string","enum":["Context","Execution","Verification","Coordination","Observability","Economics","Learning"]}
   }
 }
