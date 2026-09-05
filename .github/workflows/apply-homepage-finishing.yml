@@ -1,0 +1,37 @@
+name: Apply homepage finishing
+
+on:
+  push:
+    branches: [homepage-refinements-v0-2]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: homepage-refinements-v0-2
+      - name: Apply requested homepage changes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          s = s.replace('.scale-line i{position:absolute;right:-2px;top:-13px;font-style:normal;color:var(--accent);font-size:20px}', '.scale-line i{position:absolute;right:-2px;top:-13px;font-style:normal;color:var(--muted);font-size:20px}')
+          old = '</div></div></section>\n<section><div class="eyebrow">Potential recursion</div>'
+          new = '</div></div><div class="formula"><span>1K-agent scale</span> = amplify( friction + ambiguity + risk + coordination + cost )</div></section>\n<section><div class="eyebrow">Potential recursion</div>'
+          if old not in s:
+              raise SystemExit('Forcing-function footer insertion point not found')
+          s = s.replace(old, new, 1)
+          p.write_text(s)
+          PY
+          git rm .github/workflows/apply-homepage-finishing.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Finish homepage forcing function presentation"
+          git push origin HEAD:homepage-refinements-v0-2
