@@ -1,4 +1,4 @@
-version: 1
+version: 2
 
 mappings:
   2025-12-02-bun-joins-anthropic:
@@ -9,13 +9,13 @@ mappings:
       relationship: SUPPORTS
   2026-02-12-gloaguen-et-al-context-files-evaluation:
     - id: C03
-      relationship: REFINES
+      relationship: SUPPORTS
   2026-04-24-cursor-agents-window:
     - id: C04
-      relationship: SUPPORTS
+      relationship: INCONCLUSIVE
   2026-04-27-openai-symphony:
     - id: C04
-      relationship: REFINES
+      relationship: SUPPORTS
   2026-05-20-google-agent-executor:
     - id: C03
       relationship: SUPPORTS
@@ -23,7 +23,7 @@ mappings:
     - id: C03
       relationship: SUPPORTS
     - id: C04
-      relationship: SUPPORTS
+      relationship: INCONCLUSIVE
   2026-06-16-anthropic-agentic-coding-persistent-returns-to-expertise:
     - id: C01
       relationship: SUPPORTS
@@ -31,20 +31,20 @@ mappings:
       relationship: REFINES
   2026-08-27-uber-efficient-software-factory:
     - id: C03
-      relationship: REFINES
-    - id: C04
       relationship: SUPPORTS
+    - id: C04
+      relationship: INCONCLUSIVE
     - id: C05
       relationship: INCONCLUSIVE
   2026-08-31-infobip-phased-workflow-coding-agents:
     - id: C03
-      relationship: SUPPORTS
+      relationship: REFINES
   2026-09-02-teresa-torres-ai-evals:
     - id: C03
       relationship: REFINES
   2026-09-03-cursor-pstack:
     - id: C03
-      relationship: REFINES
+      relationship: SUPPORTS
     - id: C04
       relationship: REFINES
     - id: C05
