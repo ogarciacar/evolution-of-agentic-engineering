@@ -38,6 +38,8 @@ jobs:
         run: python scripts/check-evidence-sync.py
       - name: Build evidence page
         run: python scripts/build-evidence.py
+      - name: Build model evaluation page
+        run: python scripts/build-model-evaluation.py
       - name: Build homepage evidence
         run: python scripts/build-homepage-evidence.py
       - name: Upload generated evidence pages
@@ -46,10 +48,11 @@ jobs:
           name: generated-evidence-pages
           path: |
             evidence.html
+            evaluate.html
             signals/*/index.html
             index.html
             sitemap.xml
       - name: Verify generated artifacts are committed
         run: |
-          git diff --exit-code -- evidence.html index.html sitemap.xml signals
+          git diff --exit-code -- evidence.html evaluate.html index.html sitemap.xml signals
           test -z "$(git status --porcelain --untracked-files=all -- 'signals/*/index.html')"
