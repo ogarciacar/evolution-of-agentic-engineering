@@ -20,6 +20,8 @@ jobs:
         run: python scripts/validate-model-claims.py
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
+      - name: Validate evidence claim mappings
+        run: python scripts/validate-evidence-claims.py
       - name: Check publication safety
         run: python scripts/check-publication-safety.py
       - name: Check evidence projection schema
