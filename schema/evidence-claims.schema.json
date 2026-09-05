@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["version", "mappings"],
   "properties": {
-    "version": { "const": 1 },
+    "version": { "const": 2 },
     "mappings": {
       "type": "object",
       "minProperties": 1,
