@@ -13,13 +13,18 @@ RELATIONSHIPS = {"SUPPORTS", "REFINES", "CONTRADICTS", "INCONCLUSIVE"}
 
 
 def main() -> int:
-    claim_ids = {item["id"] for item in yaml.safe_load(CLAIMS_PATH.read_text(encoding="utf-8"))["claims"]}
+    claims_document = yaml.safe_load(CLAIMS_PATH.read_text(encoding="utf-8"))
+    model_version = claims_document.get("version")
+    claim_ids = {item["id"] for item in claims_document["claims"]}
     evidence_ids = {path.stem for path in EVIDENCE_DIR.glob("*.yaml")}
     document = yaml.safe_load(MAPPINGS_PATH.read_text(encoding="utf-8"))
     failures = 0
 
-    if document.get("version") != 1 or not isinstance(document.get("mappings"), dict):
-        print("model/evidence-claims.yaml: expected version 1 and mappings object", file=sys.stderr)
+    if document.get("version") != model_version or not isinstance(document.get("mappings"), dict):
+        print(
+            f"model/evidence-claims.yaml: expected version {model_version} and mappings object",
+            file=sys.stderr,
+        )
         return 1
 
     mappings = document["mappings"]

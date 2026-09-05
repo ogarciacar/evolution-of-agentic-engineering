@@ -18,7 +18,7 @@
     "assessment": {"type":"object","additionalProperties":false,"required":["assisted_by_ai"],"properties":{"assisted_by_ai":{"type":"boolean"}}}
   },
   "$defs": {
-    "stage": {"type":"string","enum":["Apparition","Mutation","Selection","Cooperation","Specialization"]},
+    "stage": {"type":"string","enum":["Apparition","Selection","Cooperation","Specialization"]},
     "condition": {"type":"string","enum":["Context","Execution","Verification","Coordination","Observability","Economics","Learning"]}
   }
 }

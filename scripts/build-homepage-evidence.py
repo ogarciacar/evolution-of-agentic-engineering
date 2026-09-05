@@ -133,12 +133,19 @@ def render_chart(records: list[dict]) -> str:
 
 
 def main() -> None:
-    records = load_records()
-    generated = render_chart(records)
     index_html = INDEX.read_text(encoding="utf-8")
     if index_html.count(GRID_START) != 1 or index_html.count(GRID_END) != 1:
         raise SystemExit("index.html must contain exactly one homepage evidence landscape boundary")
 
+    # v0.2.2 changes the canonical evidence mapping while the public homepage is
+    # intentionally still the v0.1 model. Keep that v0.1 landscape stable until
+    # the public-model migration updates the stage vocabulary in v0.2.4.
+    if "Working model · v0.1" in index_html:
+        print("Kept v0.1 homepage Evidence Landscape unchanged during v0.2 evidence remapping")
+        return
+
+    records = load_records()
+    generated = render_chart(records)
     before, remainder = index_html.split(GRID_START, 1)
     _, after = remainder.split(GRID_END, 1)
     INDEX.write_text(before + GRID_START + generated + GRID_END + after, encoding="utf-8")
