@@ -1,0 +1,35 @@
+name: Apply scale arrow refinement
+on: push
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: homepage-refinements-v0-2
+          token: ${{ github.token }}
+      - name: Refine scale arrow
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          old_css = '.scale-line{height:1px;background:var(--line);position:relative}.scale-line i{position:absolute;right:-2px;top:-13px;font-style:normal;color:var(--muted);font-size:20px}'
+          new_css = '.scale-line{height:1px;background:var(--line);position:relative}.scale-line::after{content:"";position:absolute;right:0;top:50%;width:7px;height:7px;border-top:1px solid var(--line);border-right:1px solid var(--line);transform:translateY(-50%) rotate(45deg);transform-origin:center}.scale-line i{display:none}'
+          if old_css not in s:
+              raise SystemExit('Expected scale arrow CSS not found')
+          p.write_text(s.replace(old_css, new_css, 1))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Refine 1K scale arrow' || true
+          git push origin HEAD:homepage-refinements-v0-2
+      - name: Remove temporary workflow
+        run: |
+          git rm .github/workflows/apply-scale-arrow.yml
+          git commit -m 'Remove temporary scale arrow workflow'
+          git push origin HEAD:homepage-refinements-v0-2
