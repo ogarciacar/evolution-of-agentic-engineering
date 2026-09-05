@@ -14,7 +14,7 @@ INDEX = ROOT / "index.html"
 GRID_START = "<!-- HOMEPAGE_EVIDENCE_START -->"
 GRID_END = "<!-- HOMEPAGE_EVIDENCE_END -->"
 MAX_ROWS = 24
-STAGES = ["Apparition", "Mutation", "Selection", "Cooperation", "Specialization"]
+STAGES = ["Apparition", "Selection", "Cooperation", "Specialization"]
 CONDITIONS = ["Context", "Execution", "Verification", "Coordination", "Observability", "Economics", "Learning"]
 
 
@@ -99,21 +99,10 @@ def render_chart(records: list[dict]) -> str:
     visible = records[:MAX_ROWS]
     if not visible:
         raise SystemExit("At least one evidence record is required for the homepage landscape")
-    if len(records) <= MAX_ROWS:
-        subtitle = f"{len(visible)} accepted evidence records · {date_range(visible)}"
-    else:
-        subtitle = f"{len(visible)} of {len(records)} accepted evidence records · {date_range(visible)}"
-
-    stage_headers = "".join(
-        f'<span class="landscape-column-label"><b>{text(stage)}</b><small>{count_mapping(visible, "stages", stage)}</small></span>'
-        for stage in STAGES
-    )
-    condition_headers = "".join(
-        f'<span class="landscape-column-label"><b>{text(condition)}</b><small>{count_mapping(visible, "conditions", condition)}</small></span>'
-        for condition in CONDITIONS
-    )
+    subtitle = f"{len(visible)} accepted evidence records · {date_range(visible)}" if len(records) <= MAX_ROWS else f"{len(visible)} of {len(records)} accepted evidence records · {date_range(visible)}"
+    stage_headers = "".join(f'<span class="landscape-column-label"><b>{text(stage)}</b><small>{count_mapping(visible, "stages", stage)}</small></span>' for stage in STAGES)
+    condition_headers = "".join(f'<span class="landscape-column-label"><b>{text(condition)}</b><small>{count_mapping(visible, "conditions", condition)}</small></span>' for condition in CONDITIONS)
     rows = "".join(render_row(record) for record in visible)
-
     return (
         '<div class="landscape-card"><div class="landscape-card-head"><div>'
         f'<strong>Scale Signal Landscape</strong><span>{text(subtitle)}</span></div></div>'
@@ -136,14 +125,6 @@ def main() -> None:
     index_html = INDEX.read_text(encoding="utf-8")
     if index_html.count(GRID_START) != 1 or index_html.count(GRID_END) != 1:
         raise SystemExit("index.html must contain exactly one homepage evidence landscape boundary")
-
-    # v0.2.2 changes the canonical evidence mapping while the public homepage is
-    # intentionally still the v0.1 model. Keep that v0.1 landscape stable until
-    # the public-model migration updates the stage vocabulary in v0.2.4.
-    if "Working model · v0.1" in index_html:
-        print("Kept v0.1 homepage Evidence Landscape unchanged during v0.2 evidence remapping")
-        return
-
     records = load_records()
     generated = render_chart(records)
     before, remainder = index_html.split(GRID_START, 1)

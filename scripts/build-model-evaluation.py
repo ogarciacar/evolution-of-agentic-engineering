@@ -21,7 +21,7 @@ def esc(value: object) -> str:
     return html.escape(str(value), quote=True)
 
 
-def render_claim(claim: dict) -> str:
+def render_claim(claim: dict, stage_number: int) -> str:
     status_class = " unobserved" if claim["status"] == "UNOBSERVED" else ""
     counts = claim["relationship_counts"]
     if claim["evidence_count"] == 0:
@@ -36,7 +36,7 @@ def render_claim(claim: dict) -> str:
         evidence = f'<strong>{claim["evidence_count"]} mapped {noun}</strong><p class="rule">{esc(count_line)}</p><details><summary>Inspect mapped evidence</summary><ul>{links}</ul></details>'
     return (
         '<article class="claim"><div class="claim-head"><div>'
-        f'<span class="claim-id">{esc(claim["id"])}</span> · <span class="stage">{esc(claim["stage"])}</span>'
+        f'<span class="claim-id">{stage_number:02d}</span> · <span class="stage">{esc(claim["stage"])}</span>'
         f'<h3>{esc(claim["title"])}</h3></div><span class="status{status_class}">{esc(claim["status"])}</span></div>'
         f'<div class="evidence">{evidence}</div></article>'
     )
@@ -44,7 +44,7 @@ def render_claim(claim: dict) -> str:
 
 def main() -> None:
     evaluation = module.evaluate()
-    claims = "\n".join(render_claim(claim) for claim in evaluation["claims"])
+    claims = "\n".join(render_claim(claim, stage_number) for stage_number, claim in enumerate(evaluation["claims"], start=1))
     page = TEMPLATE.read_text(encoding="utf-8").replace("{{CLAIMS}}", claims)
     OUTPUT.write_text(page, encoding="utf-8")
     print(f"Built {OUTPUT.relative_to(ROOT)} from {len(evaluation['claims'])} model claims")
