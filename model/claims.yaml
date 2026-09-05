@@ -12,7 +12,7 @@ claims:
       Evidence that these combinations remain only interactive tools dependent on
       continuous human operation and cannot act as meaningful engineering objects.
 
-  - id: C03
+  - id: C02
     stage: Selection
     title: Engineering environments select among viable variants
     claim: >-
@@ -24,7 +24,7 @@ claims:
       regardless of context, execution, verification, coordination, observability,
       economics, and learning conditions in their engineering environment.
 
-  - id: C04
+  - id: C03
     stage: Cooperation
     title: Cooperation can improve agentic engineering fitness
     claim: >-
@@ -36,7 +36,7 @@ claims:
       or that isolated agentic engineering objects remain systematically more effective
       as engineering demands increase.
 
-  - id: C05
+  - id: C04
     stage: Specialization
     title: Persistent cooperation can produce higher-order engineering objects
     claim: >-

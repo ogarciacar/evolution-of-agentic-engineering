@@ -23,7 +23,7 @@ assert module.status(Counter(SUPPORTS=10, CONTRADICTS=1)) == "CHALLENGED"
 first = module.evaluate()
 second = module.evaluate()
 assert first == second
-assert [claim["id"] for claim in first["claims"]] == ["C01", "C03", "C04", "C05"]
+assert [claim["id"] for claim in first["claims"]] == ["C01", "C02", "C03", "C04"]
 
 for claim in first["claims"]:
     assert sum(claim["relationship_counts"].values()) == claim["evidence_count"]

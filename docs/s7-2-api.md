@@ -5,7 +5,7 @@ The evidence read API exposes the projected relationship ledger on every record:
 ```json
 {
   "claims": [
-    {"id": "C03", "relationship": "REFINES"}
+    {"id": "C02", "relationship": "REFINES"}
   ]
 }
 ```

@@ -11,7 +11,7 @@ research_gaps:
       - Evidence of meaningful software-engineering action without continuous human operation
       - Evidence that context, tools, execution, permissions, and feedback form a viable engineering object
 
-  - claim_id: C03
+  - claim_id: C02
     stage: Selection
     question: >-
       Which engineering-environment conditions materially determine which viable
@@ -21,7 +21,7 @@ research_gaps:
       - Evidence connecting Context, Execution, Verification, Coordination, Observability, Economics, or Learning conditions to viability
       - Evidence of differential persistence or effectiveness as scale increases
 
-  - claim_id: C04
+  - claim_id: C03
     stage: Cooperation
     question: >-
       Does cooperation among agentic engineering actors, humans, and systems improve
@@ -31,7 +31,7 @@ research_gaps:
       - Coordination cost alongside the benefit produced by cooperation
       - Evidence that any cooperation advantage persists across repeated engineering work
 
-  - claim_id: C05
+  - claim_id: C04
     stage: Specialization
     question: >-
       Does persistent differentiated cooperation produce an engineering system that
