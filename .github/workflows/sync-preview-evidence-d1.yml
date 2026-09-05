@@ -43,7 +43,6 @@ jobs:
       - name: Build ephemeral Wrangler D1 configuration
         shell: bash
         run: |
-          mkdir -p .artifacts
           python - <<'PY'
           import json, os
           config = {
@@ -56,7 +55,7 @@ jobs:
                   "migrations_dir": "migrations",
               }],
           }
-          with open(".artifacts/wrangler-d1.json", "w", encoding="utf-8") as f:
+          with open("wrangler-d1.json", "w", encoding="utf-8") as f:
               json.dump(config, f)
           PY
       - name: Install Python dependencies
@@ -66,13 +65,13 @@ jobs:
       - name: Export deterministic synchronization SQL
         run: python scripts/export-evidence-sql.py --output .artifacts/evidence-sync.sql
       - name: Apply D1 migrations
-        run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config .artifacts/wrangler-d1.json
+        run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config wrangler-d1.json
       - name: Synchronize contribution evidence
-        run: npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config .artifacts/wrangler-d1.json --file=.artifacts/evidence-sync.sql
+        run: npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --file=.artifacts/evidence-sync.sql
       - name: Verify preview evidence count
         run: |
           EXPECTED=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
-          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config .artifacts/wrangler-d1.json --command='SELECT COUNT(*) AS count FROM evidence;')
+          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command='SELECT COUNT(*) AS count FROM evidence;')
           ACTUAL=$(python -c 'import json,sys; data=json.load(sys.stdin); print(data[0]["results"][0]["count"])' <<< "$OUTPUT")
           test "$ACTUAL" = "$EXPECTED" || { echo "Preview evidence count $ACTUAL != contribution count $EXPECTED"; exit 1; }
           echo "Preview D1 contains $ACTUAL evidence records from PR #${{ github.event.pull_request.number }}"
