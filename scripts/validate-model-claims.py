@@ -9,7 +9,7 @@ from jsonschema import Draft202012Validator
 ROOT = Path(__file__).resolve().parents[1]
 CLAIMS_PATH = ROOT / "model" / "claims.yaml"
 SCHEMA_PATH = ROOT / "schema" / "model-claims.schema.json"
-EXPECTED_STAGES = ["Apparition", "Mutation", "Selection", "Cooperation", "Specialization"]
+EXPECTED_STAGES = ["Apparition", "Selection", "Cooperation", "Specialization"]
 
 
 def main() -> None:
