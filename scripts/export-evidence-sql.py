@@ -26,6 +26,7 @@ def export() -> str:
     # deterministic SQL so the same file works with `wrangler d1 execute`.
     lines = [
         "PRAGMA defer_foreign_keys = true;",
+        "DELETE FROM evidence_claims;",
         "DELETE FROM evidence_conditions;",
         "DELETE FROM evidence_stages;",
         "DELETE FROM evidence;",
@@ -61,6 +62,11 @@ def export() -> str:
             lines.append(f"INSERT INTO evidence_stages (evidence_id, stage) VALUES ({sql(evidence_id)}, {sql(stage)});")
         for condition in sorted(mapping["conditions"]):
             lines.append(f"INSERT INTO evidence_conditions (evidence_id, condition) VALUES ({sql(evidence_id)}, {sql(condition)});")
+        for item in sorted(record["claims"], key=lambda item: item["id"]):
+            lines.append(
+                "INSERT INTO evidence_claims (evidence_id, claim_id, relationship) VALUES "
+                f"({sql(evidence_id)}, {sql(item['id'])}, {sql(item['relationship'])});"
+            )
 
     lines.append("PRAGMA defer_foreign_keys = false;")
     return "\n".join(lines) + "\n"
