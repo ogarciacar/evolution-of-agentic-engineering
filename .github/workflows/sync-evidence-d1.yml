@@ -9,7 +9,6 @@ on:
       - "migrations/**"
       - "scripts/export-evidence-sql.py"
       - ".github/workflows/sync-evidence-d1.yml"
-      - "wrangler.jsonc"
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +25,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      EVIDENCE_DB_NAME: ${{ vars.EVIDENCE_DB_NAME }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -35,6 +35,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
+      - name: Require production D1 configuration
+        run: test -n "$EVIDENCE_DB_NAME" || { echo "Missing production environment variable EVIDENCE_DB_NAME"; exit 1; }
       - name: Install Python dependencies
         run: pip install -r requirements.txt
       - name: Validate evidence records
@@ -42,13 +44,13 @@ jobs:
       - name: Export deterministic synchronization SQL
         run: python scripts/export-evidence-sql.py --output .artifacts/evidence-sync.sql
       - name: Apply D1 migrations
-        run: npx --yes wrangler@4 d1 migrations apply agentic-engineering-evidence --remote
+        run: npx --yes wrangler@4 d1 migrations apply "$EVIDENCE_DB_NAME" --remote
       - name: Synchronize canonical evidence
-        run: npx --yes wrangler@4 d1 execute agentic-engineering-evidence --remote --yes --file=.artifacts/evidence-sync.sql
+        run: npx --yes wrangler@4 d1 execute "$EVIDENCE_DB_NAME" --remote --yes --file=.artifacts/evidence-sync.sql
       - name: Verify remote evidence count
         run: |
           EXPECTED=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
-          OUTPUT=$(npx --yes wrangler@4 d1 execute agentic-engineering-evidence --remote --json --command='SELECT COUNT(*) AS count FROM evidence;')
+          OUTPUT=$(npx --yes wrangler@4 d1 execute "$EVIDENCE_DB_NAME" --remote --json --command='SELECT COUNT(*) AS count FROM evidence;')
           ACTUAL=$(python -c 'import json,sys; data=json.load(sys.stdin); print(data[0]["results"][0]["count"])' <<< "$OUTPUT")
           test "$ACTUAL" = "$EXPECTED" || { echo "Remote evidence count $ACTUAL != canonical count $EXPECTED"; exit 1; }
-          echo "Remote D1 contains $ACTUAL canonical evidence records"
+          echo "Production D1 contains $ACTUAL canonical evidence records"
