@@ -24,6 +24,8 @@ jobs:
         run: python scripts/check-evidence-projection.py
       - name: Check canonical corpus projection
         run: python scripts/test-evidence-projection.py
+      - name: Check deterministic evidence indexer
+        run: python scripts/check-evidence-indexer.py
       - name: Build evidence page
         run: python scripts/build-evidence.py
       - name: Build homepage evidence
