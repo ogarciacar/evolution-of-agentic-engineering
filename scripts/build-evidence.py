@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Build the living evidence record and Scale Signal pages from canonical YAML."""
+"""Build the evidence page and Scale Signal pages from canonical YAML."""
 from __future__ import annotations
 
 import html
 import re
 import shutil
-from datetime import date
 from pathlib import Path
 
 import yaml
@@ -71,25 +70,12 @@ def rendered_observed(record: dict) -> str:
     return "".join(f'<p>{esc(str(item).strip())}</p>' for item in record["observed"])
 
 
-def source_label(source: dict) -> str:
-    return "First-party source" if source["provenance"] == "primary" else "Secondary source"
-
-
-def render_entry(record: dict) -> str:
-    source = record["source"]
-    implication = record["model_implication"]
-    published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
-    signal_id = evidence_id(record)
-    headline = record["presentation"]["headline"]
-    scale = record["scale"]
-    return f'''<article class="entry" id="{esc(signal_id)}" data-signal-path="/signals/{esc(signal_id)}/"><div class="entry-head"><div class="date">{esc(published)} · {esc(source["producer"])}</div><button class="copy-signal-link" type="button" aria-label="Copy Scale Signal link" title="Copy Scale Signal link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 13.4a4 4 0 0 0 5.7 0l2.1-2.1a4 4 0 0 0-5.7-5.7l-1.2 1.2"></path><path d="M13.4 10.6a4 4 0 0 0-5.7 0l-2.1 2.1a4 4 0 0 0 5.7 5.7l1.2-1.2"></path></svg></button></div><div class="evidence"><h3>{esc(headline)}</h3><div class="meta">{rendered_chips(record)}</div><div class="scale"><strong>{esc(scale["label"])}:</strong> {esc(scale["summary"].strip())}</div><div class="layers"><div class="layer observed"> <b>OBSERVED</b>{rendered_observed(record)}</div><div class="layer"><b>INTERPRETATION</b><p>{esc(record["interpretation"].strip())}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>{esc(implication["verdict"])}.</strong> {esc(implication["explanation"].strip())}</p></div></div><a class="source" href="{esc(source["url"])}">{esc(source_label(source))} ↗</a></div></article>'''
-
-
 def render_signal_page(record: dict, template: str) -> str:
     source = record["source"]
     implication = record["model_implication"]
     signal_id = evidence_id(record)
     headline = record["presentation"]["headline"]
+    from datetime import date
     published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
     canonical_url = f"{SITE_ORIGIN}/signals/{signal_id}/"
     description = " ".join(str(record["scale"]["summary"]).split())
@@ -155,9 +141,7 @@ def update_sitemap(records: list[dict]) -> None:
 
 def main() -> None:
     records = load_records()
-    template = TEMPLATE.read_text(encoding="utf-8")
-    entries = "\n".join(render_entry(record) for record in records)
-    OUTPUT.write_text(template.replace("{{EVIDENCE_ENTRIES}}", entries), encoding="utf-8")
+    OUTPUT.write_text(TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
     build_signal_pages(records)
     update_sitemap(records)
     print(f"Built {OUTPUT.relative_to(ROOT)} and {len(records)} Scale Signal pages")
