@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agenticengineering.science/schema/evidence-claims.schema.json",
+  "title": "Evidence to model claim relationships",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "mappings"],
+  "properties": {
+    "version": { "const": 1 },
+    "mappings": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "relationship"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^C[0-9]{2}$" },
+            "relationship": {
+              "enum": ["SUPPORTS", "REFINES", "CONTRADICTS", "INCONCLUSIVE"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -20,12 +20,16 @@ jobs:
         run: python scripts/validate-model-claims.py
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
+      - name: Validate evidence claim mappings
+        run: python scripts/validate-evidence-claims.py
       - name: Check publication safety
         run: python scripts/check-publication-safety.py
       - name: Check evidence projection schema
         run: python scripts/check-evidence-projection.py
       - name: Check canonical corpus projection
         run: python scripts/test-evidence-projection.py
+      - name: Check evidence claim projection
+        run: python scripts/check-evidence-claims-projection.py
       - name: Check deterministic evidence indexer
         run: python scripts/check-evidence-indexer.py
       - name: Check D1 synchronization export

@@ -41,6 +41,7 @@ function shape(row) {
         adjacent_stage: row.adjacent_stage,
       } : null,
     },
+    claims: parseJson(row.claims_json) || [],
     interpretation: row.interpretation,
     model_implication: { verdict: row.verdict, explanation: row.verdict_explanation },
     what_this_does_not_establish: parseJson(row.limitations_json),
@@ -52,7 +53,8 @@ function shape(row) {
 const SELECT = `
 SELECT e.*,
   (SELECT json_group_array(stage) FROM (SELECT stage FROM evidence_stages s WHERE s.evidence_id = e.evidence_id ORDER BY stage)) AS stages_json,
-  (SELECT json_group_array(condition) FROM (SELECT condition FROM evidence_conditions c WHERE c.evidence_id = e.evidence_id ORDER BY condition)) AS conditions_json
+  (SELECT json_group_array(condition) FROM (SELECT condition FROM evidence_conditions c WHERE c.evidence_id = e.evidence_id ORDER BY condition)) AS conditions_json,
+  (SELECT json_group_array(json_object('id', claim_id, 'relationship', relationship)) FROM (SELECT claim_id, relationship FROM evidence_claims ec WHERE ec.evidence_id = e.evidence_id ORDER BY claim_id)) AS claims_json
 FROM evidence e`;
 
 async function listEvidence(url, env) {

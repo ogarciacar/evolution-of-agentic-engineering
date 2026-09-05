@@ -10,6 +10,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
+CLAIM_MAPPINGS = yaml.safe_load((ROOT / "model" / "evidence-claims.yaml").read_text(encoding="utf-8"))["mappings"]
 
 
 def sql(value: object) -> str:
@@ -21,11 +22,9 @@ def sql(value: object) -> str:
 
 
 def export() -> str:
-    # D1's remote SQL import path manages atomicity itself and rejects explicit
-    # BEGIN TRANSACTION / COMMIT statements. Keep this export as plain,
-    # deterministic SQL so the same file works with `wrangler d1 execute`.
     lines = [
         "PRAGMA defer_foreign_keys = true;",
+        "DELETE FROM evidence_claims;",
         "DELETE FROM evidence_conditions;",
         "DELETE FROM evidence_stages;",
         "DELETE FROM evidence;",
@@ -61,6 +60,11 @@ def export() -> str:
             lines.append(f"INSERT INTO evidence_stages (evidence_id, stage) VALUES ({sql(evidence_id)}, {sql(stage)});")
         for condition in sorted(mapping["conditions"]):
             lines.append(f"INSERT INTO evidence_conditions (evidence_id, condition) VALUES ({sql(evidence_id)}, {sql(condition)});")
+        for item in sorted(CLAIM_MAPPINGS[evidence_id], key=lambda item: item["id"]):
+            lines.append(
+                "INSERT INTO evidence_claims (evidence_id, claim_id, relationship) VALUES "
+                f"({sql(evidence_id)}, {sql(item['id'])}, {sql(item['relationship'])});"
+            )
 
     lines.append("PRAGMA defer_foreign_keys = false;")
     return "\n".join(lines) + "\n"
