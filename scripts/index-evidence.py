@@ -60,6 +60,10 @@ def project_record(connection: sqlite3.Connection, path: Path) -> None:
         "INSERT INTO evidence_conditions (evidence_id, condition) VALUES (?, ?)",
         [(evidence_id, condition) for condition in sorted(mapping["conditions"])],
     )
+    connection.executemany(
+        "INSERT INTO evidence_claims (evidence_id, claim_id, relationship) VALUES (?, ?, ?)",
+        [(evidence_id, item["id"], item["relationship"]) for item in sorted(record["claims"], key=lambda item: item["id"])],
+    )
 
 
 def rebuild(database: Path) -> int:
