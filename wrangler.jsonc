@@ -3,6 +3,10 @@
   "name": "agentic-engineering-evidence",
   "main": "src/worker.js",
   "compatibility_date": "2026-09-05",
+  "route": {
+    "pattern": "agenticengineering.science/api/*",
+    "zone_name": "agenticengineering.science"
+  },
   "assets": {
     "directory": ".",
     "binding": "ASSETS",

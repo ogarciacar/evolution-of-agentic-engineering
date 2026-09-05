@@ -1,0 +1,26 @@
+name: Verify production evidence API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/worker.js"
+      - "wrangler.jsonc"
+      - ".github/workflows/verify-production-api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for production deployment
+        run: sleep 20
+      - name: Verify evidence API returns JSON
+        run: |
+          RESPONSE=$(curl --fail --silent --show-error --retry 6 --retry-delay 10 \
+            -H 'Accept: application/json' \
+            https://agenticengineering.science/api/evidence)
+          python -c 'import json,sys; data=json.load(sys.stdin); assert isinstance(data.get("evidence"), list); assert data.get("count") == len(data["evidence"]); print(f"Production API returned {data[\"count\"]} evidence records")' <<< "$RESPONSE"
