@@ -1,0 +1,60 @@
+source:
+  title: "Background Coding Agents: Supercharging Downstream Consumer Dataset Migrations (Honk, Part 4)"
+  producer: "Spotify"
+  producer_type: organization
+  date: "2026-04-22"
+  url: "https://engineering.atspotify.com/2026/4/background-coding-agents-dataset-migrations-honk-part-4"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Spotify connects repository discoverability and platform context to autonomous migration outcomes"
+  summary: "Spotify reports using Honk with Backstage, Codesearch, and Fleet Management to migrate downstream dataset consumers at large scale, estimating 10 engineering weeks saved and identifying software-landscape context as a condition for agent-friendly automation."
+
+observed:
+  - "Spotify used Backstage endpoint lineage to identify downstream consumers and Codesearch queries to find target repositories across its GitHub Enterprise landscape before orchestrating migrations with Fleet Management."
+  - "Spotify reports using Honk, Backstage, and Fleet Management to migrate thousands of dataset consumers onto new dataset versions."
+  - "Spotify estimates that the migration approach saved 10 engineering weeks."
+  - "Spotify identifies context engineering as central to background-agent migration work and describes changes intended to make its data landscape more friendly to autonomous coding agents."
+  - "Spotify expects richer platform-provided context and improving coding-agent capabilities to enable Fleet Management and Honk to tackle increasingly complex migrations."
+
+scale:
+  label: "Scale signal"
+  summary: >
+    A dataset-consumer migration spanning thousands of consumers and repositories, with an
+    estimated 10 engineering weeks saved using Honk together with Backstage and Fleet Management.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Coordination, Economics]
+
+interpretation: >
+  Part 4 advances Selection by showing that agent viability depends on environmental knowledge
+  that exists outside the coding model itself: dependency lineage, repository targeting, search,
+  orchestration, and platform-provided context. It also demonstrates cooperation among Honk,
+  Backstage, Codesearch, and Fleet Management producing a system-level migration outcome, but the
+  source does not compare that cooperating configuration with an isolated agent configuration.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    The strongest implication is for Selection. Spotify connects Context, Execution, Coordination,
+    and Economics conditions to a concrete fleet-scale outcome and explicitly describes making the
+    software landscape more autonomous-coding-agent-friendly. Cooperation is relevant but remains
+    inconclusive because the source does not isolate the benefit or cost of cooperation relative to
+    useful isolated operation.
+
+what_this_does_not_establish:
+  - "It does not compare the same migration with and without Backstage, Codesearch, Fleet Management, or other context infrastructure."
+  - "It does not isolate which context or platform condition caused the reported outcome."
+  - "It does not provide coordination cost alongside the benefit of the cooperating platform components."
+  - "It does not establish persistent differentiated cooperation forming a higher-order engineering object."
+  - "Spotify's first-party estimate is not independent validation of the model."
+
+open_question: "Which forms of repository and dependency context most improve agent reliability and economics as migrations span increasingly heterogeneous software landscapes?"
+
+assessment:
+  assisted_by_ai: true
