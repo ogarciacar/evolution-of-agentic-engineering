@@ -1,6 +1,13 @@
 version: 2
 
 mappings:
+  2025-11-06-spotify-honk-part-1:
+    - id: C01
+      relationship: SUPPORTS
+    - id: C02
+      relationship: SUPPORTS
+    - id: C03
+      relationship: INCONCLUSIVE
   2025-12-02-bun-joins-anthropic:
     - id: C02
       relationship: REFINES
