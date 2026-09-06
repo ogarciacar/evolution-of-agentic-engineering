@@ -1,0 +1,54 @@
+version: 1
+model_version: 2
+
+findings:
+  - id: F01
+    title: Engineering environment increasingly explains agentic fitness
+    statement: >
+      Across the incorporated corpus, scaling agentic engineering is repeatedly associated
+      with conditions outside model capability alone: context, execution, verification,
+      coordination, observability, economics, and learning shape whether agentic systems
+      can operate reliably and economically.
+    claims: [C02]
+    evidence:
+      - 2025-11-24-spotify-honk-part-2
+      - 2025-12-09-spotify-honk-part-3
+      - 2026-04-22-spotify-honk-part-4
+      - 2026-08-27-uber-efficient-software-factory
+      - 2026-09-03-cursor-pstack
+    uncertainty: >
+      The corpus does not yet isolate the causal contribution of individual environmental
+      conditions or establish which conditions dominate across different agent architectures.
+
+  - id: F02
+    title: Verification feedback can change agent behavior
+    statement: >
+      Cooperation is no longer represented only by multi-agent or system architecture.
+      Incorporated evidence includes a feedback loop in which independent verification
+      components alter a coding agent's subsequent behavior and are associated with reported
+      improvements in working outcomes.
+    claims: [C03]
+    evidence:
+      - 2025-12-09-spotify-honk-part-3
+      - 2026-04-27-openai-symphony
+      - 2026-09-03-cursor-pstack
+    uncertainty: >
+      Evidence remains insufficient to quantify cooperation advantage relative to useful
+      isolated operation after accounting for coordination and execution cost.
+
+  - id: F03
+    title: The meaningful engineering object may be expanding beyond the coding agent
+    statement: >
+      Several sources describe useful outcomes produced by coding agents embedded in broader
+      systems of context services, orchestration, verification, and platform infrastructure.
+      This is consistent with a shift toward system-level engineering capabilities rather
+      than isolated coding-agent performance as the unit of analysis.
+    claims: [C03, C04]
+    evidence:
+      - 2025-12-09-spotify-honk-part-3
+      - 2026-04-22-spotify-honk-part-4
+      - 2026-08-27-uber-efficient-software-factory
+      - 2026-09-03-cursor-pstack
+    uncertainty: >
+      The corpus does not yet establish persistent differentiated cooperation that forms a
+      higher-order engineering object; C04 therefore remains an open research frontier.
