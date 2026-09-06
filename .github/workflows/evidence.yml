@@ -5,11 +5,17 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   evidence:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+          repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
@@ -26,8 +32,6 @@ jobs:
         run: python scripts/validate-evidence-claims.py
       - name: Check model claim evaluation
         run: python scripts/check-model-evaluation.py
-      - name: Check research frontier
-        run: python scripts/check-research-frontier.py
       - name: Check publication safety
         run: python scripts/check-publication-safety.py
       - name: Check evidence projection schema
@@ -40,12 +44,26 @@ jobs:
         run: python scripts/check-evidence-indexer.py
       - name: Check D1 synchronization export
         run: python scripts/check-evidence-sync.py
-      - name: Build evidence page
-        run: python scripts/build-evidence.py
-      - name: Build model evaluation page
-        run: python scripts/build-model-evaluation.py
-      - name: Build homepage evidence
-        run: python scripts/build-homepage-evidence.py
+      - name: Generate derived artifacts
+        run: python scripts/build-derived-artifacts.py
+      - name: Commit generated artifacts to contribution branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          if git diff --quiet -- research-frontier.json evidence.html evaluate.html index.html sitemap.xml signals && test -z "$(git status --porcelain --untracked-files=all -- 'signals/*/index.html')"; then
+            echo "Derived artifacts already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research-frontier.json evidence.html evaluate.html index.html sitemap.xml signals
+          git commit -m "Regenerate derived evidence artifacts"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+      - name: Check research frontier
+        run: python scripts/check-research-frontier.py
+      - name: Verify generated artifacts are clean
+        run: |
+          git diff --exit-code -- research-frontier.json evidence.html evaluate.html index.html sitemap.xml signals
+          test -z "$(git status --porcelain --untracked-files=all -- 'signals/*/index.html')"
       - name: Upload generated evidence pages
         uses: actions/upload-artifact@v7
         with:
@@ -56,7 +74,3 @@ jobs:
             signals/*/index.html
             index.html
             sitemap.xml
-      - name: Verify generated artifacts are committed
-        run: |
-          git diff --exit-code -- evidence.html evaluate.html index.html sitemap.xml signals
-          test -z "$(git status --porcelain --untracked-files=all -- 'signals/*/index.html')"
