@@ -8,9 +8,17 @@ mappings:
       relationship: SUPPORTS
     - id: C03
       relationship: INCONCLUSIVE
+  2025-11-24-spotify-honk-part-2:
+    - id: C02
+      relationship: SUPPORTS
   2025-12-02-bun-joins-anthropic:
     - id: C02
       relationship: REFINES
+  2025-12-09-spotify-honk-part-3:
+    - id: C02
+      relationship: SUPPORTS
+    - id: C03
+      relationship: SUPPORTS
   2026-01-28-lulla-et-al-agents-md-efficiency:
     - id: C02
       relationship: SUPPORTS
