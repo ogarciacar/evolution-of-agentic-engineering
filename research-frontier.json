@@ -19,7 +19,7 @@
       "stage": "Selection",
       "claim": "Engineering environments select among viable variants",
       "evaluation_state": "EMERGING",
-      "mapped_evidence_count": 12,
+      "mapped_evidence_count": 13,
       "research_question": "Which engineering-environment conditions materially determine which viable agent variants remain reliable and economical as scale and autonomy increase?",
       "evidence_needed": [
         "Comparative outcomes across materially different agent configurations",
@@ -32,7 +32,7 @@
       "stage": "Cooperation",
       "claim": "Cooperation can improve agentic engineering fitness",
       "evaluation_state": "CONTESTED",
-      "mapped_evidence_count": 6,
+      "mapped_evidence_count": 7,
       "research_question": "Does cooperation among agentic engineering actors, humans, and systems improve engineering fitness relative to useful isolated operation?",
       "evidence_needed": [
         "Comparative outcomes between cooperating and isolated operation",
