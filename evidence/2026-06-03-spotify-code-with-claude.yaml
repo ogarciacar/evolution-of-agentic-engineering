@@ -13,6 +13,8 @@ presentation:
 
 observed:
   - "Spotify reports operating Honk coding-agent sessions in Kubernetes with trusted tools and CI verification, integrated with fleet orchestration."
+  - "Spotify reports exposing Backstage's software catalog to agents through MCPs and command-line tools so they can discover component ownership, documentation, and responsible teams."
+  - "Spotify reports Fleetshift tracking migration progress, including created and merged pull requests and which changes need human attention."
   - "Spotify reports more than 2.5 million automated maintenance pull requests merged, with the vast majority auto-merged without human intervention."
   - "Spotify reports a Java migration across backend services completed in three days and describes AI-driven velocity creating 76% more pull requests to review."
 
@@ -28,23 +30,27 @@ mapping:
   transition:
     from: Selection
     to: Cooperation
-  conditions: [Execution, Verification, Coordination, Economics]
+  conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
 
 interpretation: >
-  Once code production becomes cheap, verification, orchestration and human decision-making become more visible constraints. Existing platform standardization appears to increase agent fitness.
+  Once code production becomes cheap, context availability, verification, orchestration,
+  observability and human decision-making become more visible constraints. Spotify's
+  standardized platform and software catalog appear to increase agent fitness, while
+  fleet-level progress signals make coordination and selective human intervention tractable.
 
 model_implication:
   verdict: "SUPPORTS"
   explanation: >
-    Strong support for Selection conditions and an emerging Cooperation transition.
-    It also suggests human attention belongs explicitly in the fitness function.
+    Strong support for Selection conditions, including accessible context and observable
+    feedback, and an emerging Cooperation transition. It also suggests human attention
+    belongs explicitly in the fitness function.
 
 what_this_does_not_establish:
   - "It does not establish operation of 1,000 concurrent coding agents."
   - "It does not establish stable agent Specialization."
   - "Spotify's first-party claims are not independent validation of the model."
 
-open_question: "As agent-produced change volume grows, which verification and coordination mechanisms keep human attention from becoming the dominant constraint?"
+open_question: "As agent-produced change volume grows, which context, verification, coordination, and observability mechanisms keep human attention from becoming the dominant constraint?"
 
 assessment:
   assisted_by_ai: true
