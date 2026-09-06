@@ -34,6 +34,8 @@ jobs:
         run: python scripts/validate-evidence-claims.py
       - name: Check model claim evaluation
         run: python scripts/check-model-evaluation.py
+      - name: Check synthesis drift
+        run: python scripts/check-synthesis-drift.py
       - name: Check publication safety
         run: python scripts/check-publication-safety.py
       - name: Check evidence projection schema
