@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "model_version": 2,
+  "findings": [
+    {
+      "id": "F01",
+      "fingerprint": "ffeb3e0b549a0021eae93695e8e6b4084d3f365e54f93520d29a3bbd3c6790f3"
+    },
+    {
+      "id": "F02",
+      "fingerprint": "15ebc9ffddaf5c283af4be8b9f861d7ee8d37ae211a2786cd8ef9d4d1e022a03"
+    },
+    {
+      "id": "F03",
+      "fingerprint": "ecb680b37b5a442af5e23465060702b136449f703bc6b0153e4cf5b765accd99"
+    }
+  ]
+}
