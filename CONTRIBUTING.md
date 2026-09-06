@@ -48,7 +48,7 @@ A source is especially useful when it reduces uncertainty around an active resea
 
 - **Contributor surface — `evidence/*.yaml`**: evidence proposals are authored here.
 - **Maintainer surface**: schema, generators, templates, workflows, protocols, model contracts and editorial pages.
-- **Generated surfaces**: `evidence.html`, `signals/<signal-id>/index.html`, and the bounded Evidence Landscape in `index.html`.
+- **Generated surfaces**: `research-frontier.json`, `evidence.html`, `evaluate.html`, `signals/<signal-id>/index.html`, the bounded Evidence Landscape in `index.html`, and `sitemap.xml`.
 
 Contributors author YAML evidence records, not generated pages.
 
@@ -110,6 +110,18 @@ Keep source-grounded observation separate from model-relative interpretation. So
 An evidence YAML is a living assessment of a fixed public source. Source-grounded observations change only to correct or improve extraction. Mapping, interpretation, model implication, boundaries and open questions may evolve as the model evolves; Git history preserves earlier assessments.
 
 The canonical research gaps live separately in `model/research-gaps.yaml`. Do not copy a research-gap question into an evidence record as though the source established it. Instead, assess what the source actually establishes, then use the claim relationship ledger and research-gap evaluation to determine how that evidence changes the model's frontier.
+
+## Regenerate derived artifacts
+
+After changing evidence records or evidence-to-claim mappings, regenerate every committed projection before opening the pull request:
+
+```bash
+python scripts/build-derived-artifacts.py
+```
+
+This command invokes the existing deterministic generators for the research frontier and public evidence views in dependency order. Commit the resulting generated changes together with the canonical evidence change. Do not hand-edit generated artifacts.
+
+CI remains a verifier: it checks the frontier and rebuilds the public views to ensure the committed projections exactly match canonical model state. A contribution should therefore arrive at CI already internally consistent rather than relying on CI to modify the branch.
 
 ## Review standard
 
