@@ -111,17 +111,13 @@ An evidence YAML is a living assessment of a fixed public source. Source-grounde
 
 The canonical research gaps live separately in `model/research-gaps.yaml`. Do not copy a research-gap question into an evidence record as though the source established it. Instead, assess what the source actually establishes, then use the claim relationship ledger and research-gap evaluation to determine how that evidence changes the model's frontier.
 
-## Regenerate derived artifacts
+## Derived artifacts
 
-After changing evidence records or evidence-to-claim mappings, regenerate every committed projection before opening the pull request:
+Contributors commit canonical research changes only. After validation, Evidence integrity CI runs `python scripts/build-derived-artifacts.py` and commits any changed generated projections back to same-repository contribution branches.
 
-```bash
-python scripts/build-derived-artifacts.py
-```
+Generated artifacts must not be hand-edited. The workflow stages only the known generated paths: `research-frontier.json`, `evidence.html`, `evaluate.html`, `index.html`, `sitemap.xml`, and `signals/`. The push triggers a second CI run; that run must generate no diff, which verifies that the committed projection is deterministic and current.
 
-This command invokes the existing deterministic generators for the research frontier and public evidence views in dependency order. Commit the resulting generated changes together with the canonical evidence change. Do not hand-edit generated artifacts.
-
-CI remains a verifier: it checks the frontier and rebuilds the public views to ensure the committed projections exactly match canonical model state. A contribution should therefore arrive at CI already internally consistent rather than relying on CI to modify the branch.
+For local inspection, maintainers may run `python scripts/build-derived-artifacts.py`, but contributors do not need to commit its output before opening a pull request.
 
 ## Review standard
 
