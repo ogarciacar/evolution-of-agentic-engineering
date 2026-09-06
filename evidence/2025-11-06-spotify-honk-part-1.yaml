@@ -1,0 +1,62 @@
+source:
+  title: "1,500+ PRs Later: Spotify’s Journey with Our Background Coding Agent (Honk, Part 1)"
+  producer: "Spotify"
+  producer_type: organization
+  date: "2025-11-06"
+  url: "https://engineering.atspotify.com/2025/11/spotifys-background-coding-agent-part-1"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Spotify puts background coding agents into fleet-scale software maintenance"
+  summary: "Spotify reports more than 1,500 agent-generated pull requests merged into production, 60–90% migration time savings, and a pluggable agent environment combining execution, verification, coordination, observability, and cost controls."
+
+observed:
+  - "Spotify replaced deterministic migration transformation declarations with an agent that takes natural-language instructions while retaining Fleet Management infrastructure for repository targeting, pull requests, review, and production merging."
+  - "Spotify's internal CLI delegates prompts to an agent, runs formatting and linting through local MCP, evaluates diffs with an LLM-as-judge, uploads logs to GCP, captures MLflow traces, and can switch between agents and LLMs; Spotify reports swapping components multiple times."
+  - "Spotify reports that its agents generated more than 1,500 pull requests merged into production and that migrations using the approach achieved 60–90% total time savings compared with writing the code by hand."
+  - "Spotify exposes the background coding agent through Slack and GitHub Enterprise, where an interactive agent gathers task information and hands a resulting prompt to the coding agent that produces a pull request."
+  - "Spotify describes a multi-agent architecture for planning, generating, and reviewing pull requests and reports hundreds of developers interacting with the agent."
+
+scale:
+  label: "Scale signal"
+  summary: >
+    1,500+ agent-generated pull requests merged into production; hundreds of developers
+    interacting with the agent; reported 60–90% total time savings for migrations.
+
+mapping:
+  stages: [Apparition, Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Execution, Verification, Coordination, Observability, Economics]
+
+interpretation: >
+  Spotify provides evidence of a viable background engineering actor operating inside
+  an engineered environment at substantial organizational scale. The pluggable harness
+  also demonstrates variation among agent and model configurations, while the surrounding
+  execution, verification, coordination, observability, and economic controls show how
+  environmental conditions support viable operation. The multi-agent architecture shows
+  cooperation exists, but the source does not establish that cooperation itself improves
+  engineering fitness relative to useful isolated operation.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    The strongest implication is for Selection: Spotify connects production-scale agent
+    operation to multiple engineering-environment conditions and reports meaningful scale
+    and time-saving outcomes. The source also supports Apparition by demonstrating meaningful
+    background software-engineering action. Cooperation remains inconclusive because the
+    report does not compare cooperating and isolated operation or isolate a cooperation advantage.
+
+what_this_does_not_establish:
+  - "It does not compare outcomes across the different agents or LLMs that Spotify says its pluggable CLI can use."
+  - "It does not establish that particular engineering-environment conditions cause one viable agent configuration to persist or outperform another."
+  - "It does not compare cooperating agents with useful isolated operation or quantify coordination cost alongside cooperation benefit."
+  - "It does not establish persistent differentiated cooperation forming a higher-order engineering object."
+  - "Spotify's first-party claims are not independent validation of the model."
+
+open_question: "Which engineering-environment conditions cause one viable agent configuration to remain more reliable or economical than another as scale and autonomy increase?"
+
+assessment:
+  assisted_by_ai: true
