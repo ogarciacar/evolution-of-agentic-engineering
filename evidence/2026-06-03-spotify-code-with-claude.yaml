@@ -13,6 +13,7 @@ presentation:
 
 observed:
   - "Spotify reports operating Honk coding-agent sessions in Kubernetes with trusted tools and CI verification, integrated with fleet orchestration."
+  - "Spotify reports Fleetshift scheduling and orchestrating Honk changes across thousands of repositories, while Chirp can run and coordinate many agent sessions at the same time."
   - "Spotify reports exposing Backstage's software catalog to agents through MCPs and command-line tools so they can discover component ownership, documentation, and responsible teams."
   - "Spotify reports Fleetshift tracking migration progress, including created and merged pull requests and which changes need human attention."
   - "Spotify reports more than 2.5 million automated maintenance pull requests merged, with the vast majority auto-merged without human intervention."
@@ -21,9 +22,10 @@ observed:
 scale:
   label: "Scale signal"
   summary: >
-    2.5M+ automated maintenance PRs merged; vast majority auto-merged without a human.
-    Honk schedules many agent sessions concurrently in Kubernetes. AI-driven velocity
-    produced 76% more PRs to review.
+    Fleetshift orchestrates Honk-backed changes across thousands of repositories, while
+    Chirp can coordinate many agent sessions at the same time. 2.5M+ automated maintenance
+    PRs have been merged, with the vast majority auto-merged without a human. The source
+    establishes fleet-scale agent operation but does not quantify peak concurrent sessions.
 
 mapping:
   stages: [Selection, Cooperation]
@@ -42,15 +44,16 @@ model_implication:
   verdict: "SUPPORTS"
   explanation: >
     Strong support for Selection conditions, including accessible context and observable
-    feedback, and an emerging Cooperation transition. It also suggests human attention
-    belongs explicitly in the fitness function.
+    feedback, and an emerging Cooperation transition. The evidence also demonstrates
+    agent execution and orchestration at a thousands-of-repositories fleet scale, while
+    suggesting that human attention belongs explicitly in the fitness function.
 
 what_this_does_not_establish:
-  - "It does not establish operation of 1,000 concurrent coding agents."
+  - "It does not quantify peak agent concurrency or establish that 1,000 coding-agent sessions were running simultaneously; it does establish Honk orchestration across thousands of repositories and many simultaneous agent sessions."
   - "It does not establish stable agent Specialization."
   - "Spotify's first-party claims are not independent validation of the model."
 
-open_question: "As agent-produced change volume grows, which context, verification, coordination, and observability mechanisms keep human attention from becoming the dominant constraint?"
+open_question: "At this fleet scale, which context, verification, coordination, and observability mechanisms keep human attention from becoming the dominant constraint as agent-produced change volume grows?"
 
 assessment:
   assisted_by_ai: true
