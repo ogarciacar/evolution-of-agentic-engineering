@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate every committed artifact derived from canonical research state.
-
-Run this after changing evidence records or evidence-to-claim mappings and before
-opening a pull request. CI remains the verifier: this command only invokes the
-existing deterministic generators in their dependency order.
-"""
+"""Regenerate every committed artifact derived from canonical research state."""
 
 from pathlib import Path
 import subprocess
@@ -17,6 +12,7 @@ GENERATORS = (
     "scripts/build-evidence.py",
     "scripts/build-model-evaluation.py",
     "scripts/build-homepage-evidence.py",
+    "scripts/build-research-synthesis.py",
 )
 
 
