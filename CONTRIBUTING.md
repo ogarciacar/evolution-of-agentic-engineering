@@ -13,12 +13,26 @@ Where does this fit?
 [ARTICLE URL]
 Use agenticengineering.science.
 
-Evaluate the source against the active model claims and the canonical research gaps in model/research-gaps.yaml. Identify which claim or research gap the source bears on, if any, and whether it supplies any of the evidence currently identified as needed. Do not force a contribution merely because the source concerns coding agents or agentic engineering.
+Evaluate the source against the active model and the current generated research frontier in research-frontier.json. For every frontier item the source materially bears on, report:
 
-If the source contains meaningful evidence for the model or one of its active research gaps, ask me whether I want to contribute the assessment. If I agree, follow the contribution protocol in ogarciacar/evolution-of-agentic-engineering. Before creating any YAML, branch, commit, or pull request, verify that every claim intended for publication is supported solely by publicly accessible sources. If any claim depends on private, internal, confidential, credential-gated, or otherwise restricted information, stop and do not prepare or push a contribution. Do not reproduce the sensitive information when explaining why you stopped.
+- claim and stage
+- current evaluation state
+- which specific evidence-needed items the source supplies, partially supplies, contradicts, or does not supply
+- what uncertainty the source reduces
+- what remains unresolved after considering the source
+
+Distinguish source evidence from model-relative interpretation. Do not claim that a research gap is resolved merely because the source describes the relevant topic, architecture, or mechanism. A gap advances only when the source provides evidence called for by the frontier, narrows the question, establishes a boundary, or challenges its premise.
+
+Conclude with one frontier-impact verdict for each materially affected claim: ADVANCES, CHALLENGES, or DOES_NOT_ADVANCE. `ADVANCES` means the source supplies or narrows evidence the frontier explicitly needs; `CHALLENGES` means it provides evidence against the claim or against the premise of the current research question; `DOES_NOT_ADVANCE` means it is relevant but leaves the frontier's requested evidence materially unchanged. These are assessment labels only; they are not stored evidence verdicts and do not replace SUPPORTS, REFINES, CONTRADICTS, or INCONCLUSIVE in the canonical evidence model.
+
+Do not force a contribution merely because the source concerns coding agents or agentic engineering. If it does not materially affect the model or research frontier, say so.
+
+If the source contains meaningful evidence for the model or materially advances or challenges the research frontier, ask me whether I want to contribute the assessment. If I agree, follow the contribution protocol in ogarciacar/evolution-of-agentic-engineering. Before creating any YAML, branch, commit, or pull request, verify that every claim intended for publication is supported solely by publicly accessible sources. If any claim depends on private, internal, confidential, credential-gated, or otherwise restricted information, stop and do not prepare or push a contribution. Do not reproduce the sensitive information when explaining why you stopped.
 ```
 
-The research gaps are a prioritization surface, not an admission gate. Evidence that challenges the model, reveals a missing claim, or materially changes an existing interpretation remains valuable even when it does not answer a currently listed gap.
+The generated `research-frontier.json` is the assessment input for what the model currently needs to learn. Its canonical inputs remain the active claim evaluation and `model/research-gaps.yaml`; do not hand-edit the generated frontier to fit a source.
+
+The research frontier is a prioritization surface, not an admission gate. Evidence that challenges the model, reveals a missing claim, or materially changes an existing interpretation remains valuable even when it does not answer a currently listed gap.
 
 ## Public evidence safety gate
 
@@ -101,7 +115,7 @@ The canonical research gaps live separately in `model/research-gaps.yaml`. Do no
 
 Review asks whether every claim is publicly derivable, the observation is source-grounded, interpretation is separated, the mapping is minimal, scale is not inferred, and the verdict is justified. Contradictory evidence is as welcome as supporting evidence.
 
-For research-directed contributions, review also asks whether the stated gap relevance is real: does the source provide evidence the gap calls for, narrow the question, expose a boundary, or challenge the premise? Topic similarity alone is not sufficient.
+For research-directed contributions, review also asks whether the stated frontier relevance is real: does the source provide evidence the frontier calls for, narrow the question, expose a boundary, or challenge the premise? Topic similarity alone is not sufficient. The assessment should state what remains unresolved so that a relevant source is not mistaken for a resolved research gap.
 
 ## Publication
 
