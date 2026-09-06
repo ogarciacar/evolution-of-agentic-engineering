@@ -32,7 +32,7 @@
       "stage": "Cooperation",
       "claim": "Cooperation can improve agentic engineering fitness",
       "evaluation_state": "CONTESTED",
-      "mapped_evidence_count": 7,
+      "mapped_evidence_count": 6,
       "research_question": "Does cooperation among agentic engineering actors, humans, and systems improve engineering fitness relative to useful isolated operation?",
       "evidence_needed": [
         "Comparative outcomes between cooperating and isolated operation",
