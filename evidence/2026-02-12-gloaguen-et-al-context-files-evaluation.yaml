@@ -59,6 +59,10 @@ mapping:
   stages: [Selection]
   conditions: [Context, Verification, Economics]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
 interpretation: >
   Context availability is not equivalent to context fitness. Repository files
   can successfully steer agents toward more testing, exploration, quality
