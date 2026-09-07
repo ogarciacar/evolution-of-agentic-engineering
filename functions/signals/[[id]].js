@@ -1,4 +1,5 @@
 import { getEvidenceById } from "../_lib/evidence-read-model.js";
+import { PROJECTION_HEADER, applyProjectionHeaders, projectionFromRequest } from "../_lib/evidence-projection.js";
 
 const SITE_ORIGIN = "https://agenticengineering.science";
 
@@ -82,6 +83,14 @@ export async function onRequest(context) {
     return new Response("Method not allowed", { status: 405, headers: { Allow: "GET, HEAD", "Cache-Control": "no-store" } });
   }
 
+  const projection = projectionFromRequest(request);
+  if (projection.error) {
+    return new Response(projection.error, {
+      status: 400,
+      headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "X-Projection-Header": PROJECTION_HEADER },
+    });
+  }
+
   const rawId = Array.isArray(params.id) ? params.id.join("/") : params.id;
   if (!rawId || rawId.includes("/")) return context.next();
 
@@ -89,17 +98,16 @@ export async function onRequest(context) {
   try { id = decodeURIComponent(rawId); } catch { return context.next(); }
   if (!env.EVIDENCE_DB) return context.next();
 
-  const evidence = await getEvidenceById(env, id);
+  const evidence = await getEvidenceById(env, id, projection.id);
   if (!evidence) return context.next();
 
   const html = renderSignal(evidence);
-  return new Response(request.method === "HEAD" ? null : html, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "public, max-age=60",
-      "X-Content-Type-Options": "nosniff",
-      "X-Evidence-Render-Source": "d1",
-    },
+  const headers = new Headers({
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "public, max-age=60",
+    "X-Content-Type-Options": "nosniff",
+    "X-Evidence-Render-Source": "d1",
   });
+  applyProjectionHeaders(headers, projection.id);
+  return new Response(request.method === "HEAD" ? null : html, { status: 200, headers });
 }

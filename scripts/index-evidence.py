@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sqlite3
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from evidence_claims import relationships_for
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
 MIGRATIONS_DIR = ROOT / "migrations"
+PROJECTION_PATTERN = re.compile(r"^(?:main|[0-9a-f]{12})$")
 
 
 def apply_migrations(connection: sqlite3.Connection) -> None:
@@ -21,7 +23,7 @@ def apply_migrations(connection: sqlite3.Connection) -> None:
         connection.executescript(migration.read_text(encoding="utf-8"))
 
 
-def project_record(connection: sqlite3.Connection, path: Path) -> None:
+def project_record(connection: sqlite3.Connection, path: Path, projection_id: str) -> None:
     record = yaml.safe_load(path.read_text(encoding="utf-8"))
     source = record["source"]
     presentation = record["presentation"]
@@ -34,16 +36,15 @@ def project_record(connection: sqlite3.Connection, path: Path) -> None:
     connection.execute(
         """
         INSERT INTO evidence (
-          evidence_id, github_path, source_title, source_date, producer,
-          producer_type, source_type, provenance, source_url, headline,
-          summary, observed_json, scale_label, scale_summary,
-          transition_from, transition_to, adjacent_stage, interpretation,
-          verdict, verdict_explanation, limitations_json, open_question,
-          assisted_by_ai
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          projection_id, evidence_id, github_path, source_title, source_date, producer,
+          producer_type, source_type, provenance, source_url, headline, summary,
+          observed_json, scale_label, scale_summary, transition_from, transition_to,
+          adjacent_stage, interpretation, verdict, verdict_explanation, limitations_json,
+          open_question, assisted_by_ai
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
-            evidence_id, path.relative_to(ROOT).as_posix(), source["title"], str(source["date"]),
+            projection_id, evidence_id, path.relative_to(ROOT).as_posix(), source["title"], str(source["date"]),
             source["producer"], source["producer_type"], source["type"], source["provenance"],
             source["url"], presentation["headline"], presentation.get("summary"),
             json.dumps(record["observed"], ensure_ascii=False, separators=(",", ":")),
@@ -55,23 +56,25 @@ def project_record(connection: sqlite3.Connection, path: Path) -> None:
         ),
     )
     connection.executemany(
-        "INSERT INTO evidence_stages (evidence_id, stage) VALUES (?, ?)",
-        [(evidence_id, stage) for stage in sorted(mapping["stages"])],
+        "INSERT INTO evidence_stages (projection_id, evidence_id, stage) VALUES (?, ?, ?)",
+        [(projection_id, evidence_id, stage) for stage in sorted(mapping["stages"])],
     )
     connection.executemany(
-        "INSERT INTO evidence_conditions (evidence_id, condition) VALUES (?, ?)",
-        [(evidence_id, condition) for condition in sorted(mapping["conditions"])],
+        "INSERT INTO evidence_conditions (projection_id, evidence_id, condition) VALUES (?, ?, ?)",
+        [(projection_id, evidence_id, condition) for condition in sorted(mapping["conditions"])],
     )
     connection.executemany(
-        "INSERT INTO evidence_claims (evidence_id, claim_id, relationship) VALUES (?, ?, ?)",
+        "INSERT INTO evidence_claims (projection_id, evidence_id, claim_id, relationship) VALUES (?, ?, ?, ?)",
         [
-            (evidence_id, item["id"], item["relationship"])
+            (projection_id, evidence_id, item["id"], item["relationship"])
             for item in sorted(relationships_for(path), key=lambda item: item["id"])
         ],
     )
 
 
-def rebuild(database: Path) -> int:
+def rebuild(database: Path, projection_id: str = "main") -> int:
+    if not PROJECTION_PATTERN.fullmatch(projection_id):
+        raise ValueError("projection_id must be 'main' or a 12-character lowercase hexadecimal commit SHA")
     database.parent.mkdir(parents=True, exist_ok=True)
     temporary = database.with_name(database.name + ".tmp")
     temporary.unlink(missing_ok=True)
@@ -82,8 +85,8 @@ def rebuild(database: Path) -> int:
         apply_migrations(connection)
         with connection:
             for path in sorted(EVIDENCE_DIR.glob("*.yaml")):
-                project_record(connection, path)
-        count = connection.execute("SELECT COUNT(*) FROM evidence").fetchone()[0]
+                project_record(connection, path, projection_id)
+        count = connection.execute("SELECT COUNT(*) FROM evidence WHERE projection_id = ?", (projection_id,)).fetchone()[0]
         connection.execute("PRAGMA optimize")
     except Exception:
         connection.close()
@@ -99,9 +102,10 @@ def rebuild(database: Path) -> int:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--database", type=Path, default=ROOT / ".artifacts" / "evidence.db")
+    parser.add_argument("--projection", default="main")
     args = parser.parse_args()
-    count = rebuild(args.database.resolve())
-    print(f"Rebuilt evidence projection: {count} records -> {args.database}")
+    count = rebuild(args.database.resolve(), args.projection)
+    print(f"Rebuilt evidence projection {args.projection}: {count} records -> {args.database}")
 
 
 if __name__ == "__main__":
