@@ -8,12 +8,7 @@ Evolution of Agentic Engineering is a working model. Contributions are welcome w
 
 Before opening a pull request, evaluate the source using `https://agenticengineering.science/apply.html`.
 
-```text
-Where does this fit?
-[ARTICLE URL]
-Use agenticengineering.science.
-
-Evaluate the source against the active model and the current generated research frontier in research-frontier.json. For every frontier item the source materially bears on, report:
+Assess the source against the active model and the current generated research frontier in `research-frontier.json`. For every frontier item the source materially bears on, report:
 
 - claim and stage
 - current evaluation state
@@ -23,12 +18,11 @@ Evaluate the source against the active model and the current generated research 
 
 Distinguish source evidence from model-relative interpretation. Do not claim that a research gap is resolved merely because the source describes the relevant topic, architecture, or mechanism. A gap advances only when the source provides evidence called for by the frontier, narrows the question, establishes a boundary, or challenges its premise.
 
-Conclude with one frontier-impact verdict for each materially affected claim: ADVANCES, CHALLENGES, or DOES_NOT_ADVANCE. `ADVANCES` means the source supplies or narrows evidence the frontier explicitly needs; `CHALLENGES` means it provides evidence against the claim or against the premise of the current research question; `DOES_NOT_ADVANCE` means it is relevant but leaves the frontier's requested evidence materially unchanged. These are assessment labels only; they are not stored evidence verdicts and do not replace SUPPORTS, REFINES, CONTRADICTS, or INCONCLUSIVE in the canonical evidence model.
+Conclude with one frontier-impact verdict for each materially affected claim: `ADVANCES`, `CHALLENGES`, or `DOES_NOT_ADVANCE`. These are assessment labels only; they are not stored evidence verdicts and do not replace `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE` in the canonical evidence model.
 
 Do not force a contribution merely because the source concerns coding agents or agentic engineering. If it does not materially affect the model or research frontier, say so.
 
-If the source contains meaningful evidence for the model or materially advances or challenges the research frontier, ask me whether I want to contribute the assessment. If I agree, follow the contribution protocol in ogarciacar/evolution-of-agentic-engineering. Before creating any YAML, branch, commit, or pull request, verify that every claim intended for publication is supported solely by publicly accessible sources. If any claim depends on private, internal, confidential, credential-gated, or otherwise restricted information, stop and do not prepare or push a contribution. Do not reproduce the sensitive information when explaining why you stopped.
-```
+Before creating any YAML, branch, commit, or pull request, verify that every claim intended for publication is supported solely by publicly accessible sources. If any claim depends on private, internal, confidential, credential-gated, or otherwise restricted information, stop and do not prepare or push a contribution.
 
 The generated `research-frontier.json` is the assessment input for what the model currently needs to learn. Its canonical inputs remain the active claim evaluation and `model/research-gaps.yaml`; do not hand-edit the generated frontier to fit a source.
 
@@ -50,12 +44,14 @@ For an ordinary evidence contribution, **one new or updated `evidence/*.yaml` fi
 
 The evidence record contains the source-grounded observations, model mapping, explicit claim relationships, interpretation, verdict, epistemic boundaries, and open question. CI validates that canonical input and derives the projections used by evaluation, synthesis checks, D1 synchronization, and publication.
 
-A contributor should not edit bookkeeping or generated state to make an evidence PR pass. In particular, an ordinary evidence contribution does not require edits to:
+A contributor should not edit bookkeeping or derived state to make an evidence PR pass. In particular, an ordinary evidence contribution does not require edits to:
 
 - `model/evidence-claims.yaml`
 - `model/synthesis-state.json`
 - `research-frontier.json`
-- generated HTML or `signals/`
+- generated evaluation/synthesis HTML
+- `sitemap.xml`
+- runtime publication pages or routes
 
 `model/evidence-claims.yaml` remains a compatibility source for evidence records that have not yet migrated their claim relationships into their own YAML. New evidence must declare `claims` in the evidence record.
 
@@ -64,10 +60,12 @@ If CI reports `SYNTHESIS_REVIEW_REQUIRED`, that is an editorial boundary rather 
 ## Contribution boundaries
 
 - **Contributor surface — `evidence/*.yaml`**: ordinary evidence proposals are authored here.
-- **Maintainer surface**: schema, generators, templates, workflows, protocols, model contracts, research gaps, synthesis findings, migration ledgers, and editorial pages.
-- **Generated surfaces**: `research-frontier.json`, `evidence.html`, `evaluate.html`, `synthesis.html`, `signals/<signal-id>/index.html`, the bounded Evidence Landscape in `index.html`, and `sitemap.xml`.
+- **Maintainer surface**: schema, generators, workflows, protocols, model contracts, research gaps, synthesis findings, migration ledgers, runtime functions, and editorial pages.
+- **CI-derived static/model artifacts**: `research-frontier.json`, `evaluate.html`, `synthesis.html`, and `sitemap.xml`.
+- **Runtime evidence surfaces**: `/api/evidence`, `/signals/<signal-id>/`, and the homepage Evidence Landscape. These read from the D1 projection through the shared runtime evidence read model.
+- **Authored/static publication pages**: `index.html`, `evidence.html`, `apply.html`, and `contribute.html`.
 
-Contributors author canonical evidence records, not derived model bookkeeping or generated pages.
+Contributors author canonical evidence records, not derived model bookkeeping, D1 projections, or publication surfaces.
 
 ## Contribution format
 
@@ -149,21 +147,29 @@ claim relationships + model evaluation
 semantic synthesis-drift check
       │
       ▼
-projections + D1 synchronization export
+projection/export validation
       │
-      ▼
-research frontier + publication artifacts
+      ├── research frontier + static/model artifacts
+      │
+      └── D1 synchronization
 ```
 
-Pull-request validation does not mutate the contribution branch. Generated pages are uploaded as workflow artifacts for inspection. After canonical changes reach `main`, the workflow regenerates and commits the known generated paths there.
+Pull-request validation does not mutate the contribution branch. Generated outputs may be uploaded as workflow artifacts for inspection. After canonical changes reach `main`, the workflow regenerates and may commit the known CI-owned static/model artifacts there. D1 synchronization projects the accepted corpus for runtime publication.
 
 The expected outcome for an ordinary compatible evidence contribution is therefore: **one evidence YAML in, green validation and derived outputs out**.
 
 ## Derived artifacts
 
-Generated artifacts must not be hand-edited. The known generated paths are `research-frontier.json`, `evidence.html`, `evaluate.html`, `index.html`, `sitemap.xml`, `synthesis.html`, and `signals/`.
+Generated artifacts must not be hand-edited. The current CI-owned generated paths are:
+
+- `research-frontier.json`
+- `evaluate.html`
+- `synthesis.html`
+- `sitemap.xml`
 
 For local inspection, maintainers may run `python scripts/build-derived-artifacts.py`, but contributors do not need to commit its output before opening a pull request.
+
+`evidence.html` and `index.html` are authored/static pages. Evidence-dependent runtime content is read from D1 rather than materialized into those files by CI.
 
 ## Review standard
 
@@ -175,6 +181,6 @@ A synthesis review is maintainer work. When CI identifies semantic synthesis dri
 
 ## Publication
 
-Accepted YAML evidence is automatically represented in generated evidence views. The homepage Evidence Landscape is a deterministic bounded view of up to the newest 24 accepted Scale Signals; the Evidence page and API expose the corpus for inspection.
+Accepted YAML evidence is projected into D1 after validation. The shared runtime evidence read model supplies the evidence API, Scale Signal routes, and the homepage Evidence Landscape. The homepage remains a bounded view of the corpus, while the evidence API and Scale Signal routes expose individual and queryable evidence for inspection.
 
 **Evidence should accumulate. The homepage should remain legible.**
