@@ -12,7 +12,6 @@ import yaml
 from evidence_claims import relationships_for
 
 ROOT = Path(__file__).resolve().parents[1]
-EVIDENCE_DIR = ROOT / "evidence"
 PROJECTION_PATTERN = re.compile(r"^(?:main|[0-9a-f]{12})$")
 
 
@@ -24,10 +23,19 @@ def sql(value: object) -> str:
     return "'" + str(value).replace("'", "''") + "'"
 
 
-def export(projection_id: str = "main") -> str:
+def load_legacy_mappings(source_root: Path) -> dict[str, list[dict[str, str]]]:
+    path = source_root / "model" / "evidence-claims.yaml"
+    document = yaml.safe_load(path.read_text(encoding="utf-8"))
+    return document["mappings"]
+
+
+def export(projection_id: str = "main", source_root: Path = ROOT) -> str:
     if not PROJECTION_PATTERN.fullmatch(projection_id):
         raise ValueError("projection_id must be 'main' or a 12-character lowercase hexadecimal commit SHA")
 
+    source_root = source_root.resolve()
+    evidence_dir = source_root / "evidence"
+    legacy_mappings = load_legacy_mappings(source_root)
     projection = sql(projection_id)
     lines = [
         "PRAGMA defer_foreign_keys = true;",
@@ -37,7 +45,7 @@ def export(projection_id: str = "main") -> str:
         f"DELETE FROM evidence WHERE projection_id = {projection};",
     ]
 
-    for path in sorted(EVIDENCE_DIR.glob("*.yaml")):
+    for path in sorted(evidence_dir.glob("*.yaml")):
         record = yaml.safe_load(path.read_text(encoding="utf-8"))
         source = record["source"]
         presentation = record["presentation"]
@@ -47,7 +55,7 @@ def export(projection_id: str = "main") -> str:
         implication = record["model_implication"]
         evidence_id = path.stem
         values = [
-            projection_id, evidence_id, path.relative_to(ROOT).as_posix(), source["title"], str(source["date"]),
+            projection_id, evidence_id, f"evidence/{path.name}", source["title"], str(source["date"]),
             source["producer"], source["producer_type"], source["type"], source["provenance"],
             source["url"], presentation["headline"], presentation.get("summary"),
             json.dumps(record["observed"], ensure_ascii=False, separators=(",", ":")),
@@ -73,7 +81,7 @@ def export(projection_id: str = "main") -> str:
                 "INSERT INTO evidence_conditions (projection_id, evidence_id, condition) VALUES "
                 f"({projection}, {sql(evidence_id)}, {sql(condition)});"
             )
-        for item in sorted(relationships_for(path), key=lambda item: item["id"]):
+        for item in sorted(relationships_for(path, legacy_mappings), key=lambda item: item["id"]):
             lines.append(
                 "INSERT INTO evidence_claims (projection_id, evidence_id, claim_id, relationship) VALUES "
                 f"({projection}, {sql(evidence_id)}, {sql(item['id'])}, {sql(item['relationship'])});"
@@ -87,11 +95,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / ".artifacts" / "evidence-sync.sql")
     parser.add_argument("--projection", default="main")
+    parser.add_argument("--source-root", type=Path, default=ROOT)
     args = parser.parse_args()
     output = args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(export(args.projection), encoding="utf-8")
-    print(f"Exported D1 synchronization SQL for projection {args.projection} -> {output}")
+    output.write_text(export(args.projection, args.source_root), encoding="utf-8")
+    print(f"Exported D1 synchronization SQL for projection {args.projection} from {args.source_root.resolve()} -> {output}")
 
 
 if __name__ == "__main__":
