@@ -66,6 +66,10 @@ mapping:
   stages: [Selection]
   conditions: [Verification, Observability, Economics, Learning]
 
+claims:
+  - id: C02
+    relationship: REFINES
+
 interpretation: >
   The described eval loop provides a concrete mechanism for subjecting variation
   to Selection. Traces make behavior observable; error analysis and evals turn

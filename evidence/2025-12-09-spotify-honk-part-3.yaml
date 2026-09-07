@@ -32,6 +32,12 @@ mapping:
     to: Cooperation
   conditions: [Execution, Verification, Observability]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: SUPPORTS
+
 interpretation: >
   This is unusually direct evidence for the model's Selection claim because Spotify connects
   engineered Verification and Execution conditions to observed changes in agent behavior at scale.

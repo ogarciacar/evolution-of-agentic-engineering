@@ -31,6 +31,14 @@ mapping:
     to: Cooperation
   conditions: [Execution, Verification, Coordination, Observability, Economics]
 
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: INCONCLUSIVE
+
 interpretation: >
   Spotify provides evidence of a viable background engineering actor operating inside
   an engineered environment at substantial organizational scale. The pluggable harness

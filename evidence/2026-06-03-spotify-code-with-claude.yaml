@@ -34,6 +34,12 @@ mapping:
     to: Cooperation
   conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: INCONCLUSIVE
+
 interpretation: >
   Once code production becomes cheap, context availability, verification, orchestration,
   observability and human decision-making become more visible constraints. Spotify's

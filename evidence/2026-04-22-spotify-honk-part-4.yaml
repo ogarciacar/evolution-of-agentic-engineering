@@ -31,6 +31,12 @@ mapping:
     to: Cooperation
   conditions: [Context, Execution, Coordination, Economics]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: INCONCLUSIVE
+
 interpretation: >
   Part 4 advances Selection by showing that agent viability depends on environmental knowledge
   that exists outside the coding model itself: dependency lineage, repository targeting, search,

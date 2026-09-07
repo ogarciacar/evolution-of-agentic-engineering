@@ -56,6 +56,14 @@ mapping:
     adjacent_stage: Specialization
   conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: INCONCLUSIVE
+  - id: C04
+    relationship: INCONCLUSIVE
+
 interpretation: >
   Fitness is being evaluated at the level of workload + model + context + tools +
   runtime + verification + reliability + cost, rather than model quality alone.

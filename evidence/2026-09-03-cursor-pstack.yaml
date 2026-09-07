@@ -66,6 +66,14 @@ mapping:
     adjacent_stage: Specialization
   conditions: [Context, Verification, Coordination, Economics, Learning]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: REFINES
+  - id: C04
+    relationship: INCONCLUSIVE
+
 interpretation: >
   pstack treats cooperation as something that becomes useful only after agent
   work is sufficiently bounded and verifiable, and only when the task is large

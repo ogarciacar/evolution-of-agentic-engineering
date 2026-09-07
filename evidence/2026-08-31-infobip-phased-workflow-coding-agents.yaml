@@ -27,6 +27,10 @@ mapping:
   stages: [Selection]
   conditions: [Context, Execution, Verification, Learning]
 
+claims:
+  - id: C02
+    relationship: REFINES
+
 interpretation: >
   Selection may favor environments that make context bounded, validated, compressible
   and reconstructable rather than simply maximizing available context. Durable state

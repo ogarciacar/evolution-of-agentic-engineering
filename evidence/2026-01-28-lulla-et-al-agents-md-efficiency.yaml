@@ -57,6 +57,10 @@ mapping:
   stages: [Selection]
   conditions: [Context, Economics]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
 interpretation: >
   A version-controlled repository instruction file is an environmental
   condition rather than a model change. Holding the task, repository state and

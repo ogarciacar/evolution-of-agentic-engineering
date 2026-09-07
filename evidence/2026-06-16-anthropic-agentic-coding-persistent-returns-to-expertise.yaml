@@ -65,6 +65,12 @@ mapping:
   stages: [Apparition, Selection]
   conditions: [Context, Execution, Verification, Observability]
 
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: REFINES
+
 interpretation: >
   Apparition is documented at scale rather than asserted: the agent interprets
   intent, reads files, edits code, runs commands, and works through errors
