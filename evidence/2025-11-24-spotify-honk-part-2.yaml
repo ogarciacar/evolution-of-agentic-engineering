@@ -29,6 +29,10 @@ mapping:
   stages: [Selection]
   conditions: [Context, Execution, Verification]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
 interpretation: >
   The source directly advances Selection by comparing materially different agent configurations
   and describing environmental choices that change viability. Agent choice, prompt form, context
