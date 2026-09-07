@@ -73,7 +73,7 @@ jobs:
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
       # Rebuild `main` from GitHub main on every preview sync so the default
-      # preview view cannot inherit historical data from another contribution.
+      # preview view cannot inherit data from another contribution.
       - name: Materialize canonical main source
         shell: bash
         run: |
