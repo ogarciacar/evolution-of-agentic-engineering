@@ -69,6 +69,3 @@ mappings:
       relationship: REFINES
     - id: C04
       relationship: INCONCLUSIVE
-  2026-09-06-openai-research-acceleration:
-    - id: C02
-      relationship: REFINES
