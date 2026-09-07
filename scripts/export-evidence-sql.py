@@ -95,7 +95,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / ".artifacts" / "evidence-sync.sql")
     parser.add_argument("--projection", default="main")
-    parser.add_argument("--source-root", type=Path, default=ROOT)
+    parser.add_argument("--source-root", type=Path, default=ROOT, help="Repository-shaped source root containing evidence/ and model/evidence-claims.yaml")
     args = parser.parse_args()
     output = args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
