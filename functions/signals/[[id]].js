@@ -22,13 +22,13 @@ function transitionLabel(row) {
 
 function renderChips(row) {
   const transition = transitionLabel(row);
-  if (transition) {
-    return `<span class="chip transition">${esc(transition)}</span>`;
-  }
   const stages = parseJson(row.stages_json) || [];
   const conditions = parseJson(row.conditions_json) || [];
+  const stageChips = transition
+    ? [`<span class="chip transition">${esc(transition)}</span>`]
+    : stages.map((stage) => `<span class="chip transition">${esc(stage)}</span>`);
   return [
-    ...stages.map((stage) => `<span class="chip transition">${esc(stage)}</span>`),
+    ...stageChips,
     ...conditions.map((condition) => `<span class="chip">${esc(condition)}</span>`),
   ].join("");
 }
@@ -101,7 +101,13 @@ export async function onRequest(context) {
 
   const rawId = Array.isArray(params.id) ? params.id.join("/") : params.id;
   if (!rawId || rawId.includes("/")) return context.next();
-  const id = decodeURIComponent(rawId);
+
+  let id;
+  try {
+    id = decodeURIComponent(rawId);
+  } catch {
+    return context.next();
+  }
 
   if (!env.EVIDENCE_DB) return context.next();
 
