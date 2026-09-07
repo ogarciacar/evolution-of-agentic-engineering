@@ -21,6 +21,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Validate model claims
@@ -52,6 +55,8 @@ jobs:
         run: python scripts/check-evidence-indexer.py
       - name: Check D1 synchronization export
         run: python scripts/check-evidence-sync.py
+      - name: Check shared evidence read model
+        run: node scripts/check-evidence-read-model.mjs
       - name: Generate derived artifacts
         run: python scripts/build-derived-artifacts.py
       - name: Commit generated artifacts on main
