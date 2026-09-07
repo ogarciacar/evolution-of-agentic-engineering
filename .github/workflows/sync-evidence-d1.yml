@@ -27,6 +27,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       EVIDENCE_DB_NAME: ${{ vars.EVIDENCE_DB_NAME }}
       EVIDENCE_DB_ID: ${{ vars.EVIDENCE_DB_ID }}
+      PROJECTION_ID: main
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -62,8 +63,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
-      - name: Export deterministic synchronization SQL
-        run: python scripts/export-evidence-sql.py --output .artifacts/evidence-sync.sql
+      - name: Export production projection synchronization SQL
+        run: python scripts/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
       - name: Apply D1 migrations
         run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config wrangler-d1.json
       - name: Synchronize canonical evidence
@@ -71,7 +72,7 @@ jobs:
       - name: Verify remote evidence count
         run: |
           EXPECTED=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
-          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command='SELECT COUNT(*) AS count FROM evidence;')
+          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT COUNT(*) AS count FROM evidence WHERE projection_id = '$PROJECTION_ID';")
           ACTUAL=$(python -c 'import json,sys; data=json.load(sys.stdin); print(data[0]["results"][0]["count"])' <<< "$OUTPUT")
-          test "$ACTUAL" = "$EXPECTED" || { echo "Remote evidence count $ACTUAL != canonical count $EXPECTED"; exit 1; }
-          echo "Production D1 contains $ACTUAL canonical evidence records"
+          test "$ACTUAL" = "$EXPECTED" || { echo "Production projection count $ACTUAL != canonical count $EXPECTED"; exit 1; }
+          echo "Production D1 projection main contains $ACTUAL canonical evidence records"

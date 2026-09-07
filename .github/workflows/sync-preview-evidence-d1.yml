@@ -12,7 +12,7 @@ on:
       - ".github/workflows/sync-preview-evidence-d1.yml"
 
 concurrency:
-  group: evidence-d1-preview
+  group: evidence-d1-preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
@@ -27,6 +27,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       EVIDENCE_DB_NAME: ${{ vars.EVIDENCE_DB_NAME }}
       EVIDENCE_DB_ID: ${{ vars.EVIDENCE_DB_ID }}
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -36,6 +37,13 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
+      - name: Resolve preview projection id
+        shell: bash
+        run: |
+          PROJECTION_ID="${PR_HEAD_SHA:0:12}"
+          [[ "$PROJECTION_ID" =~ ^[0-9a-f]{12}$ ]] || { echo "Invalid PR projection id: $PROJECTION_ID"; exit 1; }
+          echo "PROJECTION_ID=$PROJECTION_ID" >> "$GITHUB_ENV"
+          echo "Preview projection: $PROJECTION_ID"
       - name: Require preview D1 configuration
         run: |
           test -n "$EVIDENCE_DB_NAME" || { echo "Missing preview environment variable EVIDENCE_DB_NAME"; exit 1; }
@@ -62,16 +70,16 @@ jobs:
         run: pip install -r requirements.txt
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
-      - name: Export deterministic synchronization SQL
-        run: python scripts/export-evidence-sql.py --output .artifacts/evidence-sync.sql
+      - name: Export projection-scoped synchronization SQL
+        run: python scripts/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
       - name: Apply D1 migrations
         run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config wrangler-d1.json
-      - name: Synchronize contribution evidence
+      - name: Synchronize contribution projection
         run: npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --file=.artifacts/evidence-sync.sql
-      - name: Verify preview evidence count
+      - name: Verify preview projection count
         run: |
           EXPECTED=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
-          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command='SELECT COUNT(*) AS count FROM evidence;')
+          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT COUNT(*) AS count FROM evidence WHERE projection_id = '$PROJECTION_ID';")
           ACTUAL=$(python -c 'import json,sys; data=json.load(sys.stdin); print(data[0]["results"][0]["count"])' <<< "$OUTPUT")
-          test "$ACTUAL" = "$EXPECTED" || { echo "Preview evidence count $ACTUAL != contribution count $EXPECTED"; exit 1; }
-          echo "Preview D1 contains $ACTUAL evidence records from PR #${{ github.event.pull_request.number }}"
+          test "$ACTUAL" = "$EXPECTED" || { echo "Preview projection $PROJECTION_ID count $ACTUAL != contribution count $EXPECTED"; exit 1; }
+          echo "Preview D1 projection $PROJECTION_ID contains $ACTUAL evidence records from PR #${{ github.event.pull_request.number }}"

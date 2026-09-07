@@ -4,8 +4,16 @@ export const VERDICTS = ["SUPPORTS", "REFINES", "CONTRADICTS", "INCONCLUSIVE"];
 
 const SELECT_BASE = `
 SELECT e.*,
-  (SELECT json_group_array(stage) FROM (SELECT stage FROM evidence_stages s WHERE s.evidence_id = e.evidence_id ORDER BY stage)) AS stages_json,
-  (SELECT json_group_array(condition) FROM (SELECT condition FROM evidence_conditions c WHERE c.evidence_id = e.evidence_id ORDER BY condition)) AS conditions_json
+  (SELECT json_group_array(stage) FROM (
+    SELECT stage FROM evidence_stages s
+    WHERE s.projection_id = e.projection_id AND s.evidence_id = e.evidence_id
+    ORDER BY stage
+  )) AS stages_json,
+  (SELECT json_group_array(condition) FROM (
+    SELECT condition FROM evidence_conditions c
+    WHERE c.projection_id = e.projection_id AND c.evidence_id = e.evidence_id
+    ORDER BY condition
+  )) AS conditions_json
 FROM evidence e`;
 
 function parseJson(value, fallback = null) {
@@ -46,21 +54,23 @@ export function shapeEvidence(row) {
   };
 }
 
-export async function getEvidenceById(env, id) {
-  const row = await env.EVIDENCE_DB.prepare(`${SELECT_BASE} WHERE e.evidence_id = ?`).bind(id).first();
+export async function getEvidenceById(env, id, projectionId = "main") {
+  const row = await env.EVIDENCE_DB.prepare(`${SELECT_BASE} WHERE e.projection_id = ? AND e.evidence_id = ?`)
+    .bind(projectionId, id)
+    .first();
   return row ? shapeEvidence(row) : null;
 }
 
-export async function listEvidence(env, filters = {}, limit = 100) {
-  const where = [];
-  const params = [];
+export async function listEvidence(env, filters = {}, limit = 100, projectionId = "main") {
+  const where = ["e.projection_id=?"];
+  const params = [projectionId];
 
   if (filters.stage) {
-    where.push("EXISTS (SELECT 1 FROM evidence_stages s WHERE s.evidence_id=e.evidence_id AND s.stage=?)");
+    where.push("EXISTS (SELECT 1 FROM evidence_stages s WHERE s.projection_id=e.projection_id AND s.evidence_id=e.evidence_id AND s.stage=?)");
     params.push(filters.stage);
   }
   if (filters.condition) {
-    where.push("EXISTS (SELECT 1 FROM evidence_conditions c WHERE c.evidence_id=e.evidence_id AND c.condition=?)");
+    where.push("EXISTS (SELECT 1 FROM evidence_conditions c WHERE c.projection_id=e.projection_id AND c.evidence_id=e.evidence_id AND c.condition=?)");
     params.push(filters.condition);
   }
   if (filters.verdict) {
@@ -80,15 +90,15 @@ export async function listEvidence(env, filters = {}, limit = 100) {
     params.push(filters.to);
   }
 
-  const query = `${SELECT_BASE} ${where.length ? `WHERE ${where.join(" AND ")}` : ""} ORDER BY e.source_date DESC, e.evidence_id ASC LIMIT ?`;
+  const query = `${SELECT_BASE} WHERE ${where.join(" AND ")} ORDER BY e.source_date DESC, e.evidence_id ASC LIMIT ?`;
   const result = await env.EVIDENCE_DB.prepare(query).bind(...params, limit).all();
   return (result.results || []).map(shapeEvidence);
 }
 
-export async function getHomepageEvidence(env, limit = 24) {
+export async function getHomepageEvidence(env, limit = 24, projectionId = "main") {
   const [records, countRow] = await Promise.all([
-    listEvidence(env, {}, limit),
-    env.EVIDENCE_DB.prepare("SELECT COUNT(*) AS count FROM evidence").first(),
+    listEvidence(env, {}, limit, projectionId),
+    env.EVIDENCE_DB.prepare("SELECT COUNT(*) AS count FROM evidence WHERE projection_id = ?").bind(projectionId).first(),
   ]);
   return { records, total: Number(countRow?.count || 0) };
 }

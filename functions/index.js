@@ -1,4 +1,5 @@
 import { CONDITIONS, STAGES, getHomepageEvidence } from "./_lib/evidence-read-model.js";
+import { PROJECTION_HEADER, applyProjectionHeaders, projectionFromRequest } from "./_lib/evidence-projection.js";
 
 const GRID_START = "<!-- HOMEPAGE_EVIDENCE_START -->";
 const GRID_END = "<!-- HOMEPAGE_EVIDENCE_END -->";
@@ -74,13 +75,25 @@ export async function onRequest(context) {
   const { request, env } = context;
   if (request.method !== "GET" && request.method !== "HEAD") return context.next();
 
+  const projection = projectionFromRequest(request);
+  if (projection.error) {
+    return new Response(projection.error, {
+      status: 400,
+      headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "X-Projection-Header": PROJECTION_HEADER },
+    });
+  }
+
   const staticResponse = await context.next();
   if (!env.EVIDENCE_DB || request.method === "HEAD" || !staticResponse.ok) return staticResponse;
 
   try {
-    const { records, total } = await getHomepageEvidence(env, MAX_ROWS);
+    const { records, total } = await getHomepageEvidence(env, MAX_ROWS, projection.id);
     const chart = renderChart(records, total);
-    if (!chart) return staticResponse;
+    if (!chart) {
+      const headers = new Headers(staticResponse.headers);
+      applyProjectionHeaders(headers, projection.id);
+      return new Response(staticResponse.body, { status: staticResponse.status, statusText: staticResponse.statusText, headers });
+    }
 
     const html = await staticResponse.text();
     const start = html.indexOf(GRID_START);
@@ -92,6 +105,7 @@ export async function onRequest(context) {
     headers.set("Content-Type", "text/html; charset=utf-8");
     headers.set("Cache-Control", "public, max-age=60");
     headers.set("X-Evidence-Landscape-Source", "d1");
+    applyProjectionHeaders(headers, projection.id);
     headers.delete("Content-Length");
     return new Response(body, { status: staticResponse.status, statusText: staticResponse.statusText, headers });
   } catch {
