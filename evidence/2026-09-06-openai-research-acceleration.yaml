@@ -29,6 +29,10 @@ mapping:
   stages: [Selection]
   conditions: [Execution, Verification, Coordination, Economics]
 
+claims:
+  - id: C02
+    relationship: REFINES
+
 interpretation: >
   This provides evidence that increasing agent execution capacity can move an engineering
   environment into a regime where aggregate agent runtime exceeds available human labor

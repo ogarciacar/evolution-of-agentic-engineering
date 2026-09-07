@@ -6,10 +6,9 @@ import sys
 import tempfile
 from pathlib import Path
 
-import yaml
+from evidence_claims import all_relationships
 
 ROOT = Path(__file__).resolve().parents[1]
-MAPPINGS = yaml.safe_load((ROOT / "model" / "evidence-claims.yaml").read_text(encoding="utf-8"))["mappings"]
 
 
 def main() -> None:
@@ -23,7 +22,7 @@ def main() -> None:
 
     expected = sorted(
         (evidence_id, item["id"], item["relationship"])
-        for evidence_id, items in MAPPINGS.items()
+        for evidence_id, items in all_relationships().items()
         for item in items
     )
     assert rows == expected

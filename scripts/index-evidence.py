@@ -9,10 +9,11 @@ from pathlib import Path
 
 import yaml
 
+from evidence_claims import relationships_for
+
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
 MIGRATIONS_DIR = ROOT / "migrations"
-CLAIM_MAPPINGS = yaml.safe_load((ROOT / "model" / "evidence-claims.yaml").read_text(encoding="utf-8"))["mappings"]
 
 
 def apply_migrations(connection: sqlite3.Connection) -> None:
@@ -63,7 +64,10 @@ def project_record(connection: sqlite3.Connection, path: Path) -> None:
     )
     connection.executemany(
         "INSERT INTO evidence_claims (evidence_id, claim_id, relationship) VALUES (?, ?, ?)",
-        [(evidence_id, item["id"], item["relationship"]) for item in sorted(CLAIM_MAPPINGS[evidence_id], key=lambda item: item["id"])],
+        [
+            (evidence_id, item["id"], item["relationship"])
+            for item in sorted(relationships_for(path), key=lambda item: item["id"])
+        ],
     )
 
 

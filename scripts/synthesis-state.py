@@ -9,9 +9,10 @@ from pathlib import Path
 
 import yaml
 
+from evidence_claims import all_relationships
+
 ROOT = Path(__file__).resolve().parents[1]
 SYNTHESIS = ROOT / "model" / "synthesis.yaml"
-MAPPINGS = ROOT / "model" / "evidence-claims.yaml"
 EVALUATOR = ROOT / "scripts" / "evaluate-model-claims.py"
 
 
@@ -30,7 +31,7 @@ def fingerprint(value: object) -> str:
 
 def build_state() -> dict:
     synthesis = yaml.safe_load(SYNTHESIS.read_text(encoding="utf-8"))
-    mappings = yaml.safe_load(MAPPINGS.read_text(encoding="utf-8"))["mappings"]
+    mappings = all_relationships()
     evaluation = load_evaluation()
     evaluated = {claim["id"]: claim for claim in evaluation["claims"]}
 
