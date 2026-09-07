@@ -1,5 +1,5 @@
 import { CONDITIONS, STAGES, VERDICTS, getEvidenceById, listEvidence } from "../../_lib/evidence-read-model.js";
-import { PROJECTION_HEADER, applyProjectionHeaders, projectionFromRequest } from "../../_lib/evidence-projection.js";
+import { PROJECTION_HEADER, PROJECTION_QUERY, applyProjectionHeaders, projectionFromRequest } from "../../_lib/evidence-projection.js";
 
 const STAGE_SET = new Set(STAGES);
 const CONDITION_SET = new Set(CONDITIONS);
@@ -30,7 +30,12 @@ export async function onRequest(context) {
   if (request.method !== "GET" && request.method !== "HEAD") return json({ error: "Method not allowed" }, 405);
 
   const projection = projectionFromRequest(request);
-  if (projection.error) return json({ error: projection.error, header: PROJECTION_HEADER }, 400);
+  if (projection.error) {
+    return json({
+      error: projection.error,
+      selector: projection.source === "query" ? PROJECTION_QUERY : PROJECTION_HEADER,
+    }, 400);
+  }
 
   const rawId = Array.isArray(params.id) ? params.id.join("/") : params.id;
   if (rawId) {
