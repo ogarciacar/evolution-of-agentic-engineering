@@ -29,6 +29,10 @@ mapping:
     to: Cooperation
   conditions: [Coordination, Observability, Execution, Verification]
 
+claims:
+  - id: C03
+    relationship: SUPPORTS
+
 interpretation: >
   Cooperation can begin before rich agent-to-agent collaboration. Independent agents first create a coordination problem; explicit orchestration then allows their work to compose as a system.
 
