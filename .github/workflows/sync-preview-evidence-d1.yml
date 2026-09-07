@@ -30,6 +30,8 @@ jobs:
       PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
@@ -70,16 +72,42 @@ jobs:
         run: pip install -r requirements.txt
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
-      - name: Export projection-scoped synchronization SQL
+      - name: Materialize canonical main source
+        shell: bash
+        run: |
+          git fetch origin main
+          rm -rf .artifacts/main-source
+          mkdir -p .artifacts/main-source
+          git archive origin/main evidence model/evidence-claims.yaml | tar -x -C .artifacts/main-source
+      - name: Export canonical main projection SQL
+        run: python scripts/export-evidence-sql.py --projection main --source-root .artifacts/main-source --output .artifacts/main-evidence-sync.sql
+      - name: Export PR projection SQL
         run: python scripts/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
       - name: Apply D1 migrations
         run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config wrangler-d1.json
+      - name: Rebuild canonical main projection
+        run: npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --file=.artifacts/main-evidence-sync.sql
       - name: Synchronize contribution projection
         run: npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --file=.artifacts/evidence-sync.sql
-      - name: Verify preview projection count
+      - name: Verify main and preview projection counts
+        shell: bash
         run: |
-          EXPECTED=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
-          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT COUNT(*) AS count FROM evidence WHERE projection_id = '$PROJECTION_ID';")
-          ACTUAL=$(python -c 'import json,sys; data=json.load(sys.stdin); print(data[0]["results"][0]["count"])' <<< "$OUTPUT")
-          test "$ACTUAL" = "$EXPECTED" || { echo "Preview projection $PROJECTION_ID count $ACTUAL != contribution count $EXPECTED"; exit 1; }
-          echo "Preview D1 projection $PROJECTION_ID contains $ACTUAL evidence records from PR #${{ github.event.pull_request.number }}"
+          EXPECTED_MAIN=$(find .artifacts/main-source/evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
+          EXPECTED_PR=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
+          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT projection_id, COUNT(*) AS count FROM evidence WHERE projection_id IN ('main', '$PROJECTION_ID') GROUP BY projection_id ORDER BY projection_id;")
+          python - "$EXPECTED_MAIN" "$EXPECTED_PR" "$PROJECTION_ID" <<'PY' <<< "$OUTPUT"
+          import json, sys
+          expected_main = int(sys.argv[1])
+          expected_pr = int(sys.argv[2])
+          projection_id = sys.argv[3]
+          data = json.load(sys.stdin)
+          counts = {row["projection_id"]: row["count"] for row in data[0]["results"]}
+          actual_main = counts.get("main", 0)
+          actual_pr = counts.get(projection_id, 0)
+          if actual_main != expected_main:
+              raise SystemExit(f"main projection count {actual_main} != canonical main count {expected_main}")
+          if actual_pr != expected_pr:
+              raise SystemExit(f"preview projection {projection_id} count {actual_pr} != contribution count {expected_pr}")
+          print(f"Preview D1 main contains {actual_main} canonical records")
+          print(f"Preview D1 projection {projection_id} contains {actual_pr} records from PR #${{ github.event.pull_request.number }}")
+          PY
