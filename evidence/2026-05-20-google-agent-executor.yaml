@@ -24,6 +24,10 @@ mapping:
   stages: [Selection]
   conditions: [Execution, Observability, Learning]
 
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
 interpretation: >
   Reliability mechanisms that can be tolerated as ad hoc behavior at low scale become infrastructure concerns as autonomy and duration increase.
 
