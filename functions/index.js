@@ -1,17 +1,13 @@
+import { CONDITIONS, STAGES, getHomepageEvidence } from "./_lib/evidence-read-model.js";
+
 const GRID_START = "<!-- HOMEPAGE_EVIDENCE_START -->";
 const GRID_END = "<!-- HOMEPAGE_EVIDENCE_END -->";
 const MAX_ROWS = 24;
-const STAGES = ["Apparition", "Selection", "Cooperation", "Specialization"];
-const CONDITIONS = ["Context", "Execution", "Verification", "Coordination", "Observability", "Economics", "Learning"];
 
 function esc(value, quote = false) {
   let out = String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   if (quote) out = out.replaceAll('"', "&quot;").replaceAll("'", "&#39;");
   return out;
-}
-
-function parseJson(value) {
-  return value ? JSON.parse(value) : [];
 }
 
 function shortDate(value) {
@@ -21,52 +17,46 @@ function shortDate(value) {
 
 function monthYear(value) {
   const date = new Date(`${value}T00:00:00Z`);
-  return {
-    month: new Intl.DateTimeFormat("en", { month: "short", timeZone: "UTC" }).format(date),
-    year: date.getUTCFullYear(),
-  };
+  return { month: new Intl.DateTimeFormat("en", { month: "short", timeZone: "UTC" }).format(date), year: date.getUTCFullYear() };
 }
 
 function dateRange(records) {
-  const ordered = [...records].sort((a, b) => a.source_date.localeCompare(b.source_date));
-  const first = monthYear(ordered[0].source_date);
-  const last = monthYear(ordered[ordered.length - 1].source_date);
+  const ordered = [...records].sort((a, b) => a.source.date.localeCompare(b.source.date));
+  const first = monthYear(ordered[0].source.date);
+  const last = monthYear(ordered[ordered.length - 1].source.date);
   return first.year === last.year ? `${first.month}–${last.month} ${first.year}` : `${first.month} ${first.year}–${last.month} ${last.year}`;
 }
 
-function stages(row) { return parseJson(row.stages_json); }
-function conditions(row) { return parseJson(row.conditions_json); }
-
-function transitionTarget(row, stage) {
-  return Boolean((row.transition_from || row.transition_to || row.adjacent_stage) && row.transition_to === stage);
+function transitionTarget(evidence, stage) {
+  return Boolean(evidence.mapping.transition && evidence.mapping.transition.to === stage);
 }
 
-function adjacentStage(row, stage) {
-  return Boolean((row.transition_from || row.transition_to || row.adjacent_stage) && row.adjacent_stage === stage);
+function adjacentStage(evidence, stage) {
+  return Boolean(evidence.mapping.transition && evidence.mapping.transition.adjacent_stage === stage);
 }
 
-function renderStageCell(row, stage) {
-  if (!stages(row).includes(stage)) return '<span class="landscape-cell" aria-hidden="true"></span>';
-  const arrow = transitionTarget(row, stage) ? '<span class="landscape-arrow">→</span>' : "";
-  const marker = adjacentStage(row, stage) ? "landscape-ring" : "landscape-dot";
+function renderStageCell(evidence, stage) {
+  if (!evidence.mapping.stages.includes(stage)) return '<span class="landscape-cell" aria-hidden="true"></span>';
+  const arrow = transitionTarget(evidence, stage) ? '<span class="landscape-arrow">→</span>' : "";
+  const marker = adjacentStage(evidence, stage) ? "landscape-ring" : "landscape-dot";
   return `<span class="landscape-cell" aria-hidden="true">${arrow}<i class="${marker}"></i></span>`;
 }
 
-function renderConditionCell(row, condition) {
-  const marker = conditions(row).includes(condition) ? '<i class="landscape-square"></i>' : "";
+function renderConditionCell(evidence, condition) {
+  const marker = evidence.mapping.conditions.includes(condition) ? '<i class="landscape-square"></i>' : "";
   return `<span class="landscape-cell" aria-hidden="true">${marker}</span>`;
 }
 
-function renderRow(row) {
-  const tooltip = `${row.headline} — ${row.scale_label}: ${String(row.scale_summary || "").replace(/\s+/g, " ").trim()}`;
-  const stageCells = STAGES.map((stage) => renderStageCell(row, stage)).join("");
-  const conditionCells = CONDITIONS.map((condition) => renderConditionCell(row, condition)).join("");
-  const verdict = String(row.verdict || "");
-  return `<a class="landscape-row" href="signals/${esc(row.evidence_id, true)}/" title="${esc(tooltip, true)}"><span class="landscape-source"><span class="landscape-date">${shortDate(row.source_date)}</span><strong>${esc(row.producer)}</strong></span>${stageCells}<span class="landscape-divider" aria-hidden="true"></span>${conditionCells}<span class="landscape-verdict ${esc(verdict.toLowerCase(), true)}">${esc(verdict)}</span></a>`;
+function renderRow(evidence) {
+  const tooltip = `${evidence.presentation.headline} — ${evidence.scale.label}: ${String(evidence.scale.summary || "").replace(/\s+/g, " ").trim()}`;
+  const stageCells = STAGES.map((stage) => renderStageCell(evidence, stage)).join("");
+  const conditionCells = CONDITIONS.map((condition) => renderConditionCell(evidence, condition)).join("");
+  const verdict = String(evidence.model_implication.verdict || "");
+  return `<a class="landscape-row" href="signals/${esc(evidence.id, true)}/" title="${esc(tooltip, true)}"><span class="landscape-source"><span class="landscape-date">${shortDate(evidence.source.date)}</span><strong>${esc(evidence.source.producer)}</strong></span>${stageCells}<span class="landscape-divider" aria-hidden="true"></span>${conditionCells}<span class="landscape-verdict ${esc(verdict.toLowerCase(), true)}">${esc(verdict)}</span></a>`;
 }
 
 function countMapping(records, field, value) {
-  return records.reduce((count, row) => count + (field === "stages" ? stages(row) : conditions(row)).includes(value), 0);
+  return records.reduce((count, evidence) => count + evidence.mapping[field].includes(value), 0);
 }
 
 function renderChart(records, total) {
@@ -80,15 +70,6 @@ function renderChart(records, total) {
   return `<div class="landscape-card"><div class="landscape-card-head"><div><strong>Scale Signal Landscape</strong><span>${esc(subtitle)}</span></div></div><div class="landscape-scroll"><div class="landscape-matrix"><div class="landscape-groups"><span></span><b class="landscape-model-group">Evolutionary model</b><span></span><b class="landscape-conditions-group">Selection conditions</b><b class="landscape-implication-group">Model implication</b></div><div class="landscape-columns"><span></span>${stageHeaders}<span class="landscape-divider" aria-hidden="true"></span>${conditionHeaders}<span></span></div>${rows}</div></div><div class="landscape-legend"><span><i class="landscape-dot"></i> stage mapped</span><span><i class="landscape-ring"></i> adjacent stage signal</span><span><i class="landscape-square"></i> Selection condition mapped</span><span>→ explicit transition in canonical evidence mapping</span><span><b>SUPPORTS / REFINES</b> model implication</span></div></div>`;
 }
 
-const SELECT = `
-SELECT e.evidence_id, e.source_date, e.producer, e.headline, e.scale_label, e.scale_summary,
-       e.verdict, e.transition_from, e.transition_to, e.adjacent_stage,
-  (SELECT json_group_array(stage) FROM (SELECT stage FROM evidence_stages s WHERE s.evidence_id = e.evidence_id ORDER BY stage)) AS stages_json,
-  (SELECT json_group_array(condition) FROM (SELECT condition FROM evidence_conditions c WHERE c.evidence_id = e.evidence_id ORDER BY condition)) AS conditions_json
-FROM evidence e
-ORDER BY e.source_date DESC, e.evidence_id ASC
-LIMIT ${MAX_ROWS}`;
-
 export async function onRequest(context) {
   const { request, env } = context;
   if (request.method !== "GET" && request.method !== "HEAD") return context.next();
@@ -97,11 +78,8 @@ export async function onRequest(context) {
   if (!env.EVIDENCE_DB || request.method === "HEAD" || !staticResponse.ok) return staticResponse;
 
   try {
-    const [{ results }, countRow] = await Promise.all([
-      env.EVIDENCE_DB.prepare(SELECT).all(),
-      env.EVIDENCE_DB.prepare("SELECT COUNT(*) AS count FROM evidence").first(),
-    ]);
-    const chart = renderChart(results || [], Number(countRow?.count || 0));
+    const { records, total } = await getHomepageEvidence(env, MAX_ROWS);
+    const chart = renderChart(records, total);
     if (!chart) return staticResponse;
 
     const html = await staticResponse.text();
