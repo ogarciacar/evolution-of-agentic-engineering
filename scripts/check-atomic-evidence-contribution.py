@@ -37,8 +37,7 @@ def main() -> int:
         if not claims:
             failures += 1
             print(
-                f"{path.relative_to(ROOT)}: new evidence must declare non-empty claims in the canonical evidence YAML; "
-                "do not add its mapping to model/evidence-claims.yaml",
+                f"{path.relative_to(ROOT)}: new evidence must declare non-empty claims in the canonical evidence YAML",
                 file=sys.stderr,
             )
 

@@ -80,7 +80,7 @@ jobs:
           git fetch origin main
           rm -rf .artifacts/main-source
           mkdir -p .artifacts/main-source
-          git archive origin/main evidence model/evidence-claims.yaml | tar -x -C .artifacts/main-source
+          git archive origin/main evidence | tar -x -C .artifacts/main-source
       - name: Export canonical main projection SQL
         run: python scripts/export-evidence-sql.py --projection main --source-root .artifacts/main-source --output .artifacts/main-evidence-sync.sql
       - name: Export PR projection SQL
