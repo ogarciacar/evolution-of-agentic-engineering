@@ -1,0 +1,135 @@
+name: Sweep orphan preview evidence projections
+
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: evidence-d1-preview-sweep
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      EVIDENCE_DB_NAME: ${{ vars.EVIDENCE_DB_NAME }}
+      EVIDENCE_DB_ID: ${{ vars.EVIDENCE_DB_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Require preview D1 configuration
+        shell: bash
+        run: |
+          test -n "$EVIDENCE_DB_NAME" || { echo "Missing preview environment variable EVIDENCE_DB_NAME"; exit 1; }
+          test -n "$EVIDENCE_DB_ID" || { echo "Missing preview environment variable EVIDENCE_DB_ID"; exit 1; }
+
+      - name: Build ephemeral Wrangler D1 configuration
+        shell: bash
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const config = {
+            name: 'agentic-engineering-evidence-sweep',
+            compatibility_date: '2026-09-05',
+            d1_databases: [{
+              binding: 'EVIDENCE_DB',
+              database_name: process.env.EVIDENCE_DB_NAME,
+              database_id: process.env.EVIDENCE_DB_ID,
+            }],
+          };
+          fs.writeFileSync('wrangler-d1.json', JSON.stringify(config));
+          JS
+
+      - name: Resolve active preview projections
+        shell: bash
+        run: |
+          gh api --paginate --method GET "repos/$GITHUB_REPOSITORY/pulls" \
+            -f state=open -f base=main -f per_page=100 \
+            --jq '.[].head.sha' \
+            | cut -c1-12 \
+            | sort -u > .active-projections
+
+          while IFS= read -r projection; do
+            [[ -z "$projection" || "$projection" =~ ^[0-9a-f]{12}$ ]] || {
+              echo "Invalid open-PR projection id: $projection"
+              exit 1
+            }
+          done < .active-projections
+
+          echo "Active preview projections:"
+          cat .active-projections || true
+
+      - name: Discover orphan projections
+        shell: bash
+        run: |
+          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT DISTINCT projection_id FROM (SELECT projection_id FROM evidence UNION ALL SELECT projection_id FROM evidence_stages UNION ALL SELECT projection_id FROM evidence_conditions UNION ALL SELECT projection_id FROM evidence_claims) ORDER BY projection_id;")
+          OUTPUT="$OUTPUT" node - <<'JS'
+          const fs = require('fs');
+          const active = new Set(
+            fs.readFileSync('.active-projections', 'utf8').split(/\r?\n/).filter(Boolean)
+          );
+          const data = JSON.parse(process.env.OUTPUT);
+          const projections = data[0].results.map(row => row.projection_id);
+          const invalid = projections.filter(id => id !== 'main' && !/^[0-9a-f]{12}$/.test(id));
+          if (invalid.length) {
+            throw new Error(`Refusing sweep because preview D1 contains unexpected projection ids: ${invalid.join(', ')}`);
+          }
+          const orphaned = projections.filter(id => id !== 'main' && !active.has(id));
+          fs.writeFileSync('.orphan-projections', orphaned.join('\n') + (orphaned.length ? '\n' : ''));
+          console.log(`Preview D1 projections: ${projections.join(', ') || '(none)'}`);
+          console.log(`Orphan projections: ${orphaned.join(', ') || '(none)'}`);
+          JS
+
+      - name: Delete orphan projections
+        shell: bash
+        run: |
+          if [[ ! -s .orphan-projections ]]; then
+            echo "No orphan preview projections to remove."
+            exit 0
+          fi
+
+          : > .artifacts-preview-sweep.sql
+          while IFS= read -r projection; do
+            [[ "$projection" =~ ^[0-9a-f]{12}$ ]] || { echo "Invalid orphan projection id: $projection"; exit 1; }
+            [[ "$projection" != "main" ]] || { echo "Refusing to delete main projection"; exit 1; }
+            cat >> .artifacts-preview-sweep.sql <<SQL
+          DELETE FROM evidence_claims WHERE projection_id = '$projection';
+          DELETE FROM evidence_conditions WHERE projection_id = '$projection';
+          DELETE FROM evidence_stages WHERE projection_id = '$projection';
+          DELETE FROM evidence WHERE projection_id = '$projection';
+          SQL
+          done < .orphan-projections
+
+          npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --file=.artifacts-preview-sweep.sql
+
+      - name: Verify no orphan projections remain
+        shell: bash
+        run: |
+          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT DISTINCT projection_id FROM (SELECT projection_id FROM evidence UNION ALL SELECT projection_id FROM evidence_stages UNION ALL SELECT projection_id FROM evidence_conditions UNION ALL SELECT projection_id FROM evidence_claims) ORDER BY projection_id;")
+          OUTPUT="$OUTPUT" node - <<'JS'
+          const fs = require('fs');
+          const active = new Set(
+            fs.readFileSync('.active-projections', 'utf8').split(/\r?\n/).filter(Boolean)
+          );
+          const data = JSON.parse(process.env.OUTPUT);
+          const projections = data[0].results.map(row => row.projection_id);
+          if (!projections.includes('main')) {
+            throw new Error('Preview D1 main projection is missing after sweep');
+          }
+          const orphaned = projections.filter(id => id !== 'main' && !active.has(id));
+          if (orphaned.length) {
+            throw new Error(`Preview projection sweep incomplete: ${orphaned.join(', ')}`);
+          }
+          console.log(`Sweep complete. Preserved projections: ${projections.join(', ')}`);
+          JS
