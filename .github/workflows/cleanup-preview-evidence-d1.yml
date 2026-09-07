@@ -1,0 +1,81 @@
+name: Clean closed preview evidence projection
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+concurrency:
+  group: evidence-d1-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    environment: preview
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      EVIDENCE_DB_NAME: ${{ vars.EVIDENCE_DB_NAME }}
+      EVIDENCE_DB_ID: ${{ vars.EVIDENCE_DB_ID }}
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Resolve closed preview projection id
+        shell: bash
+        run: |
+          PROJECTION_ID="${PR_HEAD_SHA:0:12}"
+          [[ "$PROJECTION_ID" =~ ^[0-9a-f]{12}$ ]] || { echo "Invalid PR projection id: $PROJECTION_ID"; exit 1; }
+          [[ "$PROJECTION_ID" != "main" ]] || { echo "Refusing to delete main projection"; exit 1; }
+          echo "PROJECTION_ID=$PROJECTION_ID" >> "$GITHUB_ENV"
+          echo "Closed preview projection: $PROJECTION_ID"
+
+      - name: Require preview D1 configuration
+        shell: bash
+        run: |
+          test -n "$EVIDENCE_DB_NAME" || { echo "Missing preview environment variable EVIDENCE_DB_NAME"; exit 1; }
+          test -n "$EVIDENCE_DB_ID" || { echo "Missing preview environment variable EVIDENCE_DB_ID"; exit 1; }
+
+      - name: Build ephemeral Wrangler D1 configuration
+        shell: bash
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const config = {
+            name: 'agentic-engineering-evidence-cleanup',
+            compatibility_date: '2026-09-05',
+            d1_databases: [{
+              binding: 'EVIDENCE_DB',
+              database_name: process.env.EVIDENCE_DB_NAME,
+              database_id: process.env.EVIDENCE_DB_ID,
+            }],
+          };
+          fs.writeFileSync('wrangler-d1.json', JSON.stringify(config));
+          JS
+
+      - name: Delete closed contribution projection
+        shell: bash
+        run: |
+          [[ "$PROJECTION_ID" =~ ^[0-9a-f]{12}$ ]] || { echo "Invalid projection id: $PROJECTION_ID"; exit 1; }
+          [[ "$PROJECTION_ID" != "main" ]] || { echo "Refusing to delete main projection"; exit 1; }
+          SQL="DELETE FROM evidence_claims WHERE projection_id = '$PROJECTION_ID'; DELETE FROM evidence_conditions WHERE projection_id = '$PROJECTION_ID'; DELETE FROM evidence_stages WHERE projection_id = '$PROJECTION_ID'; DELETE FROM evidence WHERE projection_id = '$PROJECTION_ID';"
+          npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --command="$SQL"
+
+      - name: Verify projection is absent
+        shell: bash
+        run: |
+          OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT COUNT(*) AS count FROM (SELECT projection_id FROM evidence WHERE projection_id = '$PROJECTION_ID' UNION ALL SELECT projection_id FROM evidence_stages WHERE projection_id = '$PROJECTION_ID' UNION ALL SELECT projection_id FROM evidence_conditions WHERE projection_id = '$PROJECTION_ID' UNION ALL SELECT projection_id FROM evidence_claims WHERE projection_id = '$PROJECTION_ID');")
+          OUTPUT="$OUTPUT" node - <<'JS'
+          const data = JSON.parse(process.env.OUTPUT);
+          const count = data[0].results[0].count;
+          if (count !== 0) {
+            throw new Error(`Projection cleanup incomplete: ${count} rows remain`);
+          }
+          console.log(`Preview projection ${process.env.PROJECTION_ID} removed`);
+          JS
