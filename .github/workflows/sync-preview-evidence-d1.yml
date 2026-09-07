@@ -72,6 +72,9 @@ jobs:
         run: pip install -r requirements.txt
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
+      # Preview D1 may contain historical PR data from before projection scoping.
+      # Rebuild `main` from GitHub main on every preview sync so the default view
+      # always means canonical merged evidence rather than legacy preview state.
       - name: Materialize canonical main source
         shell: bash
         run: |
