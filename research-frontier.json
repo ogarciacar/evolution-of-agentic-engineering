@@ -19,7 +19,7 @@
       "stage": "Selection",
       "claim": "Engineering environments select among viable variants",
       "evaluation_state": "EMERGING",
-      "mapped_evidence_count": 14,
+      "mapped_evidence_count": 15,
       "research_question": "Which engineering-environment conditions materially determine which viable agent variants remain reliable and economical as scale and autonomy increase?",
       "evidence_needed": [
         "Comparative outcomes across materially different agent configurations",
