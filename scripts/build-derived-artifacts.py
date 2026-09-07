@@ -11,7 +11,6 @@ GENERATORS = (
     "scripts/build-research-frontier.py",
     "scripts/build-evidence.py",
     "scripts/build-model-evaluation.py",
-    "scripts/build-homepage-evidence.py",
     "scripts/build-research-synthesis.py",
 )
 

@@ -4,10 +4,10 @@
 # Maintainer surface — evidence architecture and publication machinery.
 /schema/ @ogarciacar
 /scripts/build-evidence.py @ogarciacar
-/scripts/build-homepage-evidence.py @ogarciacar
 /scripts/validate-evidence.py @ogarciacar
 /scripts/check-publication-safety.py @ogarciacar
 /templates/evidence.html @ogarciacar
+/functions/ @ogarciacar
 /.github/workflows/evidence.yml @ogarciacar
 
 # Generated surface — never authored directly.
