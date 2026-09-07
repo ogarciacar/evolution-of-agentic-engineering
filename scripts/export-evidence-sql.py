@@ -23,19 +23,12 @@ def sql(value: object) -> str:
     return "'" + str(value).replace("'", "''") + "'"
 
 
-def load_legacy_mappings(source_root: Path) -> dict[str, list[dict[str, str]]]:
-    path = source_root / "model" / "evidence-claims.yaml"
-    document = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return document["mappings"]
-
-
 def export(projection_id: str = "main", source_root: Path = ROOT) -> str:
     if not PROJECTION_PATTERN.fullmatch(projection_id):
         raise ValueError("projection_id must be 'main' or a 12-character lowercase hexadecimal commit SHA")
 
     source_root = source_root.resolve()
     evidence_dir = source_root / "evidence"
-    legacy_mappings = load_legacy_mappings(source_root)
     projection = sql(projection_id)
     lines = [
         "PRAGMA defer_foreign_keys = true;",
@@ -81,7 +74,7 @@ def export(projection_id: str = "main", source_root: Path = ROOT) -> str:
                 "INSERT INTO evidence_conditions (projection_id, evidence_id, condition) VALUES "
                 f"({projection}, {sql(evidence_id)}, {sql(condition)});"
             )
-        for item in sorted(relationships_for(path, legacy_mappings), key=lambda item: item["id"]):
+        for item in sorted(relationships_for(path), key=lambda item: item["id"]):
             lines.append(
                 "INSERT INTO evidence_claims (projection_id, evidence_id, claim_id, relationship) VALUES "
                 f"({projection}, {sql(evidence_id)}, {sql(item['id'])}, {sql(item['relationship'])});"
@@ -95,7 +88,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=ROOT / ".artifacts" / "evidence-sync.sql")
     parser.add_argument("--projection", default="main")
-    parser.add_argument("--source-root", type=Path, default=ROOT, help="Repository-shaped source root containing evidence/ and model/evidence-claims.yaml")
+    parser.add_argument("--source-root", type=Path, default=ROOT, help="Repository-shaped source root containing evidence/")
     args = parser.parse_args()
     output = args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
