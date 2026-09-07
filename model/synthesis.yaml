@@ -16,6 +16,7 @@ findings:
       - 2026-04-22-spotify-honk-part-4
       - 2026-08-27-uber-efficient-software-factory
       - 2026-09-03-cursor-pstack
+      - 2026-09-06-openai-research-acceleration
     uncertainty: >
       The corpus does not yet isolate the causal contribution of individual environmental
       conditions or establish which conditions dominate across different agent architectures.
