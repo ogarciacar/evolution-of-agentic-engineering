@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   evidence:
@@ -50,18 +50,6 @@ jobs:
         run: python scripts/check-evidence-sync.py
       - name: Generate derived artifacts
         run: python scripts/build-derived-artifacts.py
-      - name: Commit generated artifacts to contribution branch
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          if git diff --quiet -- research-frontier.json evidence.html evaluate.html index.html sitemap.xml synthesis.html signals && test -z "$(git status --porcelain --untracked-files=all -- 'signals/*/index.html')"; then
-            echo "Derived artifacts already current."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research-frontier.json evidence.html evaluate.html index.html sitemap.xml synthesis.html signals
-          git commit -m "Regenerate derived evidence artifacts"
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
       - name: Check research frontier
         run: python scripts/check-research-frontier.py
       - name: Verify generated artifacts are clean
