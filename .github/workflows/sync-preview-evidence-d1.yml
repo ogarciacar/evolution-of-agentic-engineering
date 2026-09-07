@@ -95,12 +95,12 @@ jobs:
           EXPECTED_MAIN=$(find .artifacts/main-source/evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
           EXPECTED_PR=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
           OUTPUT=$(npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --json --config wrangler-d1.json --command="SELECT projection_id, COUNT(*) AS count FROM evidence WHERE projection_id IN ('main', '$PROJECTION_ID') GROUP BY projection_id ORDER BY projection_id;")
-          python - "$EXPECTED_MAIN" "$EXPECTED_PR" "$PROJECTION_ID" <<'PY' <<< "$OUTPUT"
-          import json, sys
+          OUTPUT="$OUTPUT" python - "$EXPECTED_MAIN" "$EXPECTED_PR" "$PROJECTION_ID" <<'PY'
+          import json, os, sys
           expected_main = int(sys.argv[1])
           expected_pr = int(sys.argv[2])
           projection_id = sys.argv[3]
-          data = json.load(sys.stdin)
+          data = json.loads(os.environ["OUTPUT"])
           counts = {row["projection_id"]: row["count"] for row in data[0]["results"]}
           actual_main = counts.get("main", 0)
           actual_pr = counts.get(projection_id, 0)
@@ -109,5 +109,5 @@ jobs:
           if actual_pr != expected_pr:
               raise SystemExit(f"preview projection {projection_id} count {actual_pr} != contribution count {expected_pr}")
           print(f"Preview D1 main contains {actual_main} canonical records")
-          print(f"Preview D1 projection {projection_id} contains {actual_pr} records from PR #${{ github.event.pull_request.number }}")
+          print(f"Preview D1 projection {projection_id} contains {actual_pr} contribution records")
           PY
