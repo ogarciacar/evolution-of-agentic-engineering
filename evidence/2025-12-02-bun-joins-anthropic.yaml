@@ -54,6 +54,10 @@ mapping:
   stages: [Selection]
   conditions: [Execution, Verification]
 
+claims:
+  - id: C02
+    relationship: REFINES
+
 interpretation: >
   Selection may operate below the coding agent itself, on the runtime and
   tooling substrate that makes agent execution distributable, reliable, and
