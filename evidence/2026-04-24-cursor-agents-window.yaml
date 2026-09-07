@@ -28,6 +28,10 @@ mapping:
     to: Cooperation
   conditions: [Execution, Coordination, Context, Verification]
 
+claims:
+  - id: C03
+    relationship: INCONCLUSIVE
+
 interpretation: >
   The product surface itself is shifting from a single conversational agent toward supervision, isolation, and composition of parallel work.
 
