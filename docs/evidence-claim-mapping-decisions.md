@@ -1,6 +1,6 @@
 # v0.2 evidence → claim mapping decisions
 
-The v0.2 ledger reassesses every incorporated record against the corrected claim semantics. Relationships are not inherited from v0.1 and are not inferred from stage tags.
+The v0.2 evidence records reassess every incorporated source against the corrected claim semantics. Claim relationships are stored directly in each evidence YAML under `claims`. They are not inherited from v0.1 and are not inferred from stage tags.
 
 - **C01 / Apparition** retains direct support from the Anthropic session study because it documents agents performing meaningful multi-action engineering work at large observational scale.
 - **C02 / Selection** maps evidence only where engineering conditions, comparisons, runtime constraints, evaluation criteria, economics, or other environmental properties bear on the relative viability of agentic configurations. Variation is a precondition for Selection, not a separate stage.
@@ -9,4 +9,4 @@ The v0.2 ledger reassesses every incorporated record against the corrected claim
 
 Two evidence records previously tagged with the v0.1 Mutation stage are remapped to Selection. Their observations remain unchanged; only the model-relative interpretation changes. The Teresa Torres record is also reworded where its interpretation previously treated Mutation as a stage.
 
-The v0.1 mapping decisions remain recoverable from repository history. This document describes the active v0.2 interpretation.
+The v0.1 mapping decisions remain recoverable from repository history. This document describes the active v0.2 interpretation; the canonical evidence-to-claim relationships live in `evidence/*.yaml`.
