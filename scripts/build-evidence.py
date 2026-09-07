@@ -1,30 +1,21 @@
 #!/usr/bin/env python3
-"""Build the evidence page and Scale Signal pages from canonical YAML."""
+"""Build evidence publication artifacts from canonical YAML."""
 from __future__ import annotations
 
-import html
 import re
-import shutil
 from pathlib import Path
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
-SIGNALS_DIR = ROOT / "signals"
 OUTPUT = ROOT / "evidence.html"
 TEMPLATE = ROOT / "templates" / "evidence.html"
-SIGNAL_TEMPLATE = ROOT / "templates" / "scale-signal.html"
 SITEMAP = ROOT / "sitemap.xml"
 SITE_ORIGIN = "https://agenticengineering.science"
-GENERATED_MARKER = "<!-- GENERATED SCALE SIGNAL PAGE -->"
 SITEMAP_START = "<!-- SCALE_SIGNAL_URLS_START -->"
 SITEMAP_END = "<!-- SCALE_SIGNAL_URLS_END -->"
 SIGNAL_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-
-
-def esc(value: object) -> str:
-    return html.escape(str(value), quote=True)
 
 
 def load_records() -> list[dict]:
@@ -39,91 +30,8 @@ def load_records() -> list[dict]:
     return sorted(records, key=lambda r: r["source"]["date"], reverse=True)
 
 
-def transition_label(mapping: dict) -> str | None:
-    transition = mapping.get("transition")
-    if not transition:
-        return None
-    label = f'{transition["from"]} → {transition["to"]}'
-    adjacent = transition.get("adjacent_stage")
-    if adjacent:
-        label += f" / {adjacent}"
-    return label
-
-
 def evidence_id(record: dict) -> str:
     return Path(record["_path"]).stem
-
-
-def rendered_chips(record: dict) -> str:
-    mapping = record["mapping"]
-    chips = []
-    transition = transition_label(mapping)
-    if transition:
-        chips.append(f'<span class="chip transition">{esc(transition)}</span>')
-    else:
-        chips.extend(f'<span class="chip transition">{esc(stage)}</span>' for stage in mapping["stages"])
-    chips.extend(f'<span class="chip">{esc(condition)}</span>' for condition in mapping["conditions"])
-    return "".join(chips)
-
-
-def rendered_observed(record: dict) -> str:
-    return "".join(f'<p>{esc(str(item).strip())}</p>' for item in record["observed"])
-
-
-def render_signal_page(record: dict, template: str) -> str:
-    source = record["source"]
-    implication = record["model_implication"]
-    signal_id = evidence_id(record)
-    headline = record["presentation"]["headline"]
-    from datetime import date
-    published = date.fromisoformat(str(source["date"])).strftime("%B %-d, %Y")
-    canonical_url = f"{SITE_ORIGIN}/signals/{signal_id}/"
-    description = " ".join(str(record["scale"]["summary"]).split())
-    boundaries = "".join(f"<li>{esc(str(item).strip())}</li>" for item in record["what_this_does_not_establish"])
-    replacements = {
-        "{{TITLE}}": esc(f"{headline} · Scale Signal"),
-        "{{HEADLINE}}": esc(headline),
-        "{{DESCRIPTION}}": esc(description),
-        "{{CANONICAL_URL}}": esc(canonical_url),
-        "{{PUBLISHED}}": esc(published),
-        "{{ORGANIZATION}}": esc(source["producer"]),
-        "{{CHIPS}}": rendered_chips(record),
-        "{{SCALE_LABEL}}": esc(record["scale"]["label"]),
-        "{{SCALE_SUMMARY}}": esc(record["scale"]["summary"].strip()),
-        "{{OBSERVED}}": rendered_observed(record),
-        "{{INTERPRETATION}}": esc(record["interpretation"].strip()),
-        "{{VERDICT}}": esc(implication["verdict"]),
-        "{{IMPLICATION}}": esc(implication["explanation"].strip()),
-        "{{BOUNDARIES}}": boundaries,
-        "{{OPEN_QUESTION}}": esc(record["open_question"].strip()),
-        "{{SOURCE_TITLE}}": esc(source["title"]),
-        "{{SOURCE_URL}}": esc(source["url"]),
-        "{{SIGNAL_ID}}": esc(signal_id),
-    }
-    page = template
-    for placeholder, value in replacements.items():
-        page = page.replace(placeholder, value)
-    return page
-
-
-def clear_generated_signal_pages() -> None:
-    if not SIGNALS_DIR.exists():
-        return
-    for child in SIGNALS_DIR.iterdir():
-        generated_page = child / "index.html"
-        if child.is_dir() and generated_page.exists():
-            if GENERATED_MARKER in generated_page.read_text(encoding="utf-8"):
-                shutil.rmtree(child)
-
-
-def build_signal_pages(records: list[dict]) -> None:
-    template = SIGNAL_TEMPLATE.read_text(encoding="utf-8")
-    SIGNALS_DIR.mkdir(exist_ok=True)
-    clear_generated_signal_pages()
-    for record in records:
-        output_dir = SIGNALS_DIR / evidence_id(record)
-        output_dir.mkdir()
-        (output_dir / "index.html").write_text(render_signal_page(record, template), encoding="utf-8")
 
 
 def update_sitemap(records: list[dict]) -> None:
@@ -142,9 +50,8 @@ def update_sitemap(records: list[dict]) -> None:
 def main() -> None:
     records = load_records()
     OUTPUT.write_text(TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
-    build_signal_pages(records)
     update_sitemap(records)
-    print(f"Built {OUTPUT.relative_to(ROOT)} and {len(records)} Scale Signal pages")
+    print(f"Built {OUTPUT.relative_to(ROOT)} and sitemap entries for {len(records)} runtime Scale Signal routes")
 
 
 if __name__ == "__main__":
