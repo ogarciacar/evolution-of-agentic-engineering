@@ -46,21 +46,20 @@ The evidence record contains the source-grounded observations, model mapping, ex
 
 A contributor should not edit bookkeeping or derived state to make an evidence PR pass. In particular, an ordinary evidence contribution does not require edits to:
 
-- `model/evidence-claims.yaml`
 - `model/synthesis-state.json`
 - `research-frontier.json`
 - generated evaluation/synthesis HTML
 - `sitemap.xml`
 - runtime publication pages or routes
 
-`model/evidence-claims.yaml` remains a compatibility source for evidence records that have not yet migrated their claim relationships into their own YAML. New evidence must declare `claims` in the evidence record.
+Every evidence record must declare its claim relationships directly in its own `claims` block. There is no separate claim-mapping ledger.
 
 If CI reports `SYNTHESIS_REVIEW_REQUIRED`, that is an editorial boundary rather than contributor bookkeeping. A maintainer reviews the affected canonical synthesis finding. Do not refresh `model/synthesis-state.json` merely to silence the check.
 
 ## Contribution boundaries
 
 - **Contributor surface — `evidence/*.yaml`**: ordinary evidence proposals are authored here.
-- **Maintainer surface**: schema, generators, workflows, protocols, model contracts, research gaps, synthesis findings, migration ledgers, runtime functions, and editorial pages.
+- **Maintainer surface**: schema, generators, workflows, protocols, model contracts, research gaps, synthesis findings, runtime functions, and editorial pages.
 - **CI-derived static/model artifacts**: `research-frontier.json`, `evaluate.html`, `synthesis.html`, and `sitemap.xml`.
 - **Runtime evidence surfaces**: `/api/evidence`, `/signals/<signal-id>/`, and the homepage Evidence Landscape. These read from the D1 projection through the shared runtime evidence read model.
 - **Authored/static publication pages**: `index.html`, `evidence.html`, `apply.html`, and `contribute.html`.
@@ -118,7 +117,7 @@ assessment:
   assisted_by_ai: true
 ```
 
-`mapping.transition` is optional. Each `claims` entry names one active model claim and exactly one relationship: `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`. The `claims` field is required for new evidence contributions. Existing evidence records may still resolve claim relationships through the legacy `model/evidence-claims.yaml` ledger during migration. `model_implication.verdict` remains the primary evidence-level verdict and uses the same four values.
+`mapping.transition` is optional. Each `claims` entry names one active model claim and exactly one relationship: `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`. The `claims` field is required for every evidence record. `model_implication.verdict` remains the primary evidence-level verdict and uses the same four values.
 
 Use only the minimum stage and condition mapping supported by the observation. The active v0.2 stages are **Apparition, Selection, Cooperation, and Specialization**. **Variation/mutation is a mechanism, not a stage**, so describe relevant variation in interpretation rather than adding it to `mapping.stages`. The Selection conditions are Context, Execution, Verification, Coordination, Observability, Economics, and Learning.
 
