@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build evidence publication artifacts from canonical YAML."""
+"""Update evidence-derived sitemap entries from canonical YAML."""
 from __future__ import annotations
 
 import re
@@ -9,8 +9,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCE_DIR = ROOT / "evidence"
-OUTPUT = ROOT / "evidence.html"
-TEMPLATE = ROOT / "templates" / "evidence.html"
 SITEMAP = ROOT / "sitemap.xml"
 SITE_ORIGIN = "https://agenticengineering.science"
 SITEMAP_START = "<!-- SCALE_SIGNAL_URLS_START -->"
@@ -49,9 +47,8 @@ def update_sitemap(records: list[dict]) -> None:
 
 def main() -> None:
     records = load_records()
-    OUTPUT.write_text(TEMPLATE.read_text(encoding="utf-8"), encoding="utf-8")
     update_sitemap(records)
-    print(f"Built {OUTPUT.relative_to(ROOT)} and sitemap entries for {len(records)} runtime Scale Signal routes")
+    print(f"Updated sitemap entries for {len(records)} runtime Scale Signal routes")
 
 
 if __name__ == "__main__":
