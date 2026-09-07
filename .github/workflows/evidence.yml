@@ -16,6 +16,7 @@ jobs:
         with:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
+          fetch-depth: 0
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
@@ -30,6 +31,9 @@ jobs:
         run: python scripts/validate-synthesis.py
       - name: Validate evidence records
         run: python scripts/validate-evidence.py
+      - name: Check atomic evidence contribution contract
+        if: github.event_name == 'pull_request'
+        run: python scripts/check-atomic-evidence-contribution.py
       - name: Validate evidence claim mappings
         run: python scripts/validate-evidence-claims.py
       - name: Check model claim evaluation

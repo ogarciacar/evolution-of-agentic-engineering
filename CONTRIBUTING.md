@@ -44,13 +44,30 @@ Useful contributions contain observations about software engineering involving A
 
 A source is especially useful when it reduces uncertainty around an active research gap: for example, by supplying a comparison the model currently lacks, establishing a boundary, or showing that a proposed mechanism does not hold. Research-gap relevance should be stated in the assessment, but it does not change the evidence record's source-grounding requirements.
 
+## Atomic contribution contract
+
+For an ordinary evidence contribution, **one new or updated `evidence/*.yaml` file is the complete authored change**.
+
+The evidence record contains the source-grounded observations, model mapping, explicit claim relationships, interpretation, verdict, epistemic boundaries, and open question. CI validates that canonical input and derives the projections used by evaluation, synthesis checks, D1 synchronization, and publication.
+
+A contributor should not edit bookkeeping or generated state to make an evidence PR pass. In particular, an ordinary evidence contribution does not require edits to:
+
+- `model/evidence-claims.yaml`
+- `model/synthesis-state.json`
+- `research-frontier.json`
+- generated HTML or `signals/`
+
+`model/evidence-claims.yaml` remains a compatibility source for evidence records that have not yet migrated their claim relationships into their own YAML. New evidence must declare `claims` in the evidence record.
+
+If CI reports `SYNTHESIS_REVIEW_REQUIRED`, that is an editorial boundary rather than contributor bookkeeping. A maintainer reviews the affected canonical synthesis finding. Do not refresh `model/synthesis-state.json` merely to silence the check.
+
 ## Contribution boundaries
 
-- **Contributor surface — `evidence/*.yaml`**: evidence proposals are authored here.
-- **Maintainer surface**: schema, generators, templates, workflows, protocols, model contracts and editorial pages.
-- **Generated surfaces**: `research-frontier.json`, `evidence.html`, `evaluate.html`, `signals/<signal-id>/index.html`, the bounded Evidence Landscape in `index.html`, and `sitemap.xml`.
+- **Contributor surface — `evidence/*.yaml`**: ordinary evidence proposals are authored here.
+- **Maintainer surface**: schema, generators, templates, workflows, protocols, model contracts, research gaps, synthesis findings, migration ledgers, and editorial pages.
+- **Generated surfaces**: `research-frontier.json`, `evidence.html`, `evaluate.html`, `synthesis.html`, `signals/<signal-id>/index.html`, the bounded Evidence Landscape in `index.html`, and `sitemap.xml`.
 
-Contributors author YAML evidence records, not generated pages.
+Contributors author canonical evidence records, not derived model bookkeeping or generated pages.
 
 ## Contribution format
 
@@ -103,7 +120,7 @@ assessment:
   assisted_by_ai: true
 ```
 
-`mapping.transition` is optional. Each `claims` entry names one active model claim and exactly one relationship: `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`. Existing evidence records may still resolve claim relationships through the legacy `model/evidence-claims.yaml` ledger during migration, but new contributions should put those relationships directly in the evidence YAML. `model_implication.verdict` remains the primary evidence-level verdict and uses the same four values.
+`mapping.transition` is optional. Each `claims` entry names one active model claim and exactly one relationship: `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`. The `claims` field is required for new evidence contributions. Existing evidence records may still resolve claim relationships through the legacy `model/evidence-claims.yaml` ledger during migration. `model_implication.verdict` remains the primary evidence-level verdict and uses the same four values.
 
 Use only the minimum stage and condition mapping supported by the observation. The active v0.2 stages are **Apparition, Selection, Cooperation, and Specialization**. **Variation/mutation is a mechanism, not a stage**, so describe relevant variation in interpretation rather than adding it to `mapping.stages`. The Selection conditions are Context, Execution, Verification, Coordination, Observability, Economics, and Learning.
 
@@ -115,19 +132,46 @@ An evidence YAML is a living assessment of a fixed public source. Source-grounde
 
 The canonical research gaps live separately in `model/research-gaps.yaml`. Do not copy a research-gap question into an evidence record as though the source established it. Instead, assess what the source actually establishes, record its explicit claim relationships in the evidence YAML, and use research-gap evaluation to determine how that evidence changes the model's frontier.
 
+## What CI owns
+
+For an evidence PR, CI is responsible for checking and deriving the rest of the pipeline:
+
+```text
+evidence/*.yaml
+      │
+      ▼
+public-source + schema validation
+      │
+      ▼
+claim relationships + model evaluation
+      │
+      ▼
+semantic synthesis-drift check
+      │
+      ▼
+projections + D1 synchronization export
+      │
+      ▼
+research frontier + publication artifacts
+```
+
+Pull-request validation does not mutate the contribution branch. Generated pages are uploaded as workflow artifacts for inspection. After canonical changes reach `main`, the workflow regenerates and commits the known generated paths there.
+
+The expected outcome for an ordinary compatible evidence contribution is therefore: **one evidence YAML in, green validation and derived outputs out**.
+
 ## Derived artifacts
 
-Contributors commit canonical research changes only. Evidence integrity CI validates the canonical inputs, generates derived projections in the workflow runner, verifies the research frontier, and uploads generated evidence pages for inspection. Pull-request validation does not commit or push generated artifacts back to the contribution branch.
-
-Generated artifacts must not be hand-edited. After canonical changes reach `main`, the workflow regenerates and commits the known generated paths there: `research-frontier.json`, `evidence.html`, `evaluate.html`, `index.html`, `sitemap.xml`, `synthesis.html`, and `signals/`.
+Generated artifacts must not be hand-edited. The known generated paths are `research-frontier.json`, `evidence.html`, `evaluate.html`, `index.html`, `sitemap.xml`, `synthesis.html`, and `signals/`.
 
 For local inspection, maintainers may run `python scripts/build-derived-artifacts.py`, but contributors do not need to commit its output before opening a pull request.
 
 ## Review standard
 
-Review asks whether every claim is publicly derivable, the observation is source-grounded, interpretation is separated, the mapping is minimal, scale is not inferred, and the verdict is justified. Contradictory evidence is as welcome as supporting evidence.
+Review asks whether every claim is publicly derivable, the observation is source-grounded, interpretation is separated, the mapping is minimal, scale is not inferred, claim relationships are justified, and the primary verdict is justified. Contradictory evidence is as welcome as supporting evidence.
 
 For research-directed contributions, review also asks whether the stated frontier relevance is real: does the source provide evidence the frontier calls for, narrow the question, expose a boundary, or challenge the premise? Topic similarity alone is not sufficient. The assessment should state what remains unresolved so that a relevant source is not mistaken for a resolved research gap.
+
+A synthesis review is maintainer work. When CI identifies semantic synthesis drift, review the affected finding against the new evidence and update the canonical synthesis only when the finding itself needs to change. Deterministic state should follow that editorial decision rather than substitute for it.
 
 ## Publication
 
