@@ -1,18 +1,18 @@
 {
-  "version": 1,
+  "version": 2,
   "model_version": 2,
   "findings": [
     {
       "id": "F01",
-      "fingerprint": "a4458b337fea025bbdd86a2b5195683a956cbf9ec76805fa0a7382c51d6c6e32"
+      "fingerprint": "d3cbd807b39d7d1c7c73cd131ee09e3b3b724babfb1cbf3a884960b78209b6d0"
     },
     {
       "id": "F02",
-      "fingerprint": "15ebc9ffddaf5c283af4be8b9f861d7ee8d37ae211a2786cd8ef9d4d1e022a03"
+      "fingerprint": "ed560767a58dcc8a618deafa88baf29292bdf8b8d94c27cbef2b2e000df59a12"
     },
     {
       "id": "F03",
-      "fingerprint": "ecb680b37b5a442af5e23465060702b136449f703bc6b0153e4cf5b765accd99"
+      "fingerprint": "c1a3d0f85abecdf4863042d1863bfba6b5e04affa5ae254eca036e45e928a358"
     }
   ]
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build deterministic dependency fingerprints for canonical synthesis findings."""
+"""Build deterministic semantic dependency fingerprints for canonical synthesis findings."""
 from __future__ import annotations
 
 import hashlib
@@ -38,28 +38,29 @@ def build_state() -> dict:
     findings = []
     for finding in synthesis["findings"]:
         claim_ids = sorted(finding["claims"])
-        relevant_mappings = {}
-        for evidence_id, relationships in sorted(mappings.items()):
+        cited_evidence_ids = sorted(finding["evidence"])
+        cited_mappings = {}
+        for evidence_id in cited_evidence_ids:
             selected = sorted(
-                (item for item in relationships if item["id"] in claim_ids),
+                (item for item in mappings.get(evidence_id, []) if item["id"] in claim_ids),
                 key=lambda item: (item["id"], item["relationship"]),
             )
-            if selected:
-                relevant_mappings[evidence_id] = selected
+            cited_mappings[evidence_id] = selected
+
         dependency = {
             "claims": {
                 claim_id: {
+                    "stage": evaluated[claim_id]["stage"],
+                    "title": evaluated[claim_id]["title"],
                     "status": evaluated[claim_id]["status"],
-                    "evidence_count": evaluated[claim_id]["evidence_count"],
-                    "relationship_counts": evaluated[claim_id]["relationship_counts"],
                 }
                 for claim_id in claim_ids
             },
-            "mappings": relevant_mappings,
+            "cited_mappings": cited_mappings,
         }
         findings.append({"id": finding["id"], "fingerprint": fingerprint(dependency)})
 
-    return {"version": 1, "model_version": synthesis["model_version"], "findings": findings}
+    return {"version": 2, "model_version": synthesis["model_version"], "findings": findings}
 
 
 if __name__ == "__main__":

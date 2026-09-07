@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail when reviewed synthesis no longer matches its claim/mapping dependency state."""
+"""Fail when reviewed synthesis no longer matches its semantic dependency state."""
 from __future__ import annotations
 
 import importlib.util
@@ -34,17 +34,17 @@ def main() -> None:
     if stale:
         for finding_id in stale:
             print(
-                f"SYNTHESIS_REVIEW_REQUIRED {finding_id}: claim evaluation or evidence mappings changed since this finding was last reviewed.",
+                f"SYNTHESIS_REVIEW_REQUIRED {finding_id}: a claim state, claim definition, or explicitly cited evidence mapping changed since this finding was last reviewed.",
                 file=sys.stderr,
             )
         print(
-            "Review affected findings in model/synthesis.yaml, then refresh model/synthesis-state.json with: "
+            "Review affected findings in model/synthesis.yaml. If their meaning remains valid, refresh the reviewed semantic baseline with: "
             "python scripts/synthesis-state.py > model/synthesis-state.json",
             file=sys.stderr,
         )
         raise SystemExit(1)
 
-    print(f"Synthesis current: {len(current_by_id)} findings match reviewed dependency state")
+    print(f"Synthesis current: {len(current_by_id)} findings match reviewed semantic dependency state")
 
 
 if __name__ == "__main__":
