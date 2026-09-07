@@ -54,7 +54,7 @@ Contributors author YAML evidence records, not generated pages.
 
 ## Contribution format
 
-Create one YAML file under `evidence/` using `evidence/YYYY-MM-DD-<producer-slug>-<source-slug>.yaml`. The YAML record is canonical for evidence-specific content.
+Create one YAML file under `evidence/` using `evidence/YYYY-MM-DD-<producer-slug>-<source-slug>.yaml`. The YAML record is canonical for evidence-specific content, including its explicit relationships to model claims.
 
 ```yaml
 source:
@@ -84,6 +84,10 @@ mapping:
     to: Cooperation
   conditions: []
 
+claims:
+  - id: C02
+    relationship: REFINES
+
 interpretation: >
 
 model_implication:
@@ -99,23 +103,23 @@ assessment:
   assisted_by_ai: true
 ```
 
-`mapping.transition` is optional. `model_implication.verdict` is exactly one of `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`.
+`mapping.transition` is optional. Each `claims` entry names one active model claim and exactly one relationship: `SUPPORTS`, `REFINES`, `CONTRADICTS`, or `INCONCLUSIVE`. Existing evidence records may still resolve claim relationships through the legacy `model/evidence-claims.yaml` ledger during migration, but new contributions should put those relationships directly in the evidence YAML. `model_implication.verdict` remains the primary evidence-level verdict and uses the same four values.
 
 Use only the minimum stage and condition mapping supported by the observation. The active v0.2 stages are **Apparition, Selection, Cooperation, and Specialization**. **Variation/mutation is a mechanism, not a stage**, so describe relevant variation in interpretation rather than adding it to `mapping.stages`. The Selection conditions are Context, Execution, Verification, Coordination, Observability, Economics, and Learning.
 
 ## Research semantics
 
-Keep source-grounded observation separate from model-relative interpretation. Source records provenance; Observed contains only source-supported statements; Scale records documented scale or a boundary; Mapping classifies against the active model; Interpretation explains the observation through the model; Model implication gives the primary verdict; limitations state what is not established; Open question identifies the next useful observation.
+Keep source-grounded observation separate from model-relative interpretation. Source records provenance; Observed contains only source-supported statements; Scale records documented scale or a boundary; Mapping classifies against the active model; Claims records explicit relationships to active model claims; Interpretation explains the observation through the model; Model implication gives the primary verdict; limitations state what is not established; Open question identifies the next useful observation.
 
-An evidence YAML is a living assessment of a fixed public source. Source-grounded observations change only to correct or improve extraction. Mapping, interpretation, model implication, boundaries and open questions may evolve as the model evolves; Git history preserves earlier assessments.
+An evidence YAML is a living assessment of a fixed public source. Source-grounded observations change only to correct or improve extraction. Mapping, claim relationships, interpretation, model implication, boundaries and open questions may evolve as the model evolves; Git history preserves earlier assessments.
 
-The canonical research gaps live separately in `model/research-gaps.yaml`. Do not copy a research-gap question into an evidence record as though the source established it. Instead, assess what the source actually establishes, then use the claim relationship ledger and research-gap evaluation to determine how that evidence changes the model's frontier.
+The canonical research gaps live separately in `model/research-gaps.yaml`. Do not copy a research-gap question into an evidence record as though the source established it. Instead, assess what the source actually establishes, record its explicit claim relationships in the evidence YAML, and use research-gap evaluation to determine how that evidence changes the model's frontier.
 
 ## Derived artifacts
 
-Contributors commit canonical research changes only. After validation, Evidence integrity CI runs `python scripts/build-derived-artifacts.py` and commits any changed generated projections back to same-repository contribution branches.
+Contributors commit canonical research changes only. Evidence integrity CI validates the canonical inputs, generates derived projections in the workflow runner, verifies the research frontier, and uploads generated evidence pages for inspection. Pull-request validation does not commit or push generated artifacts back to the contribution branch.
 
-Generated artifacts must not be hand-edited. The workflow stages only the known generated paths: `research-frontier.json`, `evidence.html`, `evaluate.html`, `index.html`, `sitemap.xml`, and `signals/`. The push triggers a second CI run; that run must generate no diff, which verifies that the committed projection is deterministic and current.
+Generated artifacts must not be hand-edited. After canonical changes reach `main`, the workflow regenerates and commits the known generated paths there: `research-frontier.json`, `evidence.html`, `evaluate.html`, `index.html`, `sitemap.xml`, `synthesis.html`, and `signals/`.
 
 For local inspection, maintainers may run `python scripts/build-derived-artifacts.py`, but contributors do not need to commit its output before opening a pull request.
 
