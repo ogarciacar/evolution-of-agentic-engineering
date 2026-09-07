@@ -6,15 +6,12 @@
 /scripts/build-evidence.py @ogarciacar
 /scripts/validate-evidence.py @ogarciacar
 /scripts/check-publication-safety.py @ogarciacar
-/templates/evidence.html @ogarciacar
 /functions/ @ogarciacar
 /.github/workflows/evidence.yml @ogarciacar
 
-# Generated surface — never authored directly.
-/evidence.html @ogarciacar
-
 # Editorial and protocol surfaces.
 /index.html @ogarciacar
+/evidence.html @ogarciacar
 /apply.html @ogarciacar
 /contribute.html @ogarciacar
 /CONTRIBUTING.md @ogarciacar
