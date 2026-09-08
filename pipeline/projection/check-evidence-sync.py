@@ -8,9 +8,9 @@ import sys
 import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-INDEXER = ROOT / "pipeline" / "index-evidence.py"
-EXPORTER = ROOT / "pipeline" / "export-evidence-sql.py"
+ROOT = Path(__file__).resolve().parents[2]
+INDEXER = ROOT / "pipeline" / "projection" / "index-evidence.py"
+EXPORTER = ROOT / "pipeline" / "projection" / "export-evidence-sql.py"
 MIGRATIONS = ROOT / "migrations"
 TABLES = ("evidence", "evidence_stages", "evidence_conditions", "evidence_claims")
 SECOND_PROJECTION = "deadbeefcafe"

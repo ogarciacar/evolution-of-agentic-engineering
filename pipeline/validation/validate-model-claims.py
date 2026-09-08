@@ -6,7 +6,7 @@ from pathlib import Path
 import yaml
 from jsonschema import Draft202012Validator
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 CLAIMS_PATH = ROOT / "model" / "claims.yaml"
 SCHEMA_PATH = ROOT / "schema" / "model-claims.schema.json"
 EXPECTED_STAGES = ["Apparition", "Selection", "Cooperation", "Specialization"]

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 RESEARCH_GAPS = ROOT / "model" / "research-gaps.yaml"
 EVALUATOR = ROOT / "pipeline" / "evaluate-model-claims.py"
 DEFAULT_OUTPUT = ROOT / "research-frontier.json"

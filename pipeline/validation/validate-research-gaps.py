@@ -6,7 +6,7 @@ import sys
 import yaml
 from jsonschema import Draft202012Validator
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 GAPS_PATH = ROOT / "model" / "research-gaps.yaml"
 CLAIMS_PATH = ROOT / "model" / "claims.yaml"
 SCHEMA_PATH = ROOT / "schema" / "research-gaps.schema.json"

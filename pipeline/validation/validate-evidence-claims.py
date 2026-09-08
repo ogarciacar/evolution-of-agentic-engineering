@@ -5,9 +5,11 @@ import sys
 
 import yaml
 
+PIPELINE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PIPELINE))
 from evidence_claims import relationships_for
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_DIR = ROOT / "evidence"
 CLAIMS_PATH = ROOT / "model" / "claims.yaml"
 RELATIONSHIPS = {"SUPPORTS", "REFINES", "CONTRADICTS", "INCONCLUSIVE"}

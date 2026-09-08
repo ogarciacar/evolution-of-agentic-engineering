@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { shapeEvidence } from "../functions/_lib/evidence-read-model.js";
-import { PROJECTION_HEADER, PROJECTION_QUERY, projectionFromRequest } from "../functions/_lib/evidence-projection.js";
+import { shapeEvidence } from "../../functions/_lib/evidence-read-model.js";
+import { PROJECTION_HEADER, PROJECTION_QUERY, projectionFromRequest } from "../../functions/_lib/evidence-projection.js";
 
 const row = {
   evidence_id: "2026-07-20-example",

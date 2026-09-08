@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_DIR = ROOT / "evidence"
 SCHEMA = ROOT / "schema" / "evidence.schema.json"
 

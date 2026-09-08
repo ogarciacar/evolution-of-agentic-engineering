@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "evaluate.html"
 TEMPLATE = ROOT / "pipeline" / "templates" / "evaluate.html"
 EVALUATOR = ROOT / "pipeline" / "evaluate-model-claims.py"

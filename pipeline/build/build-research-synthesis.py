@@ -4,7 +4,7 @@ from pathlib import Path
 import html
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "model" / "synthesis.yaml"
 GAPS = ROOT / "model" / "research-gaps.yaml"
 OUTPUT = ROOT / "synthesis.html"

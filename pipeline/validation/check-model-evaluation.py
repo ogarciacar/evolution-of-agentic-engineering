@@ -6,7 +6,7 @@ import importlib.util
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = ROOT / "pipeline" / "evaluate-model-claims.py"
 spec = importlib.util.spec_from_file_location("evaluate_model_claims", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)

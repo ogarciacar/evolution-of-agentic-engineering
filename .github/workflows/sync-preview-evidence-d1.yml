@@ -8,7 +8,8 @@ on:
       - "evidence/**"
       - "schema/**"
       - "migrations/**"
-      - "pipeline/export-evidence-sql.py"
+      - "pipeline/projection/export-evidence-sql.py"
+      - "pipeline/validation/validate-evidence.py"
       - ".github/workflows/sync-preview-evidence-d1.yml"
 
 concurrency:
@@ -71,7 +72,7 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r pipeline/requirements.txt
       - name: Validate evidence records
-        run: python pipeline/validate-evidence.py
+        run: python pipeline/validation/validate-evidence.py
       # Rebuild `main` from GitHub main on every preview sync so the default
       # preview view cannot inherit data from another contribution.
       - name: Materialize canonical main source
@@ -82,9 +83,9 @@ jobs:
           mkdir -p .artifacts/main-source
           git archive origin/main evidence | tar -x -C .artifacts/main-source
       - name: Export canonical main projection SQL
-        run: python pipeline/export-evidence-sql.py --projection main --source-root .artifacts/main-source --output .artifacts/main-evidence-sync.sql
+        run: python pipeline/projection/export-evidence-sql.py --projection main --source-root .artifacts/main-source --output .artifacts/main-evidence-sync.sql
       - name: Export PR projection SQL
-        run: python pipeline/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
+        run: python pipeline/projection/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
       - name: Apply D1 migrations
         run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config wrangler-d1.json
       - name: Rebuild canonical main projection

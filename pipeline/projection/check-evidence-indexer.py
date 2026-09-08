@@ -9,8 +9,8 @@ import sys
 import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-INDEXER = ROOT / "pipeline" / "index-evidence.py"
+ROOT = Path(__file__).resolve().parents[2]
+INDEXER = ROOT / "pipeline" / "projection" / "index-evidence.py"
 
 
 def rebuild(path: Path) -> None:
