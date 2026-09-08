@@ -35,6 +35,9 @@ def export(projection_id: str = "main", source_root: Path = ROOT) -> str:
     projection = sql(projection_id)
     lines = [
         "PRAGMA defer_foreign_keys = true;",
+        f"DELETE FROM practice_observation_conditions WHERE projection_id = {projection};",
+        f"DELETE FROM practice_observations WHERE projection_id = {projection};",
+        f"DELETE FROM practice_assessments WHERE projection_id = {projection};",
         f"DELETE FROM evidence_claims WHERE projection_id = {projection};",
         f"DELETE FROM evidence_conditions WHERE projection_id = {projection};",
         f"DELETE FROM evidence_stages WHERE projection_id = {projection};",
@@ -82,6 +85,25 @@ def export(projection_id: str = "main", source_root: Path = ROOT) -> str:
                 "INSERT INTO evidence_claims (projection_id, evidence_id, claim_id, relationship) VALUES "
                 f"({projection}, {sql(evidence_id)}, {sql(item['id'])}, {sql(item['relationship'])});"
             )
+
+        assessment = record.get("practice_assessment") or {"status": "pending"}
+        lines.append(
+            "INSERT INTO practice_assessments (projection_id, evidence_id, status) VALUES "
+            f"({projection}, {sql(evidence_id)}, {sql(assessment['status'])});"
+        )
+        for observation in sorted(record.get("practice_observations") or [], key=lambda item: item["id"]):
+            lines.append(
+                "INSERT INTO practice_observations "
+                "(projection_id, evidence_id, observation_id, use_case, problem, reported_practice) VALUES "
+                f"({projection}, {sql(evidence_id)}, {sql(observation['id'])}, {sql(observation['use_case'])}, "
+                f"{sql(observation['problem'])}, {sql(observation['reported_practice'])});"
+            )
+            for condition in sorted(observation["selection_conditions"]):
+                lines.append(
+                    "INSERT INTO practice_observation_conditions "
+                    "(projection_id, evidence_id, observation_id, condition) VALUES "
+                    f"({projection}, {sql(evidence_id)}, {sql(observation['id'])}, {sql(condition)});"
+                )
 
     lines.append("PRAGMA defer_foreign_keys = false;")
     return "\n".join(lines) + "\n"
