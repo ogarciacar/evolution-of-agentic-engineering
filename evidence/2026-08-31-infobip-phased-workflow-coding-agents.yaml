@@ -6,11 +6,9 @@ source:
   url: "https://arxiv.org/abs/2608.30701"
   type: paper
   provenance: primary
-
 presentation:
   headline: "Context becomes an engineered workflow"
   summary: "Infobip's AI research team describes a phased workflow where context is deliberately written, selected, compressed and isolated. Validated artifacts, bounded tasks and reconstructable state let fresh agent sessions continue work while human attention is concentrated upstream."
-
 observed:
   - "Infobip's AI research team reports a four-phase workflow for agent-assisted development: research, planning, task definition, and implementation. Human effort is front-loaded and delegation increases as artifacts mature."
   - "Context management is treated as the central concern. The workflow applies four recurring strategies—write, select, compress, and isolate—to reduce context-related failure modes across phases."
@@ -18,41 +16,42 @@ observed:
   - "Research and planning produce validated artifacts before implementation. Tasks carry goals, dependencies, relevant code paths, acceptance criteria, and validation methods, and are intended to be executable in fresh agent sessions."
   - "The workflow externalizes durable state into artifacts such as Git, task state, and logs so work can be reconstructed across sessions rather than depending on conversational history alone."
   - "The authors identify the absence of established metrics for workflow effectiveness as an open problem; the paper does not provide a controlled comparison showing that the workflow outperforms unstructured delegation."
-
 scale:
   label: "Evidence boundary"
   summary: "Practitioner workflow; comparative effectiveness remains unmeasured."
-
 mapping:
   stages: [Selection]
   conditions: [Context, Execution, Verification, Learning]
-
 claims:
-  - id: C02
-    relationship: REFINES
-
-interpretation: >
-  Selection may favor environments that make context bounded, validated, compressible
-  and reconstructable rather than simply maximizing available context. Durable state
-  is externalized so fresh sessions can reconstruct sufficient state, while human
-  attention is concentrated where upstream errors have the greatest propagation cost.
-
+  - {id: C02, relationship: REFINES}
+interpretation: "Selection may favor environments that make context bounded, validated, compressible and reconstructable rather than simply maximizing available context. Durable state is externalized so fresh sessions can reconstruct sufficient state, while human attention is concentrated where upstream errors have the greatest propagation cost."
 model_implication:
   verdict: "SUPPORTS"
-  explanation: >
-    Context, Execution and Verification appear as engineered environmental conditions.
-    Updating project instructions in response to recurring agent mistakes provides an
-    emerging Learning signal, while the paper explicitly leaves workflow effectiveness
-    as an open measurement problem.
-
+  explanation: "Context, Execution and Verification appear as engineered environmental conditions. Updating project instructions in response to recurring agent mistakes provides an emerging Learning signal, while the paper explicitly leaves workflow effectiveness as an open measurement problem."
 what_this_does_not_establish:
   - "The paper does not establish through comparative measurement that the phased workflow produces better engineering outcomes than unstructured agent delegation."
   - "It does not establish organization-wide adoption across Infobip."
   - "It does not establish large-scale concurrent agent operation or 1,000-agent scale."
   - "It does not demonstrate Cooperation between coding agents or stable Specialization."
   - "It does not establish that the four phases are generally optimal or validate the evolutionary sequence proposed by this model."
-
 open_question: "Does structuring agent work around bounded, validated, and reconstructable context measurably reduce the cost and failure rate of acquiring sufficient context compared with unstructured delegation?"
-
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: phased-context-management
+    use_case: "Carry a coding task from research through planning, task definition, and implementation."
+    problem: "One growing context across the workflow becomes noisy and allows upstream errors to compound into implementation."
+    reported_practice: "Infobip structures work into four phases and repeatedly writes, selects, compresses, and isolates context between phases."
+    selection_conditions: [context]
+  - id: validated-task-artifacts
+    use_case: "Delegate implementation to fresh coding-agent sessions with sufficient task context."
+    problem: "Fresh sessions need goals, dependencies, relevant code paths, success criteria, and validation methods without relying on conversational history."
+    reported_practice: "Research and planning produce validated artifacts, and task definitions carry goals, dependencies, code paths, acceptance criteria, and validation methods."
+    selection_conditions: [context, verification]
+  - id: externalized-durable-state
+    use_case: "Continue or reconstruct engineering work across agent sessions."
+    problem: "Important state disappears when it exists only in conversational history."
+    reported_practice: "The workflow externalizes durable state into Git, task state, logs, and other artifacts."
+    selection_conditions: [context, learning]
 assessment:
   assisted_by_ai: true
