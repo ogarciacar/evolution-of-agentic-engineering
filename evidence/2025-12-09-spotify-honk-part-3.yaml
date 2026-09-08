@@ -6,63 +6,53 @@ source:
   url: "https://engineering.atspotify.com/2025/12/feedback-loops-background-coding-agents-part-3"
   type: engineering-blog
   provenance: primary
-
 presentation:
   headline: "Spotify measures how verification feedback changes background-agent outcomes"
   summary: "Spotify reports deterministic verifiers and an LLM judge operating across thousands of agent sessions, with judge vetoes triggering course correction and constrained execution improving predictability."
-
 observed:
   - "Spotify runs independent verifiers selected from repository contents and requires relevant verification before the background agent can open a pull request."
   - "Spotify adds an LLM judge after deterministic verification to evaluate the proposed diff against the original prompt."
   - "Across thousands of agent sessions, Spotify reports that the judge vetoes about one quarter of sessions and that the agent course-corrects about half of vetoed cases."
   - "Spotify reports that agents often produce non-working code without these feedback loops and that verifiers plus the judge enable increasingly complex tasks with a high degree of reliability."
   - "Spotify intentionally reduces agent flexibility through limited permissions, few binaries, sandboxing, and surrounding infrastructure because it finds the constrained design more predictable."
-
 scale:
   label: "Scale signal"
-  summary: >
-    Verification behavior is reported across thousands of agent sessions and software-component
-    changes at fleet scale; the LLM judge vetoes about one quarter of sessions and the agent
-    course-corrects about half of those vetoes.
-
+  summary: "Verification behavior is reported across thousands of agent sessions and software-component changes at fleet scale; the LLM judge vetoes about one quarter of sessions and the agent course-corrects about half of those vetoes."
 mapping:
   stages: [Selection, Cooperation]
-  transition:
-    from: Selection
-    to: Cooperation
+  transition: {from: Selection, to: Cooperation}
   conditions: [Execution, Verification, Observability]
-
 claims:
-  - id: C02
-    relationship: SUPPORTS
-  - id: C03
-    relationship: SUPPORTS
-
-interpretation: >
-  This is unusually direct evidence for the model's Selection claim because Spotify connects
-  engineered Verification and Execution conditions to observed changes in agent behavior at scale.
-  It also advances Cooperation: the coding agent and independent verification system form a feedback
-  loop in which verifier or judge feedback can cause the agent to correct its work, and Spotify
-  reports poorer outcomes without those loops. The source does not provide a controlled isolated-agent
-  baseline or quantify the full coordination cost of the cooperating system.
-
+  - {id: C02, relationship: SUPPORTS}
+  - {id: C03, relationship: SUPPORTS}
+interpretation: "This is unusually direct evidence for the model's Selection claim because Spotify connects engineered Verification and Execution conditions to observed changes in agent behavior at scale. It also advances Cooperation: the coding agent and independent verification system form a feedback loop in which verifier or judge feedback can cause the agent to correct its work, and Spotify reports poorer outcomes without those loops. The source does not provide a controlled isolated-agent baseline or quantify the full coordination cost of the cooperating system."
 model_implication:
   verdict: "SUPPORTS"
-  explanation: >
-    The source supports Selection through measured feedback from engineered verification conditions.
-    It also supports Cooperation more strongly than architectural descriptions alone: cooperating
-    verifier and judge components influence the coding agent's subsequent behavior, with reported
-    course correction and an explicit observation that agents often produce non-working code without
-    the feedback loops.
-
+  explanation: "The source supports Selection through measured feedback from engineered verification conditions. It also supports Cooperation more strongly than architectural descriptions alone: cooperating verifier and judge components influence the coding agent's subsequent behavior, with reported course correction and an explicit observation that agents often produce non-working code without the feedback loops."
 what_this_does_not_establish:
   - "It does not provide a randomized or controlled comparison between identical tasks with and without the feedback-loop system."
   - "It does not quantify coordination cost alongside the reliability benefit."
   - "It does not establish whether the cooperation advantage persists unchanged across different agent architectures or model providers."
   - "It does not establish persistent differentiated cooperation forming a higher-order engineering object."
   - "Spotify's first-party metrics are not independent validation of the model."
-
 open_question: "How much engineering fitness do verification feedback loops add relative to isolated agent operation after accounting for their coordination and execution cost?"
-
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: repository-selected-verifiers
+    use_case: "Determine whether an autonomously generated change is ready to become a pull request."
+    problem: "Agent completion does not establish that the generated code works or satisfies the task."
+    reported_practice: "Spotify selects independent deterministic verifiers from repository contents and requires relevant verification before a pull request can be opened, then applies an LLM judge to the diff."
+    selection_conditions: [verification]
+  - id: verifier-feedback-course-correction
+    use_case: "Automatically repair an agent-generated change that fails quality evaluation."
+    problem: "A verifier or judge veto would otherwise leave failed work for a human to recover."
+    reported_practice: "Judge vetoes are fed back into the coding-agent loop, and Spotify reports that the agent course-corrects about half of vetoed cases."
+    selection_conditions: [verification, learning]
+  - id: constrained-execution-environment
+    use_case: "Run background coding agents with predictable behavior."
+    problem: "Greater execution flexibility increases unpredictable behavior."
+    reported_practice: "Spotify constrains permissions, available binaries, and execution through sandboxing and surrounding infrastructure."
+    selection_conditions: [execution]
 assessment:
   assisted_by_ai: true
