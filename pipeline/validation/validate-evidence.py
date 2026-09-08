@@ -14,6 +14,27 @@ EVIDENCE_DIR = ROOT / "evidence"
 SCHEMA = ROOT / "schema" / "evidence.schema.json"
 
 
+def duplicate_practice_observation_ids(record: object) -> list[str]:
+    if not isinstance(record, dict):
+        return []
+    observations = record.get("practice_observations")
+    if not isinstance(observations, list):
+        return []
+
+    seen: set[str] = set()
+    duplicates: list[str] = []
+    for observation in observations:
+        if not isinstance(observation, dict):
+            continue
+        observation_id = observation.get("id")
+        if not isinstance(observation_id, str):
+            continue
+        if observation_id in seen and observation_id not in duplicates:
+            duplicates.append(observation_id)
+        seen.add(observation_id)
+    return duplicates
+
+
 def main() -> int:
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
@@ -35,6 +56,13 @@ def main() -> int:
             failures += 1
             location = ".".join(str(part) for part in error.absolute_path) or "<root>"
             print(f"{path.relative_to(ROOT)}:{location}: {error.message}", file=sys.stderr)
+
+        for observation_id in duplicate_practice_observation_ids(record):
+            failures += 1
+            print(
+                f"{path.relative_to(ROOT)}:practice_observations: duplicate observation id {observation_id!r}",
+                file=sys.stderr,
+            )
 
     if failures:
         print(f"Evidence validation failed with {failures} error(s)", file=sys.stderr)
