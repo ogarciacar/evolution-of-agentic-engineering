@@ -20,6 +20,33 @@ The site combines authored model pages with runtime evidence views backed by the
 
 The evidence record separates **Observed**, **Interpretation**, and **Model implication** so that published facts remain distinct from conclusions drawn through the model.
 
+## Repository architecture
+
+The repository is organized around the research and publication flow:
+
+```text
+evidence/ + model/ + schema/
+          │
+          ▼
+pipeline/
+          │
+          ├── validation
+          ├── derived-artifact generation
+          └── deterministic D1 projection
+                  │
+                  ▼
+functions/ + root publication files
+```
+
+- `evidence/`, `model/`, and `schema/` hold canonical research state and contracts.
+- `pipeline/` contains repository infrastructure for validation, evaluation, publication generation, and D1 projection; it is not a user-facing Python application or CLI.
+- `migrations/` records D1 projection schema evolution.
+- `functions/` contains the Cloudflare runtime read model and dynamic publication routes.
+- root HTML, CSS, JavaScript, and generated artifacts form the deployed Cloudflare Pages publication surface.
+- `.github/workflows/` orchestrates the pipeline and D1 lifecycle.
+
+See [`pipeline/README.md`](pipeline/README.md) and [`docs/README.md`](docs/README.md) for the maintained architecture documentation.
+
 ## Contributing evidence
 
 The evidence base is open to proposals from other engineers and their AI agents.
