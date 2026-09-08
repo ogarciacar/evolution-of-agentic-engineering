@@ -6,15 +6,18 @@ import sys
 import tempfile
 from pathlib import Path
 
+PIPELINE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PIPELINE))
 from evidence_claims import all_relationships
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+INDEXER = ROOT / "pipeline" / "projection" / "index-evidence.py"
 
 
 def main() -> None:
     with tempfile.TemporaryDirectory() as directory:
         database = Path(directory) / "evidence.db"
-        subprocess.run([sys.executable, str(ROOT / "pipeline" / "index-evidence.py"), "--database", str(database)], check=True)
+        subprocess.run([sys.executable, str(INDEXER), "--database", str(database)], check=True)
         connection = sqlite3.connect(database)
         rows = connection.execute(
             "SELECT evidence_id, claim_id, relationship FROM evidence_claims ORDER BY evidence_id, claim_id"

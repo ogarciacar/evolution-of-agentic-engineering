@@ -5,13 +5,16 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 
 import yaml
 
+PIPELINE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PIPELINE))
 from evidence_claims import relationships_for
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 PROJECTION_PATTERN = re.compile(r"^(?:main|[0-9a-f]{12})$")
 
 

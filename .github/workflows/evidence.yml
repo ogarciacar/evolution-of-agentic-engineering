@@ -27,36 +27,36 @@ jobs:
       - name: Install dependencies
         run: pip install -r pipeline/requirements.txt
       - name: Validate model claims
-        run: python pipeline/validate-model-claims.py
+        run: python pipeline/validation/validate-model-claims.py
       - name: Validate research gaps
-        run: python pipeline/validate-research-gaps.py
+        run: python pipeline/validation/validate-research-gaps.py
       - name: Validate research synthesis
-        run: python pipeline/validate-synthesis.py
+        run: python pipeline/validation/validate-synthesis.py
       - name: Validate evidence records
-        run: python pipeline/validate-evidence.py
+        run: python pipeline/validation/validate-evidence.py
       - name: Check atomic evidence contribution contract
         if: github.event_name == 'pull_request'
-        run: python pipeline/check-atomic-evidence-contribution.py
+        run: python pipeline/validation/check-atomic-evidence-contribution.py
       - name: Validate evidence claim mappings
-        run: python pipeline/validate-evidence-claims.py
+        run: python pipeline/validation/validate-evidence-claims.py
       - name: Check model claim evaluation
-        run: python pipeline/check-model-evaluation.py
+        run: python pipeline/validation/check-model-evaluation.py
       - name: Check synthesis drift
-        run: python pipeline/check-synthesis-drift.py
+        run: python pipeline/validation/check-synthesis-drift.py
       - name: Check publication safety
-        run: python pipeline/check-publication-safety.py
+        run: python pipeline/validation/check-publication-safety.py
       - name: Check evidence projection schema
-        run: python pipeline/check-evidence-projection.py
+        run: python pipeline/projection/check-evidence-projection.py
       - name: Check canonical corpus projection
-        run: python pipeline/test-evidence-projection.py
+        run: python pipeline/projection/test-evidence-projection.py
       - name: Check evidence claim projection
-        run: python pipeline/check-evidence-claims-projection.py
+        run: python pipeline/projection/check-evidence-claims-projection.py
       - name: Check deterministic evidence indexer
-        run: python pipeline/check-evidence-indexer.py
+        run: python pipeline/projection/check-evidence-indexer.py
       - name: Check D1 synchronization export
-        run: python pipeline/check-evidence-sync.py
+        run: python pipeline/projection/check-evidence-sync.py
       - name: Check shared evidence read model
-        run: node pipeline/check-evidence-read-model.mjs
+        run: node pipeline/projection/check-evidence-read-model.mjs
       - name: Generate derived artifacts
         run: python pipeline/build-derived-artifacts.py
       - name: Commit generated artifacts on main
@@ -72,7 +72,7 @@ jobs:
           git commit -m "Regenerate derived evidence artifacts"
           git push origin HEAD:main
       - name: Check research frontier
-        run: python pipeline/check-research-frontier.py
+        run: python pipeline/validation/check-research-frontier.py
       - name: Verify generated artifacts are clean on main
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: git diff --exit-code -- research-frontier.json evaluate.html sitemap.xml synthesis.html

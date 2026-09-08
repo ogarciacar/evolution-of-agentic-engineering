@@ -7,9 +7,11 @@ import json
 from pathlib import Path
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+PIPELINE_ROOT = ROOT / "pipeline"
+sys.path.insert(0, str(PIPELINE_ROOT))
 BASELINE = ROOT / "model" / "synthesis-state.json"
-STATE_BUILDER = ROOT / "pipeline" / "synthesis-state.py"
+STATE_BUILDER = PIPELINE_ROOT / "synthesis-state.py"
 
 
 def current_state() -> dict:

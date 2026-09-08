@@ -14,7 +14,7 @@ from urllib.parse import parse_qsl, urlsplit
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE_DIR = ROOT / "evidence"
 
 RESTRICTED_HOST_SUFFIXES = (".internal", ".local", ".localhost", ".corp", ".lan", ".home", ".intranet")

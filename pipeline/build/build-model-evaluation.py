@@ -4,14 +4,17 @@ from __future__ import annotations
 
 import html
 import importlib.util
+import sys
 from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
+PIPELINE_ROOT = ROOT / "pipeline"
+sys.path.insert(0, str(PIPELINE_ROOT))
 OUTPUT = ROOT / "evaluate.html"
-TEMPLATE = ROOT / "pipeline" / "templates" / "evaluate.html"
-EVALUATOR = ROOT / "pipeline" / "evaluate-model-claims.py"
+TEMPLATE = PIPELINE_ROOT / "templates" / "evaluate.html"
+EVALUATOR = PIPELINE_ROOT / "evaluate-model-claims.py"
 RESEARCH_GAPS = ROOT / "model" / "research-gaps.yaml"
 
 spec = importlib.util.spec_from_file_location("evaluate_model_claims", EVALUATOR)

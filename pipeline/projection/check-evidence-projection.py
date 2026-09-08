@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 MIGRATION = ROOT / "migrations" / "0001_evidence_projection.sql"
 
 EXPECTED_TABLES = {"evidence", "evidence_stages", "evidence_conditions"}

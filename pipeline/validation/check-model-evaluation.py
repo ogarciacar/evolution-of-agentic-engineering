@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from collections import Counter
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "pipeline" / "evaluate-model-claims.py"
+ROOT = Path(__file__).resolve().parents[2]
+PIPELINE_ROOT = ROOT / "pipeline"
+sys.path.insert(0, str(PIPELINE_ROOT))
+MODULE_PATH = PIPELINE_ROOT / "evaluate-model-claims.py"
 spec = importlib.util.spec_from_file_location("evaluate_model_claims", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)
 assert spec.loader
