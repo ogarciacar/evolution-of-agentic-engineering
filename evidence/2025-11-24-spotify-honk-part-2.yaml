@@ -6,33 +6,40 @@ source:
   url: "https://engineering.atspotify.com/2025/11/context-engineering-background-coding-agents-part-2"
   type: engineering-blog
   provenance: primary
+
 presentation:
   headline: "Spotify shows context engineering as a selection condition for background coding agents"
   summary: "Spotify reports that agent choice, prompt structure, context scope, tool constraints, and verifiable end states materially affect whether background coding agents produce predictable, mergeable changes across large repository fleets."
+
 observed:
   - "Spotify reports that its early homegrown agentic loop struggled with complex multi-file changes and context-window limits, while Claude Code became its top-performing agent and was applied to about 50 migrations and the majority of background-agent pull requests merged into production at the time of publication."
   - "Spotify found that prompts need to be tailored to the agent: its homegrown agent performed better with strict step-by-step prompts, while Claude Code performed better with outcome-oriented prompts."
   - "Spotify deliberately limits the background agent's tools and hooks because additional dynamically fetched context and tools increase dimensions of unpredictability."
   - "Spotify exposes standardized verification, limited Git operations, and allowlisted Bash commands while keeping code search and documentation tools out of the coding agent's direct toolset."
   - "Spotify recommends verifiable end states such as tests, concrete examples, preconditions, and smaller task scope to improve agent outcomes."
+
 scale:
   label: "Scale signal"
   summary: >
     Context-engineering practices were developed for background migrations across thousands
     of repositories; Spotify reports Claude Code as its top-performing agent across about
     50 migrations and the majority of background-agent PRs merged into production at publication time.
+
 mapping:
   stages: [Selection]
   conditions: [Context, Execution, Verification]
+
 claims:
   - id: C02
     relationship: SUPPORTS
+
 interpretation: >
   The source directly advances Selection by comparing materially different agent configurations
   and describing environmental choices that change viability. Agent choice, prompt form, context
   boundaries, tool exposure, and verification are treated as engineering variables rather than
   incidental implementation details. The comparison is operational rather than a controlled
   experiment, so it does not isolate the causal contribution of each condition.
+
 model_implication:
   verdict: "SUPPORTS"
   explanation: >
@@ -40,13 +47,16 @@ model_implication:
     context and instruction strategies, and reports a preferred agent after operating alternatives.
     It also connects Context, Execution, and Verification conditions to predictable, mergeable
     outcomes at fleet scale. This materially advances the active Selection frontier.
+
 what_this_does_not_establish:
   - "It does not provide controlled comparative success rates for each agent or prompt strategy."
   - "It does not isolate the causal effect size of context, tool restriction, or verification independently."
   - "It does not establish differential long-term persistence of agent variants."
   - "It does not compare cooperating multi-agent operation with useful isolated operation."
   - "Spotify's first-party claims are not independent validation of the model."
+
 open_question: "How large are the reliability and economic differences between agent configurations when context, tools, and verification strategies are varied systematically?"
+
 practice_assessment:
   status: assessed
 practice_observations:
@@ -65,5 +75,6 @@ practice_observations:
     problem: "Broad tasks without concrete success criteria are harder for agents to complete predictably."
     reported_practice: "Spotify uses tests, concrete examples, preconditions, and smaller task scope as verifiable end states."
     selection_conditions: [verification]
+
 assessment:
   assisted_by_ai: true
