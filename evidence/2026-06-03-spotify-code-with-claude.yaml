@@ -61,5 +61,24 @@ what_this_does_not_establish:
 
 open_question: "At this fleet scale, which context, verification, coordination, and observability mechanisms keep human attention from becoming the dominant constraint as agent-produced change volume grows?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: software-catalog-agent-context
+    use_case: "Give coding agents organizational context about software components before and during engineering work."
+    problem: "Agents need component ownership, documentation, and responsible-team information that is not necessarily present in source files."
+    reported_practice: "Spotify exposes Backstage's software catalog to agents through MCPs and command-line tools."
+    selection_conditions: [context]
+  - id: kubernetes-trusted-execution
+    use_case: "Run many background coding-agent sessions with controlled execution and verification."
+    problem: "Autonomous sessions need an execution environment with trusted tools and a reliable quality gate."
+    reported_practice: "Spotify runs Honk sessions in Kubernetes with trusted tools and CI verification."
+    selection_conditions: [execution, verification]
+  - id: fleetshift-orchestration-progress
+    use_case: "Coordinate agent-generated migrations across thousands of repositories while directing scarce human attention."
+    problem: "At fleet scale, teams need to know which changes were created or merged and which require human intervention."
+    reported_practice: "Fleetshift schedules and orchestrates Honk changes and tracks migration progress, pull-request state, and changes needing human attention."
+    selection_conditions: [coordination, observability]
+
 assessment:
   assisted_by_ai: true

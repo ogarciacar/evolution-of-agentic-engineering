@@ -64,5 +64,24 @@ what_this_does_not_establish:
 
 open_question: "How much engineering fitness do verification feedback loops add relative to isolated agent operation after accounting for their coordination and execution cost?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: repository-selected-verifiers
+    use_case: "Determine whether an autonomously generated change is ready to become a pull request."
+    problem: "Agent completion does not establish that the generated code works or satisfies the task."
+    reported_practice: "Spotify selects independent deterministic verifiers from repository contents and requires relevant verification before a pull request can be opened, then applies an LLM judge to the diff."
+    selection_conditions: [verification]
+  - id: verifier-feedback-course-correction
+    use_case: "Automatically repair an agent-generated change that fails quality evaluation."
+    problem: "A verifier or judge veto would otherwise leave failed work for a human to recover."
+    reported_practice: "Judge vetoes are fed back into the coding-agent loop, and Spotify reports that the agent course-corrects about half of vetoed cases."
+    selection_conditions: [verification, learning]
+  - id: constrained-execution-environment
+    use_case: "Run background coding agents with predictable behavior."
+    problem: "Greater execution flexibility increases unpredictable behavior."
+    reported_practice: "Spotify constrains permissions, available binaries, and execution through sandboxing and surrounding infrastructure."
+    selection_conditions: [execution]
+
 assessment:
   assisted_by_ai: true

@@ -101,5 +101,14 @@ open_question: >
   measurably improve execution reliability, verification throughput, or cost
   compared with general-purpose infrastructure?
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: bot-fix-verification-loop
+    use_case: "Use a coding agent to fix bugs in the Bun repository."
+    problem: "An agent-authored fix needs evidence that it resolves the bug rather than merely changing code."
+    reported_practice: "Bun's Claude Code bot opens pull requests with tests that fail against the earlier system-installed Bun and pass against the fixed debug build, then responds to review comments."
+    selection_conditions: [execution, verification]
+
 assessment:
   assisted_by_ai: true

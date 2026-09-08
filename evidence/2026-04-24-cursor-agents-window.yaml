@@ -48,5 +48,14 @@ what_this_does_not_establish:
 
 open_question: "At what concurrency does isolation and task dependency management become insufficient without stronger orchestration, shared state, and verification mechanisms?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: async-subagent-decomposition
+    use_case: "Execute multiple parts of an engineering task concurrently."
+    problem: "Parallel agent work needs decomposition, isolation, and dependency-aware composition to avoid interfering changes."
+    reported_practice: "Cursor Multitask decomposes work into asynchronous subagents, uses worktrees to isolate concurrent changes, and parallel plans to preserve task dependencies."
+    selection_conditions: [execution, coordination]
+
 assessment:
   assisted_by_ai: true

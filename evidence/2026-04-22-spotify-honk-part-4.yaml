@@ -62,5 +62,24 @@ what_this_does_not_establish:
 
 open_question: "Which forms of repository and dependency context most improve agent reliability and economics as migrations span increasingly heterogeneous software landscapes?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: dependency-lineage-targeting
+    use_case: "Identify repositories affected by a downstream dataset migration."
+    problem: "The migration system must know which repositories consume the changed dataset before an agent can modify them."
+    reported_practice: "Spotify uses Backstage endpoint lineage to identify downstream consumers."
+    selection_conditions: [context]
+  - id: cross-repository-target-search
+    use_case: "Find concrete source locations that require changes during a fleet-wide migration."
+    problem: "Knowing the downstream consumer does not identify the actual repository usages that need modification."
+    reported_practice: "Spotify uses Codesearch queries to locate migration targets across its GitHub Enterprise landscape."
+    selection_conditions: [context]
+  - id: fleet-migration-orchestration
+    use_case: "Apply a dataset migration across thousands of downstream consumers."
+    problem: "Repository-scale changes need coordinated scheduling and pull-request execution across a large fleet."
+    reported_practice: "Spotify combines Honk, Backstage, Codesearch, and Fleet Management to target and orchestrate the migration."
+    selection_conditions: [execution, coordination]
+
 assessment:
   assisted_by_ai: true

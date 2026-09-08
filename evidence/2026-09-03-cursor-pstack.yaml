@@ -122,5 +122,29 @@ open_question: >
   the execution waste, verification risk, and human attention that coordination
   prevents?
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: task-scale-orchestration-threshold
+    use_case: "Choose whether a task should use multi-agent orchestration or a plain agent."
+    problem: "Coordination ceremony can cost more than it saves on work small enough for one agent."
+    reported_practice: "The Orchestrate playbook says not to orchestrate when one agent can finish inside the task budget and uses a task-scale threshold for orchestration."
+    selection_conditions: [coordination, economics]
+  - id: specialized-orchestration-roles
+    use_case: "Coordinate multi-day programs containing many stacked pull requests and subagents."
+    problem: "Parallel work needs explicit ownership, bounded context transfer, durable state, and independent verification."
+    reported_practice: "pstack defines coordinator, optional sub-coordinator, worker, and verifier roles; structured state files; queue events; and worker briefs."
+    selection_conditions: [context, coordination, verification]
+  - id: sha-bound-verification
+    use_case: "Keep verification evidence valid as agent-authored pull requests change."
+    problem: "A verification verdict can become stale when the pull-request head changes."
+    reported_practice: "pstack records verification verdicts against a pull-request number and head SHA and voids the verdict when the head SHA changes."
+    selection_conditions: [verification]
+  - id: reflect-durable-learning
+    use_case: "Turn completed agent work into reusable improvements for future workflows."
+    problem: "Learnings from completed tasks disappear unless they are reviewed and encoded into durable workflow artifacts."
+    reported_practice: "The Reflect skill runs three parallel reviewers, synthesizes durable learnings, checks whether they should be encoded structurally, and requires approval before skill edits."
+    selection_conditions: [learning, verification]
+
 assessment:
   assisted_by_ai: true

@@ -60,5 +60,8 @@ what_this_does_not_establish:
 
 open_question: "As agent runtime grows beyond human labor capacity, which verification, coordination, observability, and resource-allocation mechanisms allow useful throughput to continue scaling without human attention or compute becoming the dominant constraint?"
 
+practice_assessment:
+  status: assessed
+
 assessment:
   assisted_by_ai: true

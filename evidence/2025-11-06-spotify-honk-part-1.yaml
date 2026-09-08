@@ -66,5 +66,24 @@ what_this_does_not_establish:
 
 open_question: "Which engineering-environment conditions cause one viable agent configuration to remain more reliable or economical than another as scale and autonomy increase?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: fleet-managed-agent-migrations
+    use_case: "Execute software migrations across a large repository fleet with a background coding agent."
+    problem: "Deterministic transformation declarations do not cover every migration, while repository targeting, pull-request lifecycle, review, and production merging still need coordinated infrastructure."
+    reported_practice: "Spotify retained Fleet Management for repository targeting and pull-request lifecycle while replacing transformation declarations with natural-language instructions executed by a coding agent."
+    selection_conditions: [execution, coordination]
+  - id: pluggable-agent-harness
+    use_case: "Operate background coding agents predictably while agent and model components evolve."
+    problem: "Agent execution needs formatting, linting, diff evaluation, logs, traces, and the ability to change agent or model components without rebuilding the surrounding workflow."
+    reported_practice: "Spotify built a pluggable CLI harness with MCP-based formatting and linting, LLM-as-judge diff evaluation, GCP logs, MLflow traces, and swappable agents and models."
+    selection_conditions: [execution, verification, observability]
+  - id: interactive-task-handoff
+    use_case: "Turn developer requests from Slack or GitHub into background coding work."
+    problem: "The background coding agent needs sufficient task information before it can independently produce a pull request."
+    reported_practice: "An interactive agent gathers task information and hands a resulting prompt to the background coding agent."
+    selection_conditions: [context, coordination]
+
 assessment:
   assisted_by_ai: true

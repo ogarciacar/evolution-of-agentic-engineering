@@ -101,5 +101,29 @@ open_question: >
   compose outcomes in multi-agent workflows, and does evidence from failed
   workflows systematically change the environment for subsequent executions?
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: workload-specific-model-benchmarks
+    use_case: "Choose models for specific managed software-engineering agent workloads."
+    problem: "General model benchmarks do not establish the best quality, reliability, and economics for a particular production workload."
+    reported_practice: "Uber builds benchmarks from each managed agent's real work and evaluates cost per completed task, output quality, and reliability."
+    selection_conditions: [economics, verification]
+  - id: outcome-denominated-agent-cost
+    use_case: "Determine whether agent automation is economically efficient."
+    problem: "Token or request spend alone does not show how much useful engineering work was delivered."
+    reported_practice: "Uber tracks outcome-denominated cost together with workload-specific quality signals and delivered volume."
+    selection_conditions: [economics, verification]
+  - id: bounded-cheaper-subagents
+    use_case: "Reduce the cost of high-volume agentic engineering work."
+    problem: "Using an expensive primary model for every bounded subtask makes scaled execution more costly."
+    reported_practice: "A primary model decomposes and evaluates work while lower-cost subagents execute bounded tasks."
+    selection_conditions: [economics, coordination]
+  - id: session-cost-antipatterns
+    use_case: "Find expensive behavioral patterns in live agent sessions."
+    problem: "Repeated unnecessary tool use and other poor session behaviors can silently consume compute."
+    reported_practice: "Uber uses live cost counters and a session-analysis dashboard that identifies 16 anti-pattern classes with financial impact and targeted remediation."
+    selection_conditions: [observability, economics, learning]
+
 assessment:
   assisted_by_ai: true

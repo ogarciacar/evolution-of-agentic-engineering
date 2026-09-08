@@ -130,5 +130,8 @@ open_question: >
   concurrent or headless agents, or whether the supply of expert direction
   becomes the throughput ceiling the forcing function anticipates.
 
+practice_assessment:
+  status: assessed
+
 assessment:
   assisted_by_ai: true

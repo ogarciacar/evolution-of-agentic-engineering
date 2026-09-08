@@ -118,5 +118,14 @@ open_question: >
   improves repeated, test-verified outcomes after accounting for their full
   inference, exploration and maintenance cost?
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: developer-repository-context-files
+    use_case: "Provide coding agents repository-specific instructions, workflow guidance, and tool information."
+    problem: "Agents need repository-specific knowledge, but extra context can be redundant and increase exploration and inference cost without improving task resolution."
+    reported_practice: "The evaluated CTXbench repositories use developer-committed repository context files that agents read and follow during coding tasks."
+    selection_conditions: [context, economics]
+
 assessment:
   assisted_by_ai: true

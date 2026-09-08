@@ -117,5 +117,14 @@ open_question: >
   across models and larger engineering tasks rather than only reducing runtime
   or output generation?
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: repository-level-agent-instructions
+    use_case: "Provide coding agents repository-specific guidance while they execute pull-request tasks."
+    problem: "Agents otherwise need to infer repository-specific instructions during execution, which can increase completion time and generated output."
+    reported_practice: "The evaluated repositories provide a version-controlled root AGENTS.md file as repository-level context for the coding agent."
+    selection_conditions: [context, economics]
+
 assessment:
   assisted_by_ai: true

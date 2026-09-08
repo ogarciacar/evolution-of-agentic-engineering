@@ -116,5 +116,24 @@ open_question: >
   economical, and sufficiently automated that fitness can be selected without
   human verification becoming the throughput ceiling?
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: baseline-variant-eval-loop
+    use_case: "Determine whether a change to an AI workflow actually improves its behavior."
+    problem: "Anecdotal testing cannot reliably distinguish an improvement from a regression."
+    reported_practice: "Establish a baseline, change prompt/context/model/decomposition/orchestration, rerun the same inputs, apply evals, and compare scores."
+    selection_conditions: [verification, learning]
+  - id: production-failures-to-evals
+    use_case: "Turn failures observed in real AI usage into regression protection."
+    problem: "Production failures remain isolated incidents unless they become reusable evaluation criteria."
+    reported_practice: "Review traces, log and categorize recurring mistakes, and turn those failure categories into eval candidates."
+    selection_conditions: [observability, learning, verification]
+  - id: tiered-evaluation-cost
+    use_case: "Run judgment-based evaluation without paying its cost for every case."
+    problem: "LLM-as-a-Judge evaluations are more expensive than deterministic assertions."
+    reported_practice: "Use a cheap code assertion first and send only threshold-crossing cases to an LLM judge."
+    selection_conditions: [verification, economics]
+
 assessment:
   assisted_by_ai: true

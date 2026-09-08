@@ -72,5 +72,29 @@ what_this_does_not_establish:
 
 open_question: "Across repeated production engineering work, which differentiated agent roles and coordination mechanisms preserve the cooperation advantage as task diversity, concurrency, and organizational constraints increase?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: planner-worker-specialization
+    use_case: "Coordinate hundreds of agents building a substantial software system concurrently."
+    problem: "Homogeneous agents make conflicting architectural decisions and spend context on both global planning and local implementation."
+    reported_practice: "Cursor separates planner agents that decompose and delegate goals from worker agents that execute bounded pieces."
+    selection_conditions: [context, coordination]
+  - id: reconciler-agents
+    use_case: "Keep independently produced implementation decisions coherent across a swarm."
+    problem: "Workers can make locally reasonable but globally incompatible design decisions."
+    reported_practice: "Cursor uses reconciler agents to resolve conflicting design decisions."
+    selection_conditions: [coordination]
+  - id: neutral-merge-agents
+    use_case: "Integrate changes produced simultaneously by many agents."
+    problem: "Conventional merge behavior accumulated more than 70,000 conflicts in an earlier run."
+    reported_practice: "Cursor uses neutral third-party agents for merge conflicts and a purpose-built version-control system at higher commit throughput."
+    selection_conditions: [coordination, execution]
+  - id: stacked-review-agents
+    use_case: "Review large volumes of concurrently agent-produced code."
+    problem: "A single review mechanism can become a verification bottleneck as swarm output grows."
+    reported_practice: "Cursor uses stacked review agents with different review lenses."
+    selection_conditions: [verification, coordination]
+
 assessment:
   assisted_by_ai: true

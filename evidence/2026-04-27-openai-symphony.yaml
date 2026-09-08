@@ -49,5 +49,14 @@ what_this_does_not_establish:
 
 open_question: "Does coordination infrastructure consistently allow useful concurrency to grow beyond the human supervision ceiling without coordination cost becoming dominant?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: always-on-agent-orchestration
+    use_case: "Run more concurrent Codex coding tasks than an engineer can comfortably supervise as separate sessions."
+    problem: "Engineers lost track of work and debugged stalled agents beyond roughly three to five simultaneous sessions."
+    reported_practice: "Symphony moves task assignment and workspace lifecycle into an always-on orchestrator where open tasks receive agents in isolated workspaces and humans review outcomes."
+    selection_conditions: [coordination, execution, observability, verification]
+
 assessment:
   assisted_by_ai: true

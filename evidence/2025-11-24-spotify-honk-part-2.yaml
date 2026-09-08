@@ -57,5 +57,24 @@ what_this_does_not_establish:
 
 open_question: "How large are the reliability and economic differences between agent configurations when context, tools, and verification strategies are varied systematically?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: agent-specific-prompts
+    use_case: "Give different background coding agents instructions they can execute effectively."
+    problem: "A single prompt style did not work equally well across agent architectures."
+    reported_practice: "Spotify tailored prompt structure to the agent, using strict step-by-step prompts for its homegrown agent and outcome-oriented prompts for Claude Code."
+    selection_conditions: [context]
+  - id: constrained-tool-surface
+    use_case: "Make autonomous background coding runs more predictable."
+    problem: "Additional dynamically fetched context and tools increase dimensions of unpredictability."
+    reported_practice: "Spotify limits tools and hooks, constrains Git and Bash operations, and exposes standardized verification."
+    selection_conditions: [context, execution, verification]
+  - id: verifiable-end-states
+    use_case: "Improve the likelihood that a background coding task ends in a usable change."
+    problem: "Broad tasks without concrete success criteria are harder for agents to complete predictably."
+    reported_practice: "Spotify uses tests, concrete examples, preconditions, and smaller task scope as verifiable end states."
+    selection_conditions: [verification]
+
 assessment:
   assisted_by_ai: true

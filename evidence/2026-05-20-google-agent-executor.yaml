@@ -44,5 +44,14 @@ what_this_does_not_establish:
 
 open_question: "Which runtime guarantees become necessary as long-running agent workflows move from individual experiments to population-scale engineering systems?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: durable-agent-runtime
+    use_case: "Run agent jobs that continue for hours or days and survive infrastructure or human interruptions."
+    problem: "A long-running agent cannot depend on one process or session remaining alive for the duration of the work."
+    reported_practice: "Google Agent Executor uses durable event logs and snapshots to support execution, resumption, and distributed deployment."
+    selection_conditions: [execution, observability]
+
 assessment:
   assisted_by_ai: true

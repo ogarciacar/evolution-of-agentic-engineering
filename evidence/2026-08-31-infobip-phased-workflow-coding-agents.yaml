@@ -54,5 +54,24 @@ what_this_does_not_establish:
 
 open_question: "Does structuring agent work around bounded, validated, and reconstructable context measurably reduce the cost and failure rate of acquiring sufficient context compared with unstructured delegation?"
 
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: phased-context-management
+    use_case: "Carry a coding task from research through planning, task definition, and implementation."
+    problem: "One growing context across the workflow becomes noisy and allows upstream errors to compound into implementation."
+    reported_practice: "Infobip structures work into four phases and repeatedly writes, selects, compresses, and isolates context between phases."
+    selection_conditions: [context]
+  - id: validated-task-artifacts
+    use_case: "Delegate implementation to fresh coding-agent sessions with sufficient task context."
+    problem: "Fresh sessions need goals, dependencies, relevant code paths, success criteria, and validation methods without relying on conversational history."
+    reported_practice: "Research and planning produce validated artifacts, and task definitions carry goals, dependencies, code paths, acceptance criteria, and validation methods."
+    selection_conditions: [context, verification]
+  - id: externalized-durable-state
+    use_case: "Continue or reconstruct engineering work across agent sessions."
+    problem: "Important state disappears when it exists only in conversational history."
+    reported_practice: "The workflow externalizes durable state into Git, task state, logs, and other artifacts."
+    selection_conditions: [context, learning]
+
 assessment:
   assisted_by_ai: true
