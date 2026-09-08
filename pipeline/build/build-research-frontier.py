@@ -5,13 +5,16 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+PIPELINE_ROOT = ROOT / "pipeline"
+sys.path.insert(0, str(PIPELINE_ROOT))
 RESEARCH_GAPS = ROOT / "model" / "research-gaps.yaml"
-EVALUATOR = ROOT / "pipeline" / "evaluate-model-claims.py"
+EVALUATOR = PIPELINE_ROOT / "evaluate-model-claims.py"
 DEFAULT_OUTPUT = ROOT / "research-frontier.json"
 
 
