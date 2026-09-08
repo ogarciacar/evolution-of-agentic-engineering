@@ -44,6 +44,13 @@ def practice_observations_for(record: dict, projection_id: str, evidence_id: str
     return observations
 
 
+def practice_assessment_status(record: dict) -> str:
+    assessment = record.get("practice_assessment")
+    if not assessment:
+        return "pending"
+    return assessment["status"]
+
+
 def project_record(connection: sqlite3.Connection, path: Path, projection_id: str) -> None:
     record = yaml.safe_load(path.read_text(encoding="utf-8"))
     source = record["source"]
@@ -90,6 +97,11 @@ def project_record(connection: sqlite3.Connection, path: Path, projection_id: st
             (projection_id, evidence_id, item["id"], item["relationship"])
             for item in sorted(relationships_for(path), key=lambda item: item["id"])
         ],
+    )
+
+    connection.execute(
+        "INSERT INTO practice_assessments (projection_id, evidence_id, status) VALUES (?, ?, ?)",
+        (projection_id, evidence_id, practice_assessment_status(record)),
     )
 
     observations = practice_observations_for(record, projection_id, evidence_id)
