@@ -30,6 +30,11 @@ assert.match(html, />coordination</);
 assert.match(html, /data-projection-id="main"/);
 assert.match(html, /data-evidence-id="2026-04-22-spotify-honk-part-4"/);
 assert.match(html, /data-observation-id="dependency-lineage-targeting"/);
+assert.match(html, /href="\/signals\/2026-04-22-spotify-honk-part-4\/"/);
+assert.match(html, />Evidence →<\/a>/);
+
+const projected = renderPracticeObservations([{ ...observations[0], projection_id: "deadbeefcafe" }]);
+assert.match(projected, /href="\/signals\/2026-04-22-spotify-honk-part-4\/\?projection_id=deadbeefcafe"/);
 
 const escaped = renderPracticeObservations([{ ...observations[0], company: "A & <B>" }]);
 assert.match(escaped, /A &amp; &lt;B&gt;/);
@@ -37,4 +42,4 @@ assert.doesNotMatch(escaped, /A & <B>/);
 
 assert.match(renderPracticeObservations([]), /No practice observations are available for this projection/);
 
-console.log("Practice Observations rendering contract is stable");
+console.log("Practice Observations rendering and evidence traceability contract is stable");
