@@ -34,7 +34,7 @@ assert.match(html, /href="\/signals\/2026-04-22-spotify-honk-part-4\/"/);
 assert.match(html, />Evidence →<\/a>/);
 
 const projected = renderPracticeObservations([{ ...observations[0], projection_id: "deadbeefcafe" }]);
-assert.match(projected, /href="\/signals\/2026-04-22-spotify-honk-part-4\/?projection_id=deadbeefcafe"/);
+assert.match(projected, /href="\/signals\/2026-04-22-spotify-honk-part-4\/\?projection_id=deadbeefcafe"/);
 
 const escaped = renderPracticeObservations([{ ...observations[0], company: "A & <B>" }]);
 assert.match(escaped, /A &amp; &lt;B&gt;/);
