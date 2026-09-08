@@ -6,59 +6,35 @@ source:
   url: "https://openai.com/index/research-acceleration-view-inside-openai/"
   type: engineering-blog
   provenance: primary
-
 presentation:
   headline: "Agent runtime exceeds human labor before human steering disappears"
   summary: "OpenAI reports that by mid-August 2026 its research organization was using 3.1 agent-workdays for every human workday, while highly concurrent workflows with four or more simultaneous agents were increasing. Over half of successful 4–8 hour tasks in the prior six months still involved at least one human intervention."
-
 observed:
   - "OpenAI reports that, as of mid-August 2026, its research organization used 3.1 agent-workdays of effort for every workday of human labor, using an eight-hour workday as the normalization basis."
   - "OpenAI reports an increasing number of researchers using highly concurrent workflows with four or more agents simultaneously; its measurement includes both agents started directly by researchers and downstream subagents."
   - "OpenAI reports that, in the prior six months, over half of successful tasks estimated at 4–8 hours of human work involved one or more human interventions."
   - "OpenAI reports that experiments per active experimenter reached an all-time high in August 2026 since tracking began in January 2025, while noting that available compute also grew significantly over that period."
   - "OpenAI states that as automation progresses, the least automatable tasks will take a larger share of researcher effort and become important bottlenecks, and that compute is another gating factor that may become more important over time."
-
 scale:
   label: "Scale signal"
-  summary: >
-    3.1 agent-workdays per human workday across OpenAI's research organization by
-    mid-August 2026; growing use of 4+ simultaneous agents; over half of successful
-    4–8 hour tasks still required at least one human intervention.
-
+  summary: "3.1 agent-workdays per human workday across OpenAI's research organization by mid-August 2026; growing use of 4+ simultaneous agents; over half of successful 4–8 hour tasks still required at least one human intervention."
 mapping:
   stages: [Selection]
   conditions: [Execution, Verification, Coordination, Economics]
-
 claims:
-  - id: C02
-    relationship: REFINES
-
-interpretation: >
-  This provides evidence that increasing agent execution capacity can move an engineering
-  environment into a regime where aggregate agent runtime exceeds available human labor
-  without removing human steering, verification, coordination, and compute constraints.
-  The source therefore narrows the Selection question: greater agent capacity changes which
-  surrounding conditions become limiting. The observed concurrent workflows also create
-  pressure toward coordination mechanisms, but concurrency alone does not establish
-  Cooperation in the model's stronger sense.
-
+  - {id: C02, relationship: REFINES}
+interpretation: "This provides evidence that increasing agent execution capacity can move an engineering environment into a regime where aggregate agent runtime exceeds available human labor without removing human steering, verification, coordination, and compute constraints. The source therefore narrows the Selection question: greater agent capacity changes which surrounding conditions become limiting."
 model_implication:
   verdict: "REFINES"
-  explanation: >
-    Refines Selection by showing a documented scale regime in which agent execution exceeds
-    human labor while human intervention and compute remain material constraints. This is
-    consistent with the model's prediction that bottlenecks migrate into surrounding
-    engineering-environment conditions as agent capacity increases, but it does not establish
-    that cooperation among agents improves engineering fitness.
-
+  explanation: "Refines Selection by showing a documented scale regime in which agent execution exceeds human labor while human intervention and compute remain material constraints. This is consistent with the model's prediction that bottlenecks migrate into surrounding engineering-environment conditions as agent capacity increases, but it does not establish that cooperation among agents improves engineering fitness."
 what_this_does_not_establish:
   - "It does not establish operation of 1,000 concurrent coding agents; the public source identifies workflows with four or more simultaneous agents but does not publish a fleet-wide concurrency maximum."
   - "It does not establish that cooperating agents outperform useful isolated agent operation."
   - "It does not establish stable agent specialization or persistent differentiated roles."
   - "The reported increase in experiments per active experimenter is correlated with increased Codex adoption, but OpenAI also reports substantial compute growth, so the source does not isolate agent adoption as the causal factor."
   - "The agent-workday ratio measures runtime rather than equivalent human productivity or business value."
-
 open_question: "As agent runtime grows beyond human labor capacity, which verification, coordination, observability, and resource-allocation mechanisms allow useful throughput to continue scaling without human attention or compute becoming the dominant constraint?"
-
+practice_assessment:
+  status: assessed
 assessment:
   assisted_by_ai: true
