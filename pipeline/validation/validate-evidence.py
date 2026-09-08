@@ -35,6 +35,19 @@ def duplicate_practice_observation_ids(record: object) -> list[str]:
     return duplicates
 
 
+def practice_assessment_consistency_error(record: object) -> str | None:
+    if not isinstance(record, dict):
+        return None
+    observations = record.get("practice_observations")
+    if not isinstance(observations, list) or not observations:
+        return None
+    assessment = record.get("practice_assessment")
+    status = assessment.get("status") if isinstance(assessment, dict) else "pending"
+    if status != "assessed":
+        return "practice observations require practice_assessment.status to be 'assessed'"
+    return None
+
+
 def main() -> int:
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
@@ -63,6 +76,11 @@ def main() -> int:
                 f"{path.relative_to(ROOT)}:practice_observations: duplicate observation id {observation_id!r}",
                 file=sys.stderr,
             )
+
+        consistency_error = practice_assessment_consistency_error(record)
+        if consistency_error:
+            failures += 1
+            print(f"{path.relative_to(ROOT)}:practice_assessment: {consistency_error}", file=sys.stderr)
 
     if failures:
         print(f"Evidence validation failed with {failures} error(s)", file=sys.stderr)
