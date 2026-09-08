@@ -6,47 +6,36 @@ source:
   url: "https://cursor.com/changelog/04-24-26"
   type: changelog
   provenance: primary
-
 presentation:
   headline: "The interface reorganizes around many agents"
-
 observed:
   - "Cursor's Agents Window runs many agents across repositories and environments."
   - "Multitask decomposes work into asynchronous subagents, while worktrees isolate concurrent changes and parallel plans preserve task dependencies."
   - "Cursor does not publish a credible fleet-wide concurrency number in this source."
-
 scale:
   label: "Scale signal"
-  summary: >
-    Cursor publicly supports many parallel agents and fleets of async subagents;
-    no credible fleet-wide concurrency number is published in these sources.
-
+  summary: "Cursor publicly supports many parallel agents and fleets of async subagents; no credible fleet-wide concurrency number is published in these sources."
 mapping:
   stages: [Selection, Cooperation]
-  transition:
-    from: Selection
-    to: Cooperation
+  transition: {from: Selection, to: Cooperation}
   conditions: [Execution, Coordination, Context, Verification]
-
 claims:
-  - id: C03
-    relationship: INCONCLUSIVE
-
-interpretation: >
-  The product surface itself is shifting from a single conversational agent toward supervision, isolation, and composition of parallel work.
-
+  - {id: C03, relationship: INCONCLUSIVE}
+interpretation: "The product surface itself is shifting from a single conversational agent toward supervision, isolation, and composition of parallel work."
 model_implication:
   verdict: "SUPPORTS"
-  explanation: >
-    Supports an emerging Cooperation transition, while the absence of public scale
-    numbers is a useful reminder not to equate product capability with demonstrated
-    fleet-scale operation.
-
+  explanation: "Supports an emerging Cooperation transition, while the absence of public scale numbers is a useful reminder not to equate product capability with demonstrated fleet-scale operation."
 what_this_does_not_establish:
   - "Product support for many agents does not establish fleet-wide organizational operation at comparable scale."
   - "It does not establish stable Specialization among agents."
-
 open_question: "At what concurrency does isolation and task dependency management become insufficient without stronger orchestration, shared state, and verification mechanisms?"
-
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: async-subagent-decomposition
+    use_case: "Execute multiple parts of an engineering task concurrently."
+    problem: "Parallel agent work needs decomposition, isolation, and dependency-aware composition to avoid interfering changes."
+    reported_practice: "Cursor Multitask decomposes work into asynchronous subagents, uses worktrees to isolate concurrent changes, and parallel plans to preserve task dependencies."
+    selection_conditions: [execution, coordination]
 assessment:
   assisted_by_ai: true
