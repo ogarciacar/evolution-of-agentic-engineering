@@ -6,28 +6,44 @@ source:
   url: "https://cloud.google.com/blog/products/ai-machine-learning/agent-executor-googles-distributed-agent-runtime"
   type: engineering-blog
   provenance: primary
+
 presentation:
   headline: "Long-running agents require a runtime"
+
 observed:
   - "Google describes agent workflows lasting hours or days and reliability and efficient production management as an emerging operational problem."
   - "Google introduced Agent Executor for execution, resumption, and distributed deployment, using event logs and snapshots so long-running agents can survive outages and human-in-the-loop interruptions."
+
 scale:
   label: "Scale signal"
-  summary: "Agent workflows lasting hours or days; Google describes reliability and efficient production management as the emerging operational problem."
+  summary: >
+    Agent workflows lasting hours or days; Google describes reliability and efficient
+    production management as the emerging operational problem.
+
 mapping:
   stages: [Selection]
   conditions: [Execution, Observability, Learning]
+
 claims:
-  - {id: C02, relationship: SUPPORTS}
-interpretation: "Reliability mechanisms that can be tolerated as ad hoc behavior at low scale become infrastructure concerns as autonomy and duration increase."
+  - id: C02
+    relationship: SUPPORTS
+
+interpretation: >
+  Reliability mechanisms that can be tolerated as ad hoc behavior at low scale become infrastructure concerns as autonomy and duration increase.
+
 model_implication:
   verdict: "SUPPORTS"
-  explanation: "Supports Selection: the environment increasingly determines which agent configurations remain operationally viable, not merely which model performs best."
+  explanation: >
+    Supports Selection: the environment increasingly determines which agent
+    configurations remain operationally viable, not merely which model performs best.
+
 what_this_does_not_establish:
   - "It does not establish organization-wide coding-agent adoption at Google."
   - "It does not establish operation of 1,000 concurrent coding agents."
   - "Google's first-party description is not independent validation of the model."
+
 open_question: "Which runtime guarantees become necessary as long-running agent workflows move from individual experiments to population-scale engineering systems?"
+
 practice_assessment:
   status: assessed
 practice_observations:
@@ -36,5 +52,6 @@ practice_observations:
     problem: "A long-running agent cannot depend on one process or session remaining alive for the duration of the work."
     reported_practice: "Google Agent Executor uses durable event logs and snapshots to support execution, resumption, and distributed deployment."
     selection_conditions: [execution, observability]
+
 assessment:
   assisted_by_ai: true
