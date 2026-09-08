@@ -1,4 +1,4 @@
-import { listPracticeObservations } from "./_lib/practice-observation-read-model.js";
+import { listPracticeObservations, PRACTICE_SELECTION_CONDITIONS } from "./_lib/practice-observation-read-model.js";
 import { PROJECTION_HEADER, applyProjectionHeaders, projectionFromRequest } from "./_lib/evidence-projection.js";
 
 const START = "<!-- PRACTICE_OBSERVATIONS_START -->";
@@ -16,9 +16,22 @@ function evidenceHref(observation) {
   return `${path}?projection_id=${encodeURIComponent(observation.projection_id)}`;
 }
 
-export function renderPracticeObservations(observations) {
+function filterHref(condition, projectionId) {
+  const params = new URLSearchParams();
+  if (projectionId !== "main") params.set("projection_id", projectionId);
+  if (condition) params.set("condition", condition);
+  const query = params.toString();
+  return query ? `/practices?${query}` : "/practices";
+}
+
+export function renderPracticeObservations(observations, selectedCondition = null, projectionId = "main") {
+  const filters = `<nav class="practice-filters" aria-label="Filter practice observations by selection condition"><a class="filter${selectedCondition ? "" : " active"}" href="${esc(filterHref(null, projectionId), true)}">All</a>${PRACTICE_SELECTION_CONDITIONS.map((condition) => `<a class="filter${selectedCondition === condition ? " active" : ""}" href="${esc(filterHref(condition, projectionId), true)}">${esc(condition)}</a>`).join("")}</nav>`;
+
   if (!observations.length) {
-    return '<div class="empty">No practice observations are available for this projection.</div>';
+    const message = selectedCondition
+      ? `No practice observations match the ${esc(selectedCondition)} selection condition.`
+      : "No practice observations are available for this projection.";
+    return `${filters}<div class="empty">${message}</div>`;
   }
 
   const rows = observations.map((observation) => {
@@ -29,7 +42,8 @@ export function renderPracticeObservations(observations) {
     return `<tr data-projection-id="${esc(observation.projection_id, true)}" data-evidence-id="${esc(observation.evidence_id, true)}" data-observation-id="${esc(observation.id, true)}"><td class="company">${esc(observation.company)}<div>${evidence}</div></td><td>${esc(observation.use_case)}</td><td>${esc(observation.problem)}</td><td>${esc(observation.reported_practice)}</td><td><span class="conditions">${conditions}</span></td></tr>`;
   }).join("");
 
-  return `<p class="count">${observations.length} practice observations</p><div class="table-shell"><table class="practice-table"><thead><tr><th>Company</th><th>Specific use case being solved</th><th>Problem encountered</th><th>Reported practice</th><th>Selection condition</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  const countLabel = selectedCondition ? `${observations.length} practice observations · ${esc(selectedCondition)}` : `${observations.length} practice observations`;
+  return `${filters}<p class="count">${countLabel}</p><div class="table-shell"><table class="practice-table"><thead><tr><th>Company</th><th>Specific use case being solved</th><th>Problem encountered</th><th>Reported practice</th><th>Selection condition</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 export async function onRequest(context) {
@@ -44,12 +58,21 @@ export async function onRequest(context) {
     });
   }
 
+  const url = new URL(request.url);
+  const condition = url.searchParams.get("condition");
+  if (condition && !PRACTICE_SELECTION_CONDITIONS.includes(condition)) {
+    return new Response(`Unknown selection condition: ${condition}`, {
+      status: 400,
+      headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+    });
+  }
+
   const staticResponse = await context.next();
   if (!env.EVIDENCE_DB || request.method === "HEAD" || !staticResponse.ok) return staticResponse;
 
   try {
-    const observations = await listPracticeObservations(env, {}, 500, projection.id);
-    const rendered = renderPracticeObservations(observations);
+    const observations = await listPracticeObservations(env, condition ? { condition } : {}, 500, projection.id);
+    const rendered = renderPracticeObservations(observations, condition, projection.id);
     const html = await staticResponse.text();
     const start = html.indexOf(START);
     const end = html.indexOf(END);
