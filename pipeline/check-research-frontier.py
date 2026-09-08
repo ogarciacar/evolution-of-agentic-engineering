@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-GENERATOR = ROOT / "scripts" / "build-research-frontier.py"
+GENERATOR = ROOT / "pipeline" / "build-research-frontier.py"
 COMMITTED = ROOT / "research-frontier.json"
 
 
@@ -24,7 +24,7 @@ def main() -> None:
     generated = load_generator().build_frontier()
     committed = json.loads(COMMITTED.read_text(encoding="utf-8"))
     if committed != generated:
-        raise SystemExit("research-frontier.json is stale; run scripts/build-research-frontier.py")
+        raise SystemExit("research-frontier.json is stale; run pipeline/build-research-frontier.py")
     print("Research frontier is deterministic and aligned with canonical model state")
 
 

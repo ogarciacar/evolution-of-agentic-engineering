@@ -7,7 +7,7 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "scripts" / "evaluate-model-claims.py"
+MODULE_PATH = ROOT / "pipeline" / "evaluate-model-claims.py"
 spec = importlib.util.spec_from_file_location("evaluate_model_claims", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)
 assert spec.loader

@@ -9,7 +9,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 BASELINE = ROOT / "model" / "synthesis-state.json"
-STATE_BUILDER = ROOT / "scripts" / "synthesis-state.py"
+STATE_BUILDER = ROOT / "pipeline" / "synthesis-state.py"
 
 
 def current_state() -> dict:
@@ -39,7 +39,7 @@ def main() -> None:
             )
         print(
             "Review affected findings in model/synthesis.yaml. If their meaning remains valid, refresh the reviewed semantic baseline with: "
-            "python scripts/synthesis-state.py > model/synthesis-state.json",
+            "python pipeline/synthesis-state.py > model/synthesis-state.json",
             file=sys.stderr,
         )
         raise SystemExit(1)

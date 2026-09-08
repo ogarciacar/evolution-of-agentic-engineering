@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def main() -> None:
     with tempfile.TemporaryDirectory() as directory:
         database = Path(directory) / "evidence.db"
-        subprocess.run([sys.executable, str(ROOT / "scripts" / "index-evidence.py"), "--database", str(database)], check=True)
+        subprocess.run([sys.executable, str(ROOT / "pipeline" / "index-evidence.py"), "--database", str(database)], check=True)
         connection = sqlite3.connect(database)
         rows = connection.execute(
             "SELECT evidence_id, claim_id, relationship FROM evidence_claims ORDER BY evidence_id, claim_id"

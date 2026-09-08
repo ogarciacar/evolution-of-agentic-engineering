@@ -13,7 +13,7 @@ from evidence_claims import all_relationships
 
 ROOT = Path(__file__).resolve().parents[1]
 SYNTHESIS = ROOT / "model" / "synthesis.yaml"
-EVALUATOR = ROOT / "scripts" / "evaluate-model-claims.py"
+EVALUATOR = ROOT / "pipeline" / "evaluate-model-claims.py"
 
 
 def load_evaluation() -> dict:
