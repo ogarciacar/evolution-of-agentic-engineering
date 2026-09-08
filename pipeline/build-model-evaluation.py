@@ -10,8 +10,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "evaluate.html"
-TEMPLATE = ROOT / "templates" / "evaluate.html"
-EVALUATOR = ROOT / "scripts" / "evaluate-model-claims.py"
+TEMPLATE = ROOT / "pipeline" / "templates" / "evaluate.html"
+EVALUATOR = ROOT / "pipeline" / "evaluate-model-claims.py"
 RESEARCH_GAPS = ROOT / "model" / "research-gaps.yaml"
 
 spec = importlib.util.spec_from_file_location("evaluate_model_claims", EVALUATOR)

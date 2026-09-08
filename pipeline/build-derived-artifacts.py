@@ -8,10 +8,10 @@ import sys
 ROOT = Path(__file__).resolve().parent.parent
 
 GENERATORS = (
-    "scripts/build-research-frontier.py",
-    "scripts/build-evidence.py",
-    "scripts/build-model-evaluation.py",
-    "scripts/build-research-synthesis.py",
+    "pipeline/build-research-frontier.py",
+    "pipeline/build-evidence.py",
+    "pipeline/build-model-evaluation.py",
+    "pipeline/build-research-synthesis.py",
 )
 
 

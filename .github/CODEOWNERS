@@ -4,9 +4,8 @@
 # Maintainer surface — research model, evidence architecture, and publication machinery.
 /model/ @ogarciacar
 /schema/ @ogarciacar
-/scripts/ @ogarciacar
+/pipeline/ @ogarciacar
 /migrations/ @ogarciacar
-/templates/ @ogarciacar
 /functions/ @ogarciacar
 /docs/ @ogarciacar
 /.github/workflows/ @ogarciacar

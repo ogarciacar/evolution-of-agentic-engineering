@@ -9,8 +9,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-INDEXER = ROOT / "scripts" / "index-evidence.py"
-EXPORTER = ROOT / "scripts" / "export-evidence-sql.py"
+INDEXER = ROOT / "pipeline" / "index-evidence.py"
+EXPORTER = ROOT / "pipeline" / "export-evidence-sql.py"
 MIGRATIONS = ROOT / "migrations"
 TABLES = ("evidence", "evidence_stages", "evidence_conditions", "evidence_claims")
 SECOND_PROJECTION = "deadbeefcafe"

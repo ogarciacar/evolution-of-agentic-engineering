@@ -4,7 +4,7 @@ Evidence contributions author canonical research state in `evidence/*.yaml`. Evi
 
 ## Pull requests
 
-Pull-request validation is read-only with respect to the contribution branch. CI runs the validators and `scripts/build-derived-artifacts.py`, then exposes generated outputs as workflow artifacts where useful for inspection. It does not commit generated files back to the PR branch.
+Pull-request validation is read-only with respect to the contribution branch. CI runs the validators and `pipeline/build-derived-artifacts.py`, then exposes generated outputs as workflow artifacts where useful for inspection. It does not commit generated files back to the PR branch.
 
 This makes one evidence YAML the ordinary contribution unit: contributors do not need to regenerate repository-owned artifacts before opening a pull request.
 

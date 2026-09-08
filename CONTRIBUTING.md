@@ -166,7 +166,7 @@ Generated artifacts must not be hand-edited. The current CI-owned generated path
 - `synthesis.html`
 - `sitemap.xml`
 
-For local inspection, maintainers may run `python scripts/build-derived-artifacts.py`, but contributors do not need to commit its output before opening a pull request.
+For local inspection, maintainers may run `python pipeline/build-derived-artifacts.py`, but contributors do not need to commit its output before opening a pull request.
 
 `evidence.html` and `index.html` are authored/static pages. Evidence-dependent runtime content is read from D1 rather than materialized into those files by CI.
 

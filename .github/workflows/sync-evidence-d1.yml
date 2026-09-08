@@ -7,7 +7,7 @@ on:
       - "evidence/**"
       - "schema/**"
       - "migrations/**"
-      - "scripts/export-evidence-sql.py"
+      - "pipeline/export-evidence-sql.py"
       - ".github/workflows/sync-evidence-d1.yml"
   workflow_dispatch:
 
@@ -60,11 +60,11 @@ jobs:
               json.dump(config, f)
           PY
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r pipeline/requirements.txt
       - name: Validate evidence records
-        run: python scripts/validate-evidence.py
+        run: python pipeline/validate-evidence.py
       - name: Export production projection synchronization SQL
-        run: python scripts/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
+        run: python pipeline/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
       - name: Apply D1 migrations
         run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config wrangler-d1.json
       - name: Synchronize canonical evidence
