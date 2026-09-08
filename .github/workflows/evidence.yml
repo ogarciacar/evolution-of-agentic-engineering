@@ -67,6 +67,8 @@ jobs:
         run: node pipeline/projection/check-practice-observations-render.mjs
       - name: Check Practice Observations navigation
         run: node pipeline/projection/check-practice-navigation.mjs
+      - name: Check Practice Observations integration
+        run: node pipeline/projection/check-practice-observations-integration.mjs
       - name: Generate derived artifacts
         run: python pipeline/build-derived-artifacts.py
       - name: Commit generated artifacts on main
