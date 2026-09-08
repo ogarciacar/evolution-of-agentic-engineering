@@ -12,7 +12,15 @@ ROOT = Path(__file__).resolve().parents[2]
 INDEXER = ROOT / "pipeline" / "projection" / "index-evidence.py"
 EXPORTER = ROOT / "pipeline" / "projection" / "export-evidence-sql.py"
 MIGRATIONS = ROOT / "migrations"
-TABLES = ("evidence", "evidence_stages", "evidence_conditions", "evidence_claims")
+TABLES = (
+    "evidence",
+    "evidence_stages",
+    "evidence_conditions",
+    "evidence_claims",
+    "practice_assessments",
+    "practice_observations",
+    "practice_observation_conditions",
+)
 SECOND_PROJECTION = "deadbeefcafe"
 
 
@@ -63,6 +71,17 @@ def main() -> None:
         assert snapshot(canonical_db, "main") == snapshot(remote_shape_db, "main"), "main D1 sync differs from deterministic projection"
 
         connection = sqlite3.connect(remote_shape_db)
+        observation_count = connection.execute(
+            "SELECT COUNT(*) FROM practice_observations WHERE projection_id = 'main'"
+        ).fetchone()[0]
+        assessment_count = connection.execute(
+            "SELECT COUNT(*) FROM practice_assessments WHERE projection_id = 'main'"
+        ).fetchone()[0]
+        connection.close()
+        assert observation_count > 0, "D1 sync omitted practice observations"
+        assert assessment_count > 0, "D1 sync omitted practice assessments"
+
+        connection = sqlite3.connect(remote_shape_db)
         connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript(second_sync.read_text(encoding="utf-8"))
         connection.close()
@@ -80,7 +99,7 @@ def main() -> None:
         assert main_before == snapshot(remote_shape_db, "main"), "resynchronizing one projection changed main"
         assert second_before == snapshot(remote_shape_db, SECOND_PROJECTION), "repeated projection synchronization changed logical state"
 
-        print("D1 synchronization is deterministic and projection-isolated")
+        print("D1 synchronization is deterministic, complete, and projection-isolated")
 
 
 if __name__ == "__main__":
