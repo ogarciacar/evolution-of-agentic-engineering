@@ -6,37 +6,101 @@ source:
   url: "https://www.uber.com/gb/en/blog/efficient-software-factory/"
   type: engineering-blog
   provenance: primary
+
 presentation:
   headline: "The software factory selects for complete managed capabilities"
   summary: "Uber reports more than 70% of PRs attributed to local or cloud agents, 3,600+ agent skills and 30,000+ skill executions per day. Managed agents are evaluated through outcome cost, quality and reliability, while primary agents can delegate bounded work to lower-cost subagents."
+
 observed:
-  - "Uber reports that more than 70% of its pull requests are attributed to local or cloud agents, that engineers have created more than 3,600 agent skills, and that those skills execute more than 30,000 times per day. Managed agents perform code review, CI self-healing, end-to-end changes with visual validation, alert triage, debugging, and code maintenance."
-  - "From February to August 2026, Uber reports a sevenfold increase in weekly active users and a 9.4-fold increase in weekly agentic requests. Holding one model fixed, it reports that cost per 1,000 model requests fell nearly 34% from its peak and cost per session fell 52% from its June peak."
-  - "Uber decomposes total spend into adoption, engagement, turns, requests, tokens, and token price. For each managed agent it also tracks an outcome-denominated cost, a quality signal such as revert rate, F1, or mean time to recovery, and delivered volume."
-  - "Model selection uses benchmarks assembled from each managed agent's real work and evaluates cost per completed task, output quality, and reliability. Uber reports using an AI Context Graph, tool search, CLI-resolved tool calls, prompt caching, standardized defaults, and code mode to reduce context-search and tool-use overhead."
-  - "Uber reports that a primary model can decompose and evaluate work while lower-cost subagents execute bounded tasks. Live cost counters and a session-analysis dashboard expose spend drivers and identify 16 classes of session anti-pattern, each paired with financial impact and a targeted remediation."
+  - >
+    Uber reports that more than 70% of its pull requests are attributed to
+    local or cloud agents, that engineers have created more than 3,600 agent
+    skills, and that those skills execute more than 30,000 times per day.
+    Managed agents perform code review, CI self-healing, end-to-end changes
+    with visual validation, alert triage, debugging, and code maintenance.
+  - >
+    From February to August 2026, Uber reports a sevenfold increase in weekly
+    active users and a 9.4-fold increase in weekly agentic requests. Holding
+    one model fixed, it reports that cost per 1,000 model requests fell nearly
+    34% from its peak and cost per session fell 52% from its June peak.
+  - >
+    Uber decomposes total spend into adoption, engagement, turns, requests,
+    tokens, and token price. For each managed agent it also tracks an
+    outcome-denominated cost, a quality signal such as revert rate, F1, or
+    mean time to recovery, and delivered volume.
+  - >
+    Model selection uses benchmarks assembled from each managed agent's real
+    work and evaluates cost per completed task, output quality, and
+    reliability. Uber reports using an AI Context Graph, tool search,
+    CLI-resolved tool calls, prompt caching, standardized defaults, and code
+    mode to reduce context-search and tool-use overhead.
+  - >
+    Uber reports that a primary model can decompose and evaluate work while
+    lower-cost subagents execute bounded tasks. Live cost counters and a
+    session-analysis dashboard expose spend drivers and identify 16 classes
+    of session anti-pattern, each paired with financial impact and a targeted
+    remediation.
+
 scale:
   label: "Scale signal"
-  summary: "More than 70% of PRs attributed to local or cloud agents; 3,600+ agent skills; 30,000+ skill executions/day. Uber reports 7× weekly active users and 9.4× weekly agentic requests from February to August 2026."
+  summary: >
+    More than 70% of PRs attributed to local or cloud agents; 3,600+ agent
+    skills; 30,000+ skill executions/day. Uber reports 7× weekly active users
+    and 9.4× weekly agentic requests from February to August 2026.
+
 mapping:
   stages: [Selection, Cooperation, Specialization]
-  transition: {from: Selection, to: Cooperation, adjacent_stage: Specialization}
+  transition:
+    from: Selection
+    to: Cooperation
+    adjacent_stage: Specialization
   conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
+
 claims:
-  - {id: C02, relationship: SUPPORTS}
-  - {id: C03, relationship: INCONCLUSIVE}
-  - {id: C04, relationship: INCONCLUSIVE}
-interpretation: "Fitness is being evaluated at the level of workload + model + context + tools + runtime + verification + reliability + cost, rather than model quality alone. Economics becomes an explicit selection mechanism, while bounded delegation and stable task-specific managed agents create Cooperation and operational Specialization signals."
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: INCONCLUSIVE
+  - id: C04
+    relationship: INCONCLUSIVE
+
+interpretation: >
+  Fitness is being evaluated at the level of workload + model + context + tools +
+  runtime + verification + reliability + cost, rather than model quality alone.
+  Economics becomes an explicit selection mechanism, while bounded delegation and
+  stable task-specific managed agents create Cooperation and operational
+  Specialization signals.
+
 model_implication:
   verdict: "REFINES"
-  explanation: "Operational specialization can appear during Selection while Cooperation is still developing. The source does not establish that repeated Cooperation caused those specializations, so it weakens a strictly sequential reading without falsifying the proposed sequence."
+  explanation: >
+    Operational specialization can appear during Selection while Cooperation is still
+    developing. The source does not establish that repeated Cooperation caused those
+    specializations, so it weakens a strictly sequential reading without falsifying
+    the proposed sequence.
+
 what_this_does_not_establish:
-  - "The source is Uber's own report and does not independently validate its adoption, quality, scale, or cost-reduction claims."
-  - "It does not report 1,000 concurrently operating coding agents or establish that Uber's results generalize to other organizations and codebases."
-  - "It does not demonstrate rich, fleet-wide cooperation among specialized agents or show that repeated cooperation caused specialization."
-  - "It does not establish a mature Learning condition in which failures systematically improve future executions; automated continuous skill improvement is described as work in progress."
-  - "It does not establish the model's proposed evolutionary sequence."
-open_question: "Do Uber's task-specialized managed agents repeatedly exchange state and compose outcomes in multi-agent workflows, and does evidence from failed workflows systematically change the environment for subsequent executions?"
+  - >
+    The source is Uber's own report and does not independently validate its
+    adoption, quality, scale, or cost-reduction claims.
+  - >
+    It does not report 1,000 concurrently operating coding agents or establish
+    that Uber's results generalize to other organizations and codebases.
+  - >
+    It does not demonstrate rich, fleet-wide cooperation among specialized
+    agents or show that repeated cooperation caused specialization.
+  - >
+    It does not establish a mature Learning condition in which failures
+    systematically improve future executions; automated continuous skill
+    improvement is described as work in progress.
+  - >
+    It does not establish the model's proposed evolutionary sequence.
+
+open_question: >
+  Do Uber's task-specialized managed agents repeatedly exchange state and
+  compose outcomes in multi-agent workflows, and does evidence from failed
+  workflows systematically change the environment for subsequent executions?
+
 practice_assessment:
   status: assessed
 practice_observations:
@@ -60,5 +124,6 @@ practice_observations:
     problem: "Repeated unnecessary tool use and other poor session behaviors can silently consume compute."
     reported_practice: "Uber uses live cost counters and a session-analysis dashboard that identifies 16 anti-pattern classes with financial impact and targeted remediation."
     selection_conditions: [observability, economics, learning]
+
 assessment:
   assisted_by_ai: true

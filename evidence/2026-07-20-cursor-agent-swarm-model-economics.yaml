@@ -6,9 +6,11 @@ source:
   url: "https://cursor.com/blog/agent-swarm-model-economics"
   type: engineering-blog
   provenance: primary
+
 presentation:
   headline: "Specialized coordination turns swarm activity into useful progress"
   summary: "Cursor reports that a redesigned agent swarm outperformed its earlier swarm across every tested model configuration on the same SQLite implementation task, while reducing coordination failures and separating planning from execution into differentiated agent roles."
+
 observed:
   - "Cursor reports running its old and new agent swarms on the same task, with the same models and the same time budget, measuring the fraction of a held-out SQL test suite passed; the new swarm performed better in every tested model configuration."
   - "Cursor reports that with Grok 4.5 the new swarm reached 80% of the held-out suite in four hours, while the old swarm was paused before its second hour after becoming unstable."
@@ -17,27 +19,59 @@ observed:
   - "Cursor describes additional differentiated coordination and verification mechanisms including reconciler agents for conflicting design decisions, neutral third-party agents for merge conflicts, outside agents for decomposing overgrown files, and stacked review agents using different review lenses."
   - "Cursor reports that its earlier browser swarm peaked at roughly 1,000 commits per hour on Git, while the newer system can peak around 1,000 commits per second and therefore uses a purpose-built version control system for agent-scale coordination."
   - "Across the tested SQLite runs, Cursor reports similar quality across model mixes but large cost differences: total reported costs ranged from $1,339 for an Opus 4.8 planner with Composer 2.5 workers to $10,565 for GPT-5.5 used for both planning and work."
+
 scale:
   label: "Scale signal"
-  summary: "The redesigned swarm is reported to peak around 1,000 commits per second. In the controlled Grok 4.5 SQLite comparison, the old swarm accumulated more than 70,000 merge conflicts before being paused, while the new swarm logged fewer than 1,000 over four hours and reached 80% of the held-out suite."
+  summary: >
+    The redesigned swarm is reported to peak around 1,000 commits per second. In the
+    controlled Grok 4.5 SQLite comparison, the old swarm accumulated more than 70,000
+    merge conflicts before being paused, while the new swarm logged fewer than 1,000
+    over four hours and reached 80% of the held-out suite.
+
 mapping:
   stages: [Selection, Cooperation, Specialization]
   conditions: [Context, Execution, Verification, Coordination, Economics]
+
 claims:
-  - {id: C02, relationship: REFINES}
-  - {id: C03, relationship: SUPPORTS}
-  - {id: C04, relationship: SUPPORTS}
-interpretation: "This source provides a controlled comparison in which the models, task, and time budget are held constant while the surrounding swarm architecture changes. The redesigned environment produces better measured task outcomes and substantially less coordination failure, refining Selection by connecting context allocation, execution structure, verification, coordination, and model economics to system viability. It also supports Cooperation and Specialization through differentiated roles and coordination mechanisms operating as an integrated system."
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: SUPPORTS
+  - id: C04
+    relationship: SUPPORTS
+
+interpretation: >
+  This source provides a controlled comparison in which the models, task, and time budget
+  are held constant while the surrounding swarm architecture changes. The redesigned
+  environment produces better measured task outcomes and substantially less coordination
+  failure, refining Selection by connecting context allocation, execution structure,
+  verification, coordination, and model economics to system viability. It also supports
+  Cooperation because the source compares two multi-agent configurations and reports that
+  coordination mechanisms materially change whether concurrent work composes into useful
+  progress. The persistent planner-worker separation, together with reconciler, merge,
+  decomposition, and review functions, supports Specialization: differentiated capabilities
+  cooperate as parts of a swarm whose system-level behavior and performance are the unit
+  being engineered and evaluated.
+
 model_implication:
   verdict: "REFINES"
-  explanation: "Refines the model by providing comparative evidence that agent-scale engineering fitness depends on the architecture surrounding the agents, while also supplying concrete support for Cooperation and Specialization."
+  explanation: >
+    Refines the model by providing comparative evidence that agent-scale engineering fitness
+    depends on the architecture surrounding the agents, while also supplying concrete support
+    for Cooperation and Specialization. The source shows differentiated roles and coordination
+    mechanisms operating as an integrated system, but it remains a controlled Cursor research
+    experiment rather than evidence that the same architecture or advantage generalizes across
+    ordinary production software-engineering environments.
+
 what_this_does_not_establish:
   - "It does not establish that the redesigned swarm architecture generalizes to ordinary production engineering teams or arbitrary software-engineering tasks."
   - "It does not establish that roughly 1,000 commits per second correspond to 1,000 useful changes per second; commit rate is system activity rather than equivalent engineering value."
   - "It does not establish operation of 1,000 concurrent coding agents; the source discusses hundreds of concurrent agents and reports commit throughput, but does not publish a concurrent-agent maximum for the new system."
   - "Cursor is evaluating its own swarm architecture, so the reported comparison is first-party evidence rather than independent replication."
-  - "The SQLite experiment does not isolate the causal contribution of each individual coordination, context, verification, or specialization mechanism."
+  - "The SQLite experiment isolates the harness comparison better than observational production evidence, but it does not isolate the causal contribution of each individual coordination, context, verification, or specialization mechanism."
+
 open_question: "Across repeated production engineering work, which differentiated agent roles and coordination mechanisms preserve the cooperation advantage as task diversity, concurrency, and organizational constraints increase?"
+
 practice_assessment:
   status: assessed
 practice_observations:
@@ -61,5 +95,6 @@ practice_observations:
     problem: "A single review mechanism can become a verification bottleneck as swarm output grows."
     reported_practice: "Cursor uses stacked review agents with different review lenses."
     selection_conditions: [verification, coordination]
+
 assessment:
   assisted_by_ai: true
