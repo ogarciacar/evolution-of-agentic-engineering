@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "workers/ai-search/**"
+      - "experiments/ai-search/**"
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
@@ -14,6 +15,7 @@ on:
     branches: [main]
     paths:
       - "workers/ai-search/**"
+      - "experiments/ai-search/**"
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
@@ -36,3 +38,13 @@ jobs:
         run: node workers/ai-search/check-search-endpoint.mjs
       - name: Check Ask the evidence UI contract
         run: node workers/ai-search/check-search-ui.mjs
+      - name: Run production retrieval evaluation
+        run: node experiments/ai-search/evaluate.mjs --output .artifacts/ai-search-evaluation.md
+      - name: Show retrieval evaluation
+        run: cat .artifacts/ai-search-evaluation.md
+      - name: Upload retrieval evaluation
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-search-evaluation-report
+          path: .artifacts/ai-search-evaluation.md
+          if-no-files-found: error
