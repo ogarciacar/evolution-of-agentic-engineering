@@ -19,6 +19,8 @@ derived AI Search index
 
 visitor
    ↓
+/evidence → Ask the evidence
+   ↓
 /api/search
    ↓
 agentic-engineering-search-api Worker
@@ -76,7 +78,7 @@ Initial include patterns:
 
 The experiment intentionally starts with a narrow crawl surface. `/signals/**` is the most important source because Scale Signal pages are rendered server-side from the D1 read model and contain the evidence source, observed facts, interpretation, model implication, epistemic boundaries, and open question.
 
-The current sitemap contains the signal routes needed for the Slice 1 infrastructure proof. `/practices` is server-rendered from D1 but is not currently listed in the sitemap, so it is not guaranteed to enter the index in Sitemap mode. Do not change sitemap generation merely to expand the experiment before retrieval evaluation demonstrates that this is necessary.
+The current sitemap contains the signal routes needed for the infrastructure proof. `/practices` is server-rendered from D1 but is not currently listed in the sitemap, so it is not guaranteed to enter the index in Sitemap mode. Do not change sitemap generation merely to expand the experiment before retrieval evaluation demonstrates that this is necessary.
 
 ### Discover-mode finding
 
@@ -86,7 +88,7 @@ The first configuration used `Discover`. On 2026-09-09, the crawl repeatedly sto
 paused_blocked_by_content_signal
 ```
 
-The job log showed that Discover initiated a Browser Run crawl job. Switching the experiment to Sitemap parsing avoided that discovery path and indexed the server-rendered signal pages successfully. Browser Run is therefore not part of the working Slice 1 architecture.
+The job log showed that Discover initiated a Browser Run crawl job. Switching the experiment to Sitemap parsing avoided that discovery path and indexed the server-rendered signal pages successfully. Browser Run is therefore not part of the working architecture.
 
 Cloudflare-managed `robots.txt` configuration was also disabled during diagnosis so the repository-owned `robots.txt` is served unchanged. The repository policy explicitly allows Cloudflare AI Search and publishes the sitemap. Any future managed robots/content-signal policy should be reviewed separately from the retrieval experiment rather than weakening the evidence site's content policy to satisfy a crawler.
 
@@ -150,14 +152,52 @@ It does not expose chunk identifiers, scoring details, vector scores, keyword ra
 
 ## Slice 1 retrieval proof
 
-The first successful Sitemap-based index returned relevant Spotify evidence in the Cloudflare Search playground, including real source URLs such as:
+The successful Sitemap-based index returned relevant Spotify evidence in the Cloudflare Search playground and through the deployed Worker endpoint.
+
+A live request to:
+
+```text
+https://agenticengineering.science/api/search?q=Spotify
+```
+
+returned real source URLs including:
 
 ```text
 https://agenticengineering.science/signals/2025-11-24-spotify-honk-part-2/
 https://agenticengineering.science/signals/2026-06-03-spotify-code-with-claude/
+https://agenticengineering.science/signals/2025-12-09-spotify-honk-part-3/
 ```
 
-This establishes the first half of the Slice 1 hypothesis: the public D1-derived website can be indexed by AI Search and semantically queried while preserving source provenance. The remaining Slice 1 proof is the repository Worker endpoint at `/api/search`.
+This satisfies the Slice 1 infrastructure and provenance acceptance criteria.
+
+## Slice 2 — Ask the evidence UI
+
+The Evidence page exposes one deliberately small natural-language search surface immediately before the existing structured evidence filters.
+
+Files:
+
+```text
+evidence.html
+evidence-search.css
+evidence-search.js
+```
+
+Behavior:
+
+- label: `Ask the evidence`
+- native search input with `maxlength=500`
+- same-origin request to `/api/search?q=...`
+- loading state disables the submit button and announces `Searching evidence…`
+- empty-result state is announced through an `aria-live` status region
+- errors degrade to the existing structured evidence filters below
+- returned titles and excerpts are rendered as retrieval results, not generated answers
+- excerpts are presentation-clamped in the browser to keep result cards compact; retrieval/ranking is unchanged
+- every rendered result links to the AgenticEngineering.science source URL returned by the Worker
+- off-site URLs are rejected defensively in the browser as well as by the Worker
+- relevance scores and AI Search implementation details are not shown to visitors
+- the existing structured evidence query remains unchanged
+
+The UI does not deduplicate results, change ranking, rewrite queries, alter score thresholds, or modify the AI Search instance. Those questions belong to retrieval evaluation and tuning.
 
 ## Observability
 
@@ -170,11 +210,9 @@ The Worker writes one structured log record per search containing:
 
 Raw public query text is not logged. The experiment does not introduce a new analytics system.
 
-## Local development
+## Local development and checks
 
 AI Search itself does not run locally. The binding is configured with `remote: true`, allowing Wrangler development mode to proxy to the deployed AI Search instance.
-
-After creating and indexing `agentic-engineering-search` in Cloudflare:
 
 ```bash
 npx --yes wrangler@4 dev --config workers/ai-search/wrangler.jsonc
@@ -188,23 +226,22 @@ curl "http://localhost:8787/api/search?q=repository%20context"
 curl "http://localhost:8787/api/search?q=verification"
 ```
 
-The contract test is fully local and does not require Cloudflare credentials:
+The experiment checks do not require Cloudflare credentials:
 
 ```bash
 node workers/ai-search/check-search-endpoint.mjs
+node workers/ai-search/check-search-ui.mjs
 ```
 
 ## Preview behavior
 
 PR preview D1 projections are not independently indexed for this experiment. AI Search crawls the production AgenticEngineering.science website only, so search remains a production-derived retrieval surface even while repository PR previews may expose separate D1 projections.
 
-This avoids adding ephemeral preview evidence to the search index.
+The Slice 2 browser UI in a Pages preview therefore calls the production `/api/search` Worker route when exercised on the production hostname; preview deployments do not create a separate AI Search corpus.
 
 ## Production deployment
 
-Before deployment, create the AI Search instance and wait for the website source to finish indexing. Inspect the instance Items view and verify that real `/signals/.../` pages are present.
-
-Deploy the Worker with Wrangler 4:
+The search Worker is independently deployed with Wrangler 4:
 
 ```bash
 npx --yes wrangler@4 deploy --config workers/ai-search/wrangler.jsonc
@@ -216,47 +253,36 @@ The configured route is:
 agenticengineering.science/api/search*
 ```
 
-The Worker itself accepts only the exact `/api/search` path and returns `404` for any other path that happens to match the route pattern.
-
-Production verification:
-
-```bash
-curl --fail-with-body \
-  --silent \
-  --show-error \
-  "https://agenticengineering.science/api/search?q=Spotify"
-```
-
-At least one returned `url` should resolve to a real AgenticEngineering.science source page, preferably a `/signals/.../` page.
+The Pages application deploys the Evidence-page UI through its existing Git integration. Slice 2 does not require another Worker deployment because it does not change Worker code or retrieval configuration.
 
 ## Manual Cloudflare configuration
 
-The following account-side setup is intentionally not automated by repository code:
+The working account-side setup is:
 
-1. Create AI Search instance `agentic-engineering-search` in the default namespace.
-2. Add `agenticengineering.science` as a Website data source.
-3. Configure Sitemap parsing with `https://agenticengineering.science/sitemap.xml`.
-4. Configure Static site parsing.
-5. Add the initial include patterns listed above.
-6. Configure 256-token chunks with 10% overlap.
-7. Enable hybrid search; leave query rewriting and reranking disabled.
-8. Set maximum results to 5 and leave the initial score threshold at 0.4.
-9. Disable similarity cache for the experiment.
-10. Start/synchronize the crawl and verify indexed Items and Playground search results.
-11. Ensure the API token used for Worker deployment can create/update the Worker route for the `agenticengineering.science` zone.
-12. Deploy `agentic-engineering-search-api` using `workers/ai-search/wrangler.jsonc`.
+1. AI Search instance `agentic-engineering-search` in the default namespace.
+2. `agenticengineering.science` Website data source.
+3. Sitemap parsing with `https://agenticengineering.science/sitemap.xml`.
+4. Static site parsing.
+5. Initial include patterns listed above.
+6. 256-token chunks with 10% overlap.
+7. Hybrid search enabled; query rewriting and reranking disabled.
+8. Maximum results 5; score threshold 0.4.
+9. Similarity cache disabled for the experiment.
+10. `agentic-engineering-search-api` deployed with the direct `AI_SEARCH` binding.
 
-The successful Slice 1 path does not require Browser Run or rendered-site crawling.
+The successful path does not require Browser Run or rendered-site crawling.
 
 ## Disable / removal
 
 The experiment is intentionally disposable.
 
-To disable public search, remove or disable the Worker route:
+To disable public search immediately, remove or disable the Worker route:
 
 ```text
 agenticengineering.science/api/search*
 ```
+
+To remove the visitor-facing Slice 2 surface, remove the `#ask-evidence` section and the `evidence-search.js` / `evidence-search.css` references from `evidence.html`.
 
 The Worker and AI Search instance can then be deleted independently:
 
@@ -265,8 +291,8 @@ agentic-engineering-search-api
 agentic-engineering-search
 ```
 
-No D1 rollback, evidence migration, projection rebuild, or Pages change is required.
+No D1 rollback, evidence migration, projection rebuild, or core Pages runtime change is required.
 
-## Slice 1 boundary
+## Experiment boundary
 
-Slice 1 proves retrieval infrastructure only. It does not add an `Ask the evidence` UI, evaluation corpus, retrieval tuning, synthesis, conversational behavior, or generated answers.
+Slice 2 adds only the minimal visitor-facing retrieval UI. It does not add an evaluation corpus, retrieval tuning, deduplication, synthesis, conversational behavior, memory, or generated answers.
