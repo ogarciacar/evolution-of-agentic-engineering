@@ -133,6 +133,33 @@ async function body(response) {
 }
 
 {
+  const uglyTableChunk = "| Company | Specific use case being solved | Problem encountered | Reported practice | Selection condition |";
+  const { env } = fakeEnv(async () => ({
+    chunks: [
+      {
+        score: 0.93,
+        text: uglyTableChunk,
+        item: {
+          key: "https://agenticengineering.science/practices",
+          metadata: {},
+        },
+      },
+    ],
+  }));
+
+  const response = await worker.fetch(request("/api/search?q=code%20search"), env);
+  const data = await body(response);
+  assert.equal(data.results.length, 1);
+  assert.deepEqual(data.results[0], {
+    title: "Practice observations",
+    url: "https://agenticengineering.science/practices",
+    excerpt: "Reported engineering practices across companies, use cases, problems, and selection conditions.",
+    score: 0.93,
+  });
+  assert.doesNotMatch(JSON.stringify(data), /Specific use case being solved|Reported practice/);
+}
+
+{
   const { env } = fakeEnv(async () => { throw new Error("secret Cloudflare failure detail"); });
   const response = await worker.fetch(request("/api/search?q=Spotify"), env);
   assert.equal(response.status, 503);
