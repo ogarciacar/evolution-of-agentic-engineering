@@ -154,18 +154,28 @@ This supports keeping the AI Search corpus restricted to signal pages and Practi
 
 ### Intervention C — Source diversity at the API boundary
 
-Change one dimension only: return at most one result per source page.
+Change one dimension only: return at most one result per source page while preserving the original AI Search retrieval workload.
 
 Implementation:
 
-- request up to 10 ranked chunks from AI Search as the candidate pool;
+- request the same top 5 ranked chunks from AI Search as before;
 - preserve AI Search order;
-- keep the highest-ranked chunk for each source URL;
-- continue until at most 5 unique source pages are selected;
-- return the same public result shape as before.
+- keep only the highest-ranked chunk for each source URL;
+- return the remaining 1–5 unique source pages without backfilling from a larger candidate pool;
+- keep the same public result shape.
 
 This does not change embeddings, chunk size, overlap, score threshold, hybrid search, query rewriting, reranking, or the visitor UI.
 
-Prediction: queries that currently spend multiple top-five slots on chunks from the same signal should return more distinct evidence pages while keeping the strongest chunk from the highest-ranked source.
+An initial version requested 10 candidates in order to refill the response to five unique sources. That version produced 0 duplicate-source queries but also 4/10 zero-result queries in the first post-deploy run, so it changed retrieval workload and source diversity at the same time and was rejected as a clean experiment.
 
-After deploying this Worker intervention, rerun the exact same ten queries and compare duplicate-source diagnostics before considering any semantic-ranking changes.
+The revised version restored `max_num_results: 5` and deduplicates only those original five candidates. Two production runs showed:
+
+- duplicate-source queries: 0/10 in both runs, down from 5/10 after Intervention B;
+- off-site provenance: 0 results;
+- the repeat run returned results for 9/10 queries, matching the previously observed intermittent single-zero-result pattern;
+- the zero-result query moved to Q07 on the repeat, supporting the existing upstream instability hypothesis rather than a deduplication-specific failure;
+- Q03 continued to surface `/practices` at rank 2;
+- scale, verification, Spotify, human-review, organizational-context and autonomy queries retained substantive evidence results;
+- result counts can intentionally be below five when multiple top-five chunks came from the same source.
+
+This supports keeping source-URL deduplication at the API boundary while treating intermittent zero-result behavior as a separate reliability issue.
