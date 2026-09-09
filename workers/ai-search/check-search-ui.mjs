@@ -3,11 +3,14 @@ import fs from "node:fs";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { shortExcerpt, safeSourceUrl, normalizeResults, renderResult } = require("../../evidence-search.js");
+const { shortExcerpt, safeSourceUrl, isPracticesUrl, normalizeResults, renderResult } = require("../../evidence-search.js");
 
 assert.equal(safeSourceUrl("/signals/example/"), "https://agenticengineering.science/signals/example/");
 assert.equal(safeSourceUrl("https://agenticengineering.science/signals/example/"), "https://agenticengineering.science/signals/example/");
 assert.equal(safeSourceUrl("https://example.com/not-evidence"), null);
+assert.equal(isPracticesUrl("https://agenticengineering.science/practices"), true);
+assert.equal(isPracticesUrl("https://agenticengineering.science/practices/"), true);
+assert.equal(isPracticesUrl("https://agenticengineering.science/signals/example/"), false);
 
 const long = `${"evidence ".repeat(100)}tail`;
 assert.ok(shortExcerpt(long).length <= 621);
@@ -38,6 +41,15 @@ assert.match(markup, /Spotify context engineering/);
 assert.match(markup, /Read evidence →/);
 assert.match(markup, /https:\/\/agenticengineering\.science\/signals\/spotify\//);
 assert.doesNotMatch(markup, /0\.98|score|chunk/i);
+
+const practiceMarkup = renderResult({
+  title: "Practice observations",
+  url: "https://agenticengineering.science/practices",
+  excerpt: "Reported engineering practices across companies, use cases, problems, and selection conditions.",
+});
+assert.match(practiceMarkup, /Practice observations/);
+assert.match(practiceMarkup, /Explore practices →/);
+assert.doesNotMatch(practiceMarkup, /Read evidence →/);
 
 const page = fs.readFileSync("evidence.html", "utf8");
 assert.match(page, /id="ask-evidence"/);
