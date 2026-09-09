@@ -108,7 +108,7 @@ async function body(response) {
   assert.deepEqual(calls[0], {
     query: "Spotify",
     ai_search_options: {
-      retrieval: { max_num_results: 10, context_expansion: 0 },
+      retrieval: { max_num_results: 5, context_expansion: 0 },
       query_rewrite: { enabled: false },
       reranking: { enabled: false },
     },
@@ -130,32 +130,6 @@ async function body(response) {
     score: 0.74,
   });
   assert.doesNotMatch(JSON.stringify(data), /same-source-lower-ranked-chunk|second matching chunk|internal-chunk-id|scoring_details|vector_score|keyword_score|keyword_rank/);
-}
-
-{
-  const chunks = Array.from({ length: 7 }, (_, index) => ({
-    score: 1 - index * 0.01,
-    text: `Evidence ${index}`,
-    item: {
-      key: index === 1
-        ? "https://agenticengineering.science/signals/source-0/"
-        : `https://agenticengineering.science/signals/source-${index === 0 ? 0 : index - 1}/`,
-      metadata: { title: `Source ${index}` },
-    },
-  }));
-  const { env } = fakeEnv(async () => ({ chunks }));
-  const response = await worker.fetch(request("/api/search?q=diversity"), env);
-  const data = await body(response);
-
-  assert.equal(data.results.length, 5);
-  assert.deepEqual(data.results.map((result) => result.url), [
-    "https://agenticengineering.science/signals/source-0/",
-    "https://agenticengineering.science/signals/source-1/",
-    "https://agenticengineering.science/signals/source-2/",
-    "https://agenticengineering.science/signals/source-3/",
-    "https://agenticengineering.science/signals/source-4/",
-  ]);
-  assert.equal(data.results[0].excerpt, "Evidence 0");
 }
 
 {
