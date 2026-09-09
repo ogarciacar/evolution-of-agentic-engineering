@@ -2,8 +2,8 @@ const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
 const PRACTICES_PATH = "/practices";
-const PRACTICES_TITLE = "Practice observations";
-const PRACTICES_EXCERPT = "Reported engineering practices across companies, use cases, problems, and selection conditions.";
+const PRACTICES_TITLE = "Practice Observations";
+const PRACTICES_EXCERPT = "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.";
 
 function json(data, status = 200, extraHeaders = {}) {
   return Response.json(data, {
