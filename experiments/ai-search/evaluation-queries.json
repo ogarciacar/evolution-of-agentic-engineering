@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "queries": [
+    {"id":"Q01","query":"What evidence shows that coding is no longer the constraint?"},
+    {"id":"Q02","query":"What practices help coding agents acquire repository context?"},
+    {"id":"Q03","query":"Which companies use dependency lineage?"},
+    {"id":"Q04","query":"What evidence exists about coding agents operating at scale?"},
+    {"id":"Q05","query":"How do companies verify agent-generated changes?"},
+    {"id":"Q06","query":"What has Spotify reported?"},
+    {"id":"Q07","query":"What practices relate to code search?"},
+    {"id":"Q08","query":"What evidence exists about human review becoming a bottleneck?"},
+    {"id":"Q09","query":"How is organizational context supplied to coding agents?"},
+    {"id":"Q10","query":"What evidence challenges the claim that coding agents can operate autonomously?"}
+  ]
+}
