@@ -101,3 +101,27 @@ Do not apply these automatically. Test one intervention at a time against this b
 - does Q08 need retrieval/query behavior changes after duplicate and corpus-surface issues are addressed?
 
 The baseline argues for fixing corpus coverage and result diversity before changing semantic ranking behavior.
+
+## Slice 4 tuning log
+
+### Intervention A — Practice Observations corpus coverage
+
+Change one dimension only: add the existing public `/practices` runtime route to `sitemap.xml` so the Sitemap-mode AI Search crawler can index the Practice Observations surface.
+
+Why this intervention comes first:
+
+- Q03 dependency-lineage retrieval is weak.
+- Q07 code-search retrieval is weak.
+- both concepts are represented explicitly on `/practices` as company/use-case/problem/practice relationships.
+- the current index is otherwise strong enough that changing semantic ranking before fixing missing corpus coverage would confound the experiment.
+
+The intervention deliberately does **not**:
+
+- remove `evidence.html`
+- deduplicate source URLs
+- change chunk size or overlap
+- change result count or score threshold
+- enable query rewriting or reranking
+- modify the Worker or visitor UI
+
+After this change reaches production, trigger an AI Search sitemap sync and rerun the exact ten baseline queries. Compare Q03 and Q07 first, then check whether any previously strong queries regress. Only after that comparison should Intervention B be selected.
