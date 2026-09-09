@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - "workers/ai-search/**"
+      - "evidence-search.js"
+      - "evidence-search.css"
+      - "evidence.html"
       - "docs/ai-search-experiment.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
@@ -11,6 +14,9 @@ on:
     branches: [main]
     paths:
       - "workers/ai-search/**"
+      - "evidence-search.js"
+      - "evidence-search.css"
+      - "evidence.html"
       - "docs/ai-search-experiment.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
@@ -28,3 +34,5 @@ jobs:
           node-version: "22"
       - name: Check AI Search endpoint contract
         run: node workers/ai-search/check-search-endpoint.mjs
+      - name: Check Ask the evidence UI contract
+        run: node workers/ai-search/check-search-ui.mjs
