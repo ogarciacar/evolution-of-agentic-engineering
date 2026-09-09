@@ -1,5 +1,7 @@
 # Slice 5A — Reliability characterization
 
+Date: 2026-09-09
+
 ## Question
 
 Are the intermittent zero-result responses observed during Slice 4 reproducible for unchanged queries, and are they correlated with slow retrieval or request/API failures?
@@ -8,40 +10,54 @@ Are the intermittent zero-result responses observed during Slice 4 reproducible 
 
 Observation only. Do not change the production Worker, AI Search index, ranking, chunking, result count, source deduplication, query rewriting, reranking, or visitor retry behavior.
 
-Run the existing 10-query evaluation corpus repeatedly against the production `/api/search` endpoint.
+The existing 10-query corpus was executed in three independent rounds against the production `/api/search` endpoint. These are measurement attempts, not visitor retries.
 
-## Measurement
+## Production results
 
-CI runs three rounds of the same 10 questions. Each query is classified as:
+Across 30 production attempts:
 
-- `stable-nonzero` — every attempt returns at least one result;
-- `transient-zero` — at least one attempt returns zero results and another returns results;
-- `persistent-zero` — every attempt returns zero results without an HTTP/API error;
-- `transient-error` — at least one attempt has an HTTP/API error while another does not;
-- `persistent-error` — every attempt has an HTTP/API error.
+- 26/30 attempts returned one or more results.
+- 4/30 attempts returned zero results.
+- 0/30 attempts returned an HTTP/API error.
+- 6/10 queries were `stable-nonzero`.
+- 4/10 queries were `transient-zero`.
+- 0/10 queries were `persistent-zero`.
+- 0/10 queries were transient or persistent API errors.
+- 8/30 attempts took at least 7 seconds.
+- latency P50 was 4,144 ms.
+- latency P90 was 8,324 ms.
+- maximum observed latency was 10,230 ms.
+- duplicate-source attempts remained 0.
+- off-site source URLs remained 0.
+- missing titles remained 0.
 
-The report also records:
+Transient-zero queries were Q01, Q02, Q03, and Q05. Each returned zero results in exactly one round and useful non-zero results in the other two rounds.
 
-- per-attempt result count;
-- unique source count;
-- latency;
-- attempts at or above 7 seconds;
-- HTTP/API errors;
-- duplicate-source diagnostics;
-- off-site provenance and missing-title diagnostics;
-- latency P50, P90 and maximum.
+## Interpretation
 
-Attempts are run as rounds over the whole corpus rather than immediate per-query retries. The measurement does not hide an initial zero result by automatically retrying a visitor request.
+The observed failure mode is transient retrieval inconsistency rather than a persistent corpus or query failure.
 
-## Acceptance
+This matters because the next experiment should target reliability rather than semantic retrieval quality:
 
-Slice 5A is complete when a production report gives enough repeated evidence to distinguish a stable semantic zero from intermittent retrieval behavior.
+- changing corpus coverage, ranking, chunking, embeddings, query rewriting, or reranking is not justified by these measurements;
+- a narrow retry/fallback experiment is justified because the same unchanged query can recover on a subsequent independent attempt;
+- any retry must be evaluated as a reliability intervention rather than treated as a relevance improvement;
+- latency must be part of the acceptance criteria because a retry can improve successful-response rate while worsening visitor latency.
 
-Possible follow-ups belong in later slices:
+The measurements do not establish the root cause inside Cloudflare AI Search. They establish only the observable production behavior at the `/api/search` boundary.
 
-- Worker-side retry/fallback behavior;
-- timeout changes;
-- Cloudflare AI Search configuration changes;
-- service-level monitoring or alerting.
+## Next experiment
 
-Those are deliberately out of scope here and may require a Worker deployment.
+Slice 5B should test one Worker-side reliability intervention only: a bounded retry when AI Search returns zero chunks, with no retrieval/ranking configuration changes.
+
+Candidate acceptance criteria:
+
+- materially reduce visitor-visible zero-result responses;
+- do not retry non-zero responses;
+- preserve result ranking and source deduplication;
+- cap retry count at one;
+- record whether the response recovered on retry;
+- establish an explicit latency budget before keeping the intervention;
+- keep HTTP/API errors distinct from zero-result recovery.
+
+Slice 5B requires a Worker deployment and should be performed when deployment access is available.
