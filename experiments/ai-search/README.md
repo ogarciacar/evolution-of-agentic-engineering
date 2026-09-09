@@ -108,20 +108,64 @@ The baseline argues for fixing corpus coverage and result diversity before chang
 
 Change one dimension only: add the existing public `/practices` runtime route to `sitemap.xml` so the Sitemap-mode AI Search crawler can index the Practice Observations surface.
 
-Why this intervention comes first:
+Why this intervention came first:
 
-- Q03 dependency-lineage retrieval is weak.
-- Q07 code-search retrieval is weak.
+- Q03 dependency-lineage retrieval was weak.
+- Q07 code-search retrieval was weak.
 - both concepts are represented explicitly on `/practices` as company/use-case/problem/practice relationships.
-- the current index is otherwise strong enough that changing semantic ranking before fixing missing corpus coverage would confound the experiment.
+- the existing index was otherwise strong enough that changing semantic ranking before fixing missing corpus coverage would confound the experiment.
 
-The intervention deliberately does **not**:
+After the production sitemap change and a completed AI Search sync:
 
-- remove `evidence.html`
-- deduplicate source URLs
-- change chunk size or overlap
-- change result count or score threshold
-- enable query rewriting or reranking
-- modify the Worker or visitor UI
+- Q03 surfaced `/practices` at rank 2.
+- Q07 surfaced `/practices` at rank 1.
+- duplicate-source queries improved from 7/10 in the original baseline to 5/10 in the repeated post-sync run.
+- provenance remained on-site.
 
-After this change reaches production, trigger an AI Search sitemap sync and rerun the exact ten baseline queries. Compare Q03 and Q07 first, then check whether any previously strong queries regress. Only after that comparison should Intervention B be selected.
+This supports keeping `/practices` in the searchable corpus.
+
+### Intervention B — Remove generic evidence landing surfaces from AI Search
+
+Change the AI Search path filters only. Remove:
+
+```text
+**/evidence
+**/evidence.html
+```
+
+Keep:
+
+```text
+**/signals/**
+**/practices
+```
+
+The public website and public sitemap are unchanged; only the AI Search corpus excludes the two generic evidence navigation/query surfaces.
+
+After sync and a repeated evaluation:
+
+- `/evidence` and `/evidence.html` no longer appeared in any returned result.
+- Q07 kept `/practices` at rank 1 and the substantive Spotify context-engineering signal moved up to rank 2.
+- missing-title results dropped from 4 in the post-A run to 2; the remaining missing titles are `/practices`.
+- duplicate-source queries remained 5/10 on the repeated run, so corpus hygiene did not solve result diversity.
+- a single zero-result query continued to move between evaluation runs, indicating a separate latency/runtime instability rather than a corpus-specific regression.
+
+This supports keeping the AI Search corpus restricted to signal pages and Practice Observations.
+
+### Intervention C — Source diversity at the API boundary
+
+Change one dimension only: return at most one result per source page.
+
+Implementation:
+
+- request up to 10 ranked chunks from AI Search as the candidate pool;
+- preserve AI Search order;
+- keep the highest-ranked chunk for each source URL;
+- continue until at most 5 unique source pages are selected;
+- return the same public result shape as before.
+
+This does not change embeddings, chunk size, overlap, score threshold, hybrid search, query rewriting, reranking, or the visitor UI.
+
+Prediction: queries that currently spend multiple top-five slots on chunks from the same signal should return more distinct evidence pages while keeping the strongest chunk from the highest-ranked source.
+
+After deploying this Worker intervention, rerun the exact same ten queries and compare duplicate-source diagnostics before considering any semantic-ranking changes.
