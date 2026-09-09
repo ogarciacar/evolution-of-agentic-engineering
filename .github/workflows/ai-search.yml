@@ -1,0 +1,30 @@
+name: AI Search experiment
+
+on:
+  pull_request:
+    paths:
+      - "workers/ai-search/**"
+      - "docs/ai-search-experiment.md"
+      - "docs/README.md"
+      - ".github/workflows/ai-search.yml"
+  push:
+    branches: [main]
+    paths:
+      - "workers/ai-search/**"
+      - "docs/ai-search-experiment.md"
+      - "docs/README.md"
+      - ".github/workflows/ai-search.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Check AI Search endpoint contract
+        run: node workers/ai-search/check-search-endpoint.mjs
