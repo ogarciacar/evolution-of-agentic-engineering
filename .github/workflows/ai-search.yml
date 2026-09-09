@@ -8,6 +8,7 @@ on:
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
+      - "sitemap.xml"
       - "docs/ai-search-experiment.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
@@ -19,6 +20,7 @@ on:
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
+      - "sitemap.xml"
       - "docs/ai-search-experiment.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
@@ -38,6 +40,8 @@ jobs:
         run: node workers/ai-search/check-search-endpoint.mjs
       - name: Check Ask the evidence UI contract
         run: node workers/ai-search/check-search-ui.mjs
+      - name: Check AI Search corpus sitemap coverage
+        run: node experiments/ai-search/check-corpus-coverage.mjs
       - name: Run production retrieval evaluation
         run: node experiments/ai-search/evaluate.mjs --output .artifacts/ai-search-evaluation.md
       - name: Show retrieval evaluation
