@@ -40,12 +40,27 @@ function sourcePath(url) {
   }
 }
 
+function parsedDescription(text) {
+  const raw = String(text ?? "").trim();
+  if (!raw.startsWith("---")) return null;
+
+  const lineMatch = raw.match(/(?:^|\n)description:\s*(?:"([^"\n]+)"|'([^'\n]+)'|([^\n]+))/i);
+  if (lineMatch) {
+    const value = (lineMatch[1] || lineMatch[2] || lineMatch[3] || "").trim();
+    if (value && !/^(?:>|\|)$/.test(value)) return value;
+  }
+
+  const inlineMatch = raw.match(/\bdescription:\s*(.*?)\s+title:/i);
+  return inlineMatch?.[1]?.trim().replace(/^['"]|['"]$/g, "") || null;
+}
+
 function normalizeChunk(chunk) {
   const url = sourceUrl(chunk?.item?.key);
   if (!url) return null;
 
+  const path = sourcePath(url);
   const score = Number.isFinite(chunk?.score) ? chunk.score : null;
-  if (sourcePath(url) === PRACTICES_PATH) {
+  if (path === PRACTICES_PATH) {
     return {
       title: PRACTICES_TITLE,
       url,
@@ -54,10 +69,13 @@ function normalizeChunk(chunk) {
     };
   }
 
+  const rawExcerpt = String(chunk?.text ?? "").trim();
+  const excerpt = path?.startsWith("/signals/") ? parsedDescription(rawExcerpt) || rawExcerpt : rawExcerpt;
+
   return {
     title: sourceTitle(chunk?.item?.metadata),
     url,
-    excerpt: String(chunk?.text ?? "").trim(),
+    excerpt,
     score,
   };
 }
