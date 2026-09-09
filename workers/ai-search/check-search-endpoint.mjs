@@ -76,6 +76,15 @@ async function body(response) {
         scoring_details: { vector_score: 0.91, keyword_score: 0.61, keyword_rank: 1 },
       },
       {
+        id: "same-source-lower-ranked-chunk",
+        score: 0.78,
+        text: "A second matching chunk from the same Spotify evidence page.",
+        item: {
+          key: "https://agenticengineering.science/signals/2026-06-03-spotify-code-with-claude/",
+          metadata: { title: "Spotify — Code with Claude" },
+        },
+      },
+      {
         id: "relative-source",
         score: 0.74,
         text: "Repository context is assembled before execution.",
@@ -120,7 +129,7 @@ async function body(response) {
     excerpt: "Repository context is assembled before execution.",
     score: 0.74,
   });
-  assert.doesNotMatch(JSON.stringify(data), /internal-chunk-id|scoring_details|vector_score|keyword_score|keyword_rank/);
+  assert.doesNotMatch(JSON.stringify(data), /same-source-lower-ranked-chunk|second matching chunk|internal-chunk-id|scoring_details|vector_score|keyword_score|keyword_rank/);
 }
 
 {

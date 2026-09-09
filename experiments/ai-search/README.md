@@ -108,20 +108,74 @@ The baseline argues for fixing corpus coverage and result diversity before chang
 
 Change one dimension only: add the existing public `/practices` runtime route to `sitemap.xml` so the Sitemap-mode AI Search crawler can index the Practice Observations surface.
 
-Why this intervention comes first:
+Why this intervention came first:
 
-- Q03 dependency-lineage retrieval is weak.
-- Q07 code-search retrieval is weak.
+- Q03 dependency-lineage retrieval was weak.
+- Q07 code-search retrieval was weak.
 - both concepts are represented explicitly on `/practices` as company/use-case/problem/practice relationships.
-- the current index is otherwise strong enough that changing semantic ranking before fixing missing corpus coverage would confound the experiment.
+- the existing index was otherwise strong enough that changing semantic ranking before fixing missing corpus coverage would confound the experiment.
 
-The intervention deliberately does **not**:
+After the production sitemap change and a completed AI Search sync:
 
-- remove `evidence.html`
-- deduplicate source URLs
-- change chunk size or overlap
-- change result count or score threshold
-- enable query rewriting or reranking
-- modify the Worker or visitor UI
+- Q03 surfaced `/practices` at rank 2.
+- Q07 surfaced `/practices` at rank 1.
+- duplicate-source queries improved from 7/10 in the original baseline to 5/10 in the repeated post-sync run.
+- provenance remained on-site.
 
-After this change reaches production, trigger an AI Search sitemap sync and rerun the exact ten baseline queries. Compare Q03 and Q07 first, then check whether any previously strong queries regress. Only after that comparison should Intervention B be selected.
+This supports keeping `/practices` in the searchable corpus.
+
+### Intervention B — Remove generic evidence landing surfaces from AI Search
+
+Change the AI Search path filters only. Remove:
+
+```text
+**/evidence
+**/evidence.html
+```
+
+Keep:
+
+```text
+**/signals/**
+**/practices
+```
+
+The public website and public sitemap are unchanged; only the AI Search corpus excludes the two generic evidence navigation/query surfaces.
+
+After sync and a repeated evaluation:
+
+- `/evidence` and `/evidence.html` no longer appeared in any returned result.
+- Q07 kept `/practices` at rank 1 and the substantive Spotify context-engineering signal moved up to rank 2.
+- missing-title results dropped from 4 in the post-A run to 2; the remaining missing titles are `/practices`.
+- duplicate-source queries remained 5/10 on the repeated run, so corpus hygiene did not solve result diversity.
+- a single zero-result query continued to move between evaluation runs, indicating a separate latency/runtime instability rather than a corpus-specific regression.
+
+This supports keeping the AI Search corpus restricted to signal pages and Practice Observations.
+
+### Intervention C — Source diversity at the API boundary
+
+Change one dimension only: return at most one result per source page while preserving the original AI Search retrieval workload.
+
+Implementation:
+
+- request the same top 5 ranked chunks from AI Search as before;
+- preserve AI Search order;
+- keep only the highest-ranked chunk for each source URL;
+- return the remaining 1–5 unique source pages without backfilling from a larger candidate pool;
+- keep the same public result shape.
+
+This does not change embeddings, chunk size, overlap, score threshold, hybrid search, query rewriting, reranking, or the visitor UI.
+
+An initial version requested 10 candidates in order to refill the response to five unique sources. That version produced 0 duplicate-source queries but also 4/10 zero-result queries in the first post-deploy run, so it changed retrieval workload and source diversity at the same time and was rejected as a clean experiment.
+
+The revised version restored `max_num_results: 5` and deduplicates only those original five candidates. Two production runs showed:
+
+- duplicate-source queries: 0/10 in both runs, down from 5/10 after Intervention B;
+- off-site provenance: 0 results;
+- the repeat run returned results for 9/10 queries, matching the previously observed intermittent single-zero-result pattern;
+- the zero-result query moved to Q07 on the repeat, supporting the existing upstream instability hypothesis rather than a deduplication-specific failure;
+- Q03 continued to surface `/practices` at rank 2;
+- scale, verification, Spotify, human-review, organizational-context and autonomy queries retained substantive evidence results;
+- result counts can intentionally be below five when multiple top-five chunks came from the same source.
+
+This supports keeping source-URL deduplication at the API boundary while treating intermittent zero-result behavior as a separate reliability issue.
