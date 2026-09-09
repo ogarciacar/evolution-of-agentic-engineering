@@ -1,6 +1,9 @@
 const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
+const PRACTICES_PATH = "/practices";
+const PRACTICES_TITLE = "Practice observations";
+const PRACTICES_EXCERPT = "Reported engineering practices across companies, use cases, problems, and selection conditions.";
 
 function json(data, status = 200, extraHeaders = {}) {
   return Response.json(data, {
@@ -28,14 +31,34 @@ function sourceTitle(metadata) {
   return title || null;
 }
 
+function sourcePath(url) {
+  try {
+    const pathname = new URL(url).pathname;
+    return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  } catch {
+    return null;
+  }
+}
+
 function normalizeChunk(chunk) {
   const url = sourceUrl(chunk?.item?.key);
   if (!url) return null;
+
+  const score = Number.isFinite(chunk?.score) ? chunk.score : null;
+  if (sourcePath(url) === PRACTICES_PATH) {
+    return {
+      title: PRACTICES_TITLE,
+      url,
+      excerpt: PRACTICES_EXCERPT,
+      score,
+    };
+  }
+
   return {
     title: sourceTitle(chunk?.item?.metadata),
     url,
     excerpt: String(chunk?.text ?? "").trim(),
-    score: Number.isFinite(chunk?.score) ? chunk.score : null,
+    score,
   };
 }
 
