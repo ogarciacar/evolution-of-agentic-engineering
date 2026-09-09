@@ -133,6 +133,56 @@ async function body(response) {
 }
 
 {
+  const uglyTableChunk = "| Company | Specific use case being solved | Problem encountered | Reported practice | Selection condition |";
+  const { env } = fakeEnv(async () => ({
+    chunks: [
+      {
+        score: 0.93,
+        text: uglyTableChunk,
+        item: {
+          key: "https://agenticengineering.science/practices",
+          metadata: {},
+        },
+      },
+    ],
+  }));
+
+  const response = await worker.fetch(request("/api/search?q=code%20search"), env);
+  const data = await body(response);
+  assert.equal(data.results.length, 1);
+  assert.deepEqual(data.results[0], {
+    title: "Practice Observations",
+    url: "https://agenticengineering.science/practices",
+    excerpt: "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.",
+    score: 0.93,
+  });
+  assert.doesNotMatch(JSON.stringify(data), /Specific use case being solved|Reported practice/);
+}
+
+{
+  const description = "Context-engineering practices were developed for background migrations across thousands of repositories; Spotify reports Claude Code as its top-performing agent across about 50 migrations.";
+  const parserChunk = `---\ndescription: ${description}\ntitle: Spotify shows context engineering as a selection condition for background coding agents\n---\nEvidence record ## Source → Observed → Interpretation → Model implication **SOURCE**`;
+  const { env } = fakeEnv(async () => ({
+    chunks: [
+      {
+        score: 0.91,
+        text: parserChunk,
+        item: {
+          key: "https://agenticengineering.science/signals/2025-11-24-spotify-honk-part-2/",
+          metadata: { title: "Spotify shows context engineering as a selection condition for background coding agents" },
+        },
+      },
+    ],
+  }));
+
+  const response = await worker.fetch(request("/api/search?q=code%20search"), env);
+  const data = await body(response);
+  assert.equal(data.results.length, 1);
+  assert.equal(data.results[0].excerpt, description);
+  assert.doesNotMatch(data.results[0].excerpt, /description:|title:|Evidence record|SOURCE/);
+}
+
+{
   const { env } = fakeEnv(async () => { throw new Error("secret Cloudflare failure detail"); });
   const response = await worker.fetch(request("/api/search?q=Spotify"), env);
   assert.equal(response.status, 503);

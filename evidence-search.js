@@ -30,6 +30,16 @@
     }
   }
 
+  function isPracticesUrl(value) {
+    try {
+      const url = new URL(String(value ?? ""), SITE_ORIGIN);
+      const pathname = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, "") : url.pathname;
+      return url.origin === SITE_ORIGIN && pathname === "/practices";
+    } catch {
+      return false;
+    }
+  }
+
   function normalizeResult(result) {
     const url = safeSourceUrl(result?.url);
     if (!url) return null;
@@ -46,7 +56,8 @@
   }
 
   function renderResult(result) {
-    return `<article class="ask-result"><h3>${esc(result.title)}</h3>${result.excerpt ? `<p>${esc(result.excerpt)}</p>` : ""}<div class="ask-result-foot"><a class="source" href="${esc(result.url, true)}">Read evidence →</a></div></article>`;
+    const action = isPracticesUrl(result.url) ? "Explore practices →" : "Read evidence →";
+    return `<article class="ask-result"><h3>${esc(result.title)}</h3>${result.excerpt ? `<p>${esc(result.excerpt)}</p>` : ""}<div class="ask-result-foot"><a class="source" href="${esc(result.url, true)}">${action}</a></div></article>`;
   }
 
   function init(doc = globalThis.document, fetchImpl = globalThis.fetch) {
@@ -99,7 +110,7 @@
   }
 
   if (typeof module !== "undefined" && module.exports) {
-    module.exports = { shortExcerpt, safeSourceUrl, normalizeResults, renderResult };
+    module.exports = { shortExcerpt, safeSourceUrl, isPracticesUrl, normalizeResults, renderResult };
   }
 
   if (typeof document !== "undefined") init();

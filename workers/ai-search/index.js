@@ -1,6 +1,9 @@
 const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
+const PRACTICES_PATH = "/practices";
+const PRACTICES_TITLE = "Practice Observations";
+const PRACTICES_EXCERPT = "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.";
 
 function json(data, status = 200, extraHeaders = {}) {
   return Response.json(data, {
@@ -28,14 +31,52 @@ function sourceTitle(metadata) {
   return title || null;
 }
 
+function sourcePath(url) {
+  try {
+    const pathname = new URL(url).pathname;
+    return pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  } catch {
+    return null;
+  }
+}
+
+function parsedDescription(text) {
+  const raw = String(text ?? "").trim();
+  if (!raw.startsWith("---")) return null;
+
+  const lineMatch = raw.match(/(?:^|\n)description:\s*(?:"([^"\n]+)"|'([^'\n]+)'|([^\n]+))/i);
+  if (lineMatch) {
+    const value = (lineMatch[1] || lineMatch[2] || lineMatch[3] || "").trim();
+    if (value && !/^(?:>|\|)$/.test(value)) return value;
+  }
+
+  const inlineMatch = raw.match(/\bdescription:\s*(.*?)\s+title:/i);
+  return inlineMatch?.[1]?.trim().replace(/^['"]|['"]$/g, "") || null;
+}
+
 function normalizeChunk(chunk) {
   const url = sourceUrl(chunk?.item?.key);
   if (!url) return null;
+
+  const path = sourcePath(url);
+  const score = Number.isFinite(chunk?.score) ? chunk.score : null;
+  if (path === PRACTICES_PATH) {
+    return {
+      title: PRACTICES_TITLE,
+      url,
+      excerpt: PRACTICES_EXCERPT,
+      score,
+    };
+  }
+
+  const rawExcerpt = String(chunk?.text ?? "").trim();
+  const excerpt = path?.startsWith("/signals/") ? parsedDescription(rawExcerpt) || rawExcerpt : rawExcerpt;
+
   return {
     title: sourceTitle(chunk?.item?.metadata),
     url,
-    excerpt: String(chunk?.text ?? "").trim(),
-    score: Number.isFinite(chunk?.score) ? chunk.score : null,
+    excerpt,
+    score,
   };
 }
 
