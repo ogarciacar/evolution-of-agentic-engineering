@@ -1,6 +1,7 @@
 const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
+const MAX_CANDIDATES = 10;
 
 function json(data, status = 200, extraHeaders = {}) {
   return Response.json(data, {
@@ -39,6 +40,22 @@ function normalizeChunk(chunk) {
   };
 }
 
+function uniqueResults(chunks) {
+  const results = [];
+  const seenUrls = new Set();
+
+  for (const chunk of chunks || []) {
+    const result = normalizeChunk(chunk);
+    if (!result || seenUrls.has(result.url)) continue;
+
+    seenUrls.add(result.url);
+    results.push(result);
+    if (results.length === MAX_RESULTS) break;
+  }
+
+  return results;
+}
+
 export async function handleRequest(request, env) {
   const url = new URL(request.url);
   if (url.pathname !== "/api/search") return json({ error: "Not found" }, 404);
@@ -58,7 +75,7 @@ export async function handleRequest(request, env) {
       query,
       ai_search_options: {
         retrieval: {
-          max_num_results: MAX_RESULTS,
+          max_num_results: MAX_CANDIDATES,
           context_expansion: 0,
         },
         query_rewrite: { enabled: false },
@@ -66,11 +83,14 @@ export async function handleRequest(request, env) {
       },
     });
 
-    const results = (search?.chunks || []).map(normalizeChunk).filter(Boolean).slice(0, MAX_RESULTS);
+    const candidates = search?.chunks || [];
+    const results = uniqueResults(candidates);
     const latencyMs = Date.now() - startedAt;
     console.log(JSON.stringify({
       event: "ai_search",
       result_count: results.length,
+      candidate_count: candidates.length,
+      duplicate_chunks_dropped: Math.max(0, candidates.length - results.length),
       latency_ms: latencyMs,
       zero_results: results.length === 0,
     }));
