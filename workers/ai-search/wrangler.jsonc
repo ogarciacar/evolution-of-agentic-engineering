@@ -1,0 +1,19 @@
+{
+  "name": "agentic-engineering-search-api",
+  "main": "./index.js",
+  "compatibility_date": "2026-09-05",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "agenticengineering.science/api/search*",
+      "zone_name": "agenticengineering.science"
+    }
+  ],
+  "ai_search": [
+    {
+      "binding": "AI_SEARCH",
+      "instance_name": "agentic-engineering-search",
+      "remote": true
+    }
+  ]
+}
