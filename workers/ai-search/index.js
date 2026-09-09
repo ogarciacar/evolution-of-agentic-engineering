@@ -1,7 +1,6 @@
 const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
-const MAX_CANDIDATES = 10;
 
 function json(data, status = 200, extraHeaders = {}) {
   return Response.json(data, {
@@ -75,7 +74,7 @@ export async function handleRequest(request, env) {
       query,
       ai_search_options: {
         retrieval: {
-          max_num_results: MAX_CANDIDATES,
+          max_num_results: MAX_RESULTS,
           context_expansion: 0,
         },
         query_rewrite: { enabled: false },
