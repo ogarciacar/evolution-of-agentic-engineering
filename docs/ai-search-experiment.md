@@ -46,14 +46,24 @@ The Worker configuration is isolated at `workers/ai-search/wrangler.jsonc`. The 
 
 Configure `agenticengineering.science` as the AI Search website data source.
 
-Initial crawler configuration:
+Working crawler configuration for Slice 1:
 
-- parse/discovery mode: Discover
-- rendering: Static
-- include subdomains: disabled
-- follow external links: disabled
+- parse type: Sitemap
+- specific sitemap: `https://agenticengineering.science/sitemap.xml`
+- parsing mode: Static site
 - chunk size: 256 tokens
+- chunk overlap: 10%
+- hybrid search: enabled
+- hybrid fusion: Reciprocal Rank Fusion
+- keyword match mode: AND
+- keyword tokenizer: Standard with Stemming (Porter)
+- query rewriting: disabled
+- reranking: disabled
+- maximum results: 5
+- score threshold: 0.4
+- similarity cache: disabled
 - content selectors: none initially
+- custom metadata: none initially
 
 Initial include patterns:
 
@@ -64,9 +74,21 @@ Initial include patterns:
 **/evidence.html
 ```
 
-The experiment intentionally starts with a narrow crawl surface. `/signals/**` is the most important source because Scale Signal pages are rendered server-side from the D1 read model and contain the evidence source, observed facts, interpretation, model implication, epistemic boundaries, and open question. `/practices` is also rendered server-side from D1. `/evidence` is included for corpus framing, while its interactive result list remains client-side.
+The experiment intentionally starts with a narrow crawl surface. `/signals/**` is the most important source because Scale Signal pages are rendered server-side from the D1 read model and contain the evidence source, observed facts, interpretation, model implication, epistemic boundaries, and open question.
 
-`robots.txt` already allows the `Cloudflare-AI-Search` crawler and advertises the production sitemap.
+The current sitemap contains the signal routes needed for the Slice 1 infrastructure proof. `/practices` is server-rendered from D1 but is not currently listed in the sitemap, so it is not guaranteed to enter the index in Sitemap mode. Do not change sitemap generation merely to expand the experiment before retrieval evaluation demonstrates that this is necessary.
+
+### Discover-mode finding
+
+The first configuration used `Discover`. On 2026-09-09, the crawl repeatedly stopped with:
+
+```text
+paused_blocked_by_content_signal
+```
+
+The job log showed that Discover initiated a Browser Run crawl job. Switching the experiment to Sitemap parsing avoided that discovery path and indexed the server-rendered signal pages successfully. Browser Run is therefore not part of the working Slice 1 architecture.
+
+Cloudflare-managed `robots.txt` configuration was also disabled during diagnosis so the repository-owned `robots.txt` is served unchanged. The repository policy explicitly allows Cloudflare AI Search and publishes the sitemap. Any future managed robots/content-signal policy should be reviewed separately from the retrieval experiment rather than weakening the evidence site's content policy to satisfy a crawler.
 
 ## Retrieval endpoint
 
@@ -81,10 +103,9 @@ Contract:
 - query is required and trimmed
 - maximum query length is 500 characters
 - maximum returned results is 5
-- default AI Search hybrid retrieval is used
+- the AI Search instance uses hybrid retrieval
 - query rewriting is disabled
 - reranking is disabled
-- context expansion is 0
 - no generation is performed
 
 The Worker calls the direct instance binding with:
@@ -93,7 +114,9 @@ The Worker calls the direct instance binding with:
 env.AI_SEARCH.search(...)
 ```
 
-It does not use Workers AI, `env.AI`, `env.AI.autorag()`, Vectorize, Agents, or another model provider.
+It does not use Workers AI, `env.AI`, `env.AI.autorag()`, an application-managed Vectorize index, Agents, or another model provider.
+
+Cloudflare AI Search may expose internal indexing implementation details in its own job logs; those do not add a Vectorize resource or binding to this repository's architecture.
 
 ## Provenance
 
@@ -124,6 +147,17 @@ The public response intentionally exposes only:
 ```
 
 It does not expose chunk identifiers, scoring details, vector scores, keyword ranks, or other AI Search internals.
+
+## Slice 1 retrieval proof
+
+The first successful Sitemap-based index returned relevant Spotify evidence in the Cloudflare Search playground, including real source URLs such as:
+
+```text
+https://agenticengineering.science/signals/2025-11-24-spotify-honk-part-2/
+https://agenticengineering.science/signals/2026-06-03-spotify-code-with-claude/
+```
+
+This establishes the first half of the Slice 1 hypothesis: the public D1-derived website can be indexed by AI Search and semantically queried while preserving source provenance. The remaining Slice 1 proof is the repository Worker endpoint at `/api/search`.
 
 ## Observability
 
@@ -201,14 +235,18 @@ The following account-side setup is intentionally not automated by repository co
 
 1. Create AI Search instance `agentic-engineering-search` in the default namespace.
 2. Add `agenticengineering.science` as a Website data source.
-3. Configure Discover + Static crawling.
-4. Add the initial include patterns listed above.
-5. Configure 256-token chunks.
-6. Start/synchronize the crawl and verify indexed Items.
-7. Ensure the API token used for Worker deployment can create/update the Worker route for the `agenticengineering.science` zone.
-8. Deploy `agentic-engineering-search-api` using `workers/ai-search/wrangler.jsonc`.
+3. Configure Sitemap parsing with `https://agenticengineering.science/sitemap.xml`.
+4. Configure Static site parsing.
+5. Add the initial include patterns listed above.
+6. Configure 256-token chunks with 10% overlap.
+7. Enable hybrid search; leave query rewriting and reranking disabled.
+8. Set maximum results to 5 and leave the initial score threshold at 0.4.
+9. Disable similarity cache for the experiment.
+10. Start/synchronize the crawl and verify indexed Items and Playground search results.
+11. Ensure the API token used for Worker deployment can create/update the Worker route for the `agenticengineering.science` zone.
+12. Deploy `agentic-engineering-search-api` using `workers/ai-search/wrangler.jsonc`.
 
-Normal website crawling should be tested first. Do not enable browser-rendered crawling unless static crawling demonstrably fails to capture the intended server-rendered pages.
+The successful Slice 1 path does not require Browser Run or rendered-site crawling.
 
 ## Disable / removal
 
