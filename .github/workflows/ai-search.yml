@@ -1,4 +1,4 @@
-name: AI Search experiment
+name: AI Search contracts
 
 on:
   pull_request:
@@ -9,9 +9,10 @@ on:
       - "evidence-search.css"
       - "evidence.html"
       - "sitemap.xml"
-      - "docs/ai-search-experiment.md"
+      - "docs/ai-search.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
+      - ".github/workflows/ai-search-production.yml"
   push:
     branches: [main]
     paths:
@@ -21,9 +22,10 @@ on:
       - "evidence-search.css"
       - "evidence.html"
       - "sitemap.xml"
-      - "docs/ai-search-experiment.md"
+      - "docs/ai-search.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
+      - ".github/workflows/ai-search-production.yml"
 
 permissions:
   contents: read
@@ -42,19 +44,9 @@ jobs:
         run: node workers/ai-search/check-search-ui.mjs
       - name: Check AI Search corpus sitemap coverage
         run: node experiments/ai-search/check-corpus-coverage.mjs
-      - name: Run production retrieval reliability characterization
-        run: node experiments/ai-search/evaluate.mjs --attempts 3 --slow-ms 7000 --output .artifacts/ai-search-reliability.md
-      - name: Show retrieval reliability characterization
-        run: cat .artifacts/ai-search-reliability.md
-      - name: Run production retrieval precision benchmark
-        run: node experiments/ai-search/evaluate-precision.mjs --attempts 3 --output .artifacts/ai-search-precision.md
-      - name: Show retrieval precision benchmark
-        run: cat .artifacts/ai-search-precision.md
-      - name: Upload retrieval evaluation reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: ai-search-reliability-report
-          path: |
-            .artifacts/ai-search-reliability.md
-            .artifacts/ai-search-precision.md
-          if-no-files-found: error
+      - name: Check evaluation tooling syntax
+        run: |
+          node --check experiments/ai-search/evaluate.mjs
+          node --check experiments/ai-search/evaluate-precision.mjs
+          node -e 'JSON.parse(require("node:fs").readFileSync("experiments/ai-search/evaluation-queries.json", "utf8"))'
+          node -e 'JSON.parse(require("node:fs").readFileSync("experiments/ai-search/precision-judgments.json", "utf8"))'
