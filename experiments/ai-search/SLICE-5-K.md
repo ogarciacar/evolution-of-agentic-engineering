@@ -45,18 +45,56 @@ Aggregate metrics are calculated across all query attempts. Errors and zero-resu
 
 The v1 judgments are intentionally small and human-reviewable. They are not intended to be exhaustive ground truth.
 
+A source counts as relevant when it materially helps answer the question, including negative or counter-evidence. Relevance is not limited to evidence that supports the premise of the question.
+
 A change to `precision-judgments.json` changes the benchmark itself and should therefore be reviewed separately from a retrieval/configuration experiment. Future search experiments should normally keep the judgment set fixed.
+
+## 5H production baseline
+
+The benchmark ran against the merged/deployed 5H Worker with three attempts per question.
+
+Reliability in the same run:
+
+- 30/30 non-zero attempts
+- 0 zero-result attempts
+- 0 request/API errors
+- 10/10 stable-nonzero queries
+- latency P50 926 ms, P90 981 ms, max 3,909 ms
+
+Precision:
+
+- Hit@1: **0.667 (20/30)**
+- Hit@5: **1.000 (30/30)**
+- MRR: **0.775**
+- no relevant-result misses in the top five
+
+Per-query first-relevant ranks across the three attempts:
+
+| ID | Hit@1 | Hit@5 | MRR | First relevant ranks |
+| --- | ---: | ---: | ---: | --- |
+| Q01 | 1.000 | 1.000 | 1.000 | 1, 1, 1 |
+| Q02 | 1.000 | 1.000 | 1.000 | 1, 1, 1 |
+| Q03 | 1.000 | 1.000 | 1.000 | 1, 1, 1 |
+| Q04 | 0.667 | 1.000 | 0.750 | 1, 4, 1 |
+| Q05 | 1.000 | 1.000 | 1.000 | 1, 1, 1 |
+| Q06 | 0.000 | 1.000 | 0.500 | 2, 2, 2 |
+| Q07 | 1.000 | 1.000 | 1.000 | 1, 1, 1 |
+| Q08 | 1.000 | 1.000 | 1.000 | 1, 1, 1 |
+| Q09 | 0.000 | 1.000 | 0.200 | 5, 5, 5 |
+| Q10 | 0.000 | 1.000 | 0.300 | 2, 5, 5 |
+
+The benchmark makes the remaining precision problem concrete. Q06 consistently retrieves Spotify evidence but only from rank 2 because an unrelated source can rank first. Q09 consistently finds directly relevant organizational-context evidence only at rank 5. Q10 also has weak top-rank precision. Q04 shows ranking variability across repeated identical questions.
 
 ## Acceptance
 
-Keep Slice 5K if:
+Slice 5K passes its acceptance criteria:
 
 - the evaluator validates exact Q01–Q10 judgment coverage
-- CI can run the benchmark against production without changing retrieval
+- CI runs the benchmark against production without changing retrieval
 - the report exposes Hit@1, Hit@5, MRR, per-query first-relevant ranks, and representative ranked outputs
-- the resulting 5H numbers are useful as a stable comparison baseline for future experiments
+- the 5H measurements provide a stable comparison baseline for future experiments
 
-This slice does not introduce pass/fail precision thresholds yet. Its first purpose is characterization and benchmark establishment.
+This slice deliberately does not introduce pass/fail precision thresholds yet. Future retrieval experiments can now be evaluated against both reliability and precision without optimizing a single example in isolation.
 
 ## Deliberately unchanged
 
