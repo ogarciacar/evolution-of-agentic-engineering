@@ -9,10 +9,10 @@
       "zone_name": "agenticengineering.science"
     }
   ],
-  "ai_search": [
+  "ai_search_namespaces": [
     {
       "binding": "AI_SEARCH",
-      "instance_name": "agentic-engineering-search",
+      "namespace": "default",
       "remote": true
     }
   ]
