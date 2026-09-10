@@ -116,9 +116,7 @@ async function body(response) {
   assert.deepEqual(calls[0], {
     messages: [{ role: "user", content: "Spotify" }],
     ai_search_options: {
-      retrieval: {
-        keyword_match_mode: "or",
-      },
+      retrieval: { keyword_match_mode: "or" },
     },
   });
 
