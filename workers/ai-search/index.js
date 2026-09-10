@@ -5,6 +5,47 @@ const AI_SEARCH_INSTANCE = "agentic-engineering-search";
 const PRACTICES_PATH = "/practices";
 const PRACTICES_TITLE = "Practice Observations";
 const PRACTICES_EXCERPT = "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.";
+const LEXICAL_STOP_WORDS = new Set([
+  "a",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "by",
+  "companies",
+  "do",
+  "does",
+  "evidence",
+  "exists",
+  "for",
+  "from",
+  "has",
+  "have",
+  "how",
+  "in",
+  "is",
+  "it",
+  "of",
+  "on",
+  "or",
+  "relate",
+  "reported",
+  "that",
+  "the",
+  "their",
+  "this",
+  "to",
+  "use",
+  "what",
+  "when",
+  "where",
+  "which",
+  "who",
+  "why",
+  "with",
+]);
 
 function json(data, status = 200, extraHeaders = {}) {
   return Response.json(data, {
@@ -97,6 +138,38 @@ function uniqueResults(chunks) {
   return results;
 }
 
+function lexicalTokens(text) {
+  const tokens = String(text ?? "").toLowerCase().match(/[a-z0-9]+/g) || [];
+  return [...new Set(tokens.filter((token) => token.length > 1 && !LEXICAL_STOP_WORDS.has(token)))];
+}
+
+function lexicalAffinity(queryTokens, result) {
+  const titleTokens = new Set(lexicalTokens(result?.title));
+  const excerptTokens = new Set(lexicalTokens(result?.excerpt));
+  let affinity = 0;
+
+  for (const token of queryTokens) {
+    if (titleTokens.has(token)) affinity += 2;
+    if (excerptTokens.has(token)) affinity += 1;
+  }
+
+  return affinity;
+}
+
+function rerankResults(query, results) {
+  const queryTokens = lexicalTokens(query);
+  if (queryTokens.length === 0 || results.length < 2) return results;
+
+  return results
+    .map((result, originalRank) => ({
+      result,
+      originalRank,
+      affinity: lexicalAffinity(queryTokens, result),
+    }))
+    .sort((left, right) => right.affinity - left.affinity || left.originalRank - right.originalRank)
+    .map(({ result }) => result);
+}
+
 export async function handleRequest(request, env) {
   const url = new URL(request.url);
   if (url.pathname !== "/api/search") return json({ error: "Not found" }, 404);
@@ -123,7 +196,7 @@ export async function handleRequest(request, env) {
     });
 
     const candidates = search?.chunks || [];
-    const results = uniqueResults(candidates);
+    const results = rerankResults(query, uniqueResults(candidates));
     const latencyMs = Date.now() - startedAt;
     console.log(JSON.stringify({
       event: "ai_search",
