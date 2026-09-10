@@ -1,6 +1,7 @@
 const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
+const RETRY_BUDGET_MS = 5000;
 const PRACTICES_PATH = "/practices";
 const PRACTICES_TITLE = "Practice Observations";
 const PRACTICES_EXCERPT = "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.";
@@ -110,6 +111,30 @@ function searchOptions(query) {
   };
 }
 
+function retryWithinBudget(env, options, budgetMs = RETRY_BUDGET_MS) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const startedAt = Date.now();
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      resolve({ search: null, error: false, timedOut: true, latencyMs: Date.now() - startedAt });
+    }, budgetMs);
+
+    env.AI_SEARCH.search(options).then((search) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve({ search, error: false, timedOut: false, latencyMs: Date.now() - startedAt });
+    }).catch(() => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve({ search: null, error: true, timedOut: false, latencyMs: Date.now() - startedAt });
+    });
+  });
+}
+
 export async function handleRequest(request, env) {
   const url = new URL(request.url);
   if (url.pathname !== "/api/search") return json({ error: "Not found" }, 404);
@@ -138,22 +163,22 @@ export async function handleRequest(request, env) {
     let retryLatencyMs = null;
     let retryRecovered = false;
     let retryError = false;
+    let retryTimedOut = false;
 
     if (firstCandidates.length === 0) {
       retryAttempted = true;
-      const retryStartedAt = Date.now();
-      try {
-        const retrySearch = await env.AI_SEARCH.search(options);
-        retryLatencyMs = Date.now() - retryStartedAt;
-        const retryCandidates = retrySearch?.chunks || [];
+      const retry = await retryWithinBudget(env, options);
+      retryLatencyMs = retry.latencyMs;
+      retryError = retry.error;
+      retryTimedOut = retry.timedOut;
+
+      if (retry.search) {
+        const retryCandidates = retry.search?.chunks || [];
         retryCandidateCount = retryCandidates.length;
         if (retryCandidates.length > 0) {
           candidates = retryCandidates;
           retryRecovered = true;
         }
-      } catch {
-        retryLatencyMs = Date.now() - retryStartedAt;
-        retryError = true;
       }
     }
 
@@ -169,6 +194,8 @@ export async function handleRequest(request, env) {
       retry_candidate_count: retryCandidateCount,
       retry_recovered: retryRecovered,
       retry_error: retryError,
+      retry_timed_out: retryTimedOut,
+      retry_budget_ms: RETRY_BUDGET_MS,
       first_latency_ms: firstLatencyMs,
       retry_latency_ms: retryLatencyMs,
       latency_ms: latencyMs,
@@ -182,6 +209,7 @@ export async function handleRequest(request, env) {
       event: "ai_search_error",
       result_count: 0,
       retry_attempted: false,
+      retry_budget_ms: RETRY_BUDGET_MS,
       latency_ms: latencyMs,
       zero_results: true,
     }));
