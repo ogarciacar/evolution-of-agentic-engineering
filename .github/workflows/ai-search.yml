@@ -46,9 +46,15 @@ jobs:
         run: node experiments/ai-search/evaluate.mjs --attempts 3 --slow-ms 7000 --output .artifacts/ai-search-reliability.md
       - name: Show retrieval reliability characterization
         run: cat .artifacts/ai-search-reliability.md
+      - name: Run Playground parity probe
+        run: node experiments/ai-search/evaluate.mjs --queries experiments/ai-search/playground-parity-queries.json --attempts 10 --slow-ms 7000 --output .artifacts/ai-search-playground-parity.md
+      - name: Show Playground parity probe
+        run: cat .artifacts/ai-search-playground-parity.md
       - name: Upload retrieval reliability characterization
         uses: actions/upload-artifact@v4
         with:
           name: ai-search-reliability-report
-          path: .artifacts/ai-search-reliability.md
+          path: |
+            .artifacts/ai-search-reliability.md
+            .artifacts/ai-search-playground-parity.md
           if-no-files-found: error
