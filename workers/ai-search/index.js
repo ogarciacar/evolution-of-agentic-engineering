@@ -112,7 +112,7 @@ export async function handleRequest(request, env) {
   const startedAt = Date.now();
   try {
     const search = await env.AI_SEARCH.search({
-      query,
+      messages: [{ role: "user", content: query }],
       ai_search_options: {
         retrieval: {
           max_num_results: MAX_RESULTS,
