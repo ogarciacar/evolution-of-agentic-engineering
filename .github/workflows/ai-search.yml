@@ -46,9 +46,15 @@ jobs:
         run: node experiments/ai-search/evaluate.mjs --attempts 3 --slow-ms 7000 --output .artifacts/ai-search-reliability.md
       - name: Show retrieval reliability characterization
         run: cat .artifacts/ai-search-reliability.md
-      - name: Upload retrieval reliability characterization
+      - name: Run production retrieval precision benchmark
+        run: node experiments/ai-search/evaluate-precision.mjs --attempts 3 --output .artifacts/ai-search-precision.md
+      - name: Show retrieval precision benchmark
+        run: cat .artifacts/ai-search-precision.md
+      - name: Upload retrieval evaluation reports
         uses: actions/upload-artifact@v4
         with:
           name: ai-search-reliability-report
-          path: .artifacts/ai-search-reliability.md
+          path: |
+            .artifacts/ai-search-reliability.md
+            .artifacts/ai-search-precision.md
           if-no-files-found: error
