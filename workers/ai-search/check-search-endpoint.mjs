@@ -106,7 +106,7 @@ async function body(response) {
 
   assert.equal(calls.length, 1);
   assert.deepEqual(calls[0], {
-    query: "Spotify",
+    messages: [{ role: "user", content: "Spotify" }],
     ai_search_options: {
       retrieval: { max_num_results: 5, context_expansion: 0 },
       query_rewrite: { enabled: false },
