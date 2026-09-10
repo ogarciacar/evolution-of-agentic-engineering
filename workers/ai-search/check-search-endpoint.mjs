@@ -139,6 +139,82 @@ async function body(response) {
 }
 
 {
+  const urls = [
+    "/signals/cursor/",
+    "/signals/spotify-one/",
+    "/signals/spotify-two/",
+    "/signals/other/",
+    "/signals/spotify-three/",
+  ];
+  const { env } = fakeEnv(async () => ({
+    chunks: [
+      {
+        score: 1,
+        text: "Coordination cost across many subagents.",
+        item: { key: urls[0], metadata: { title: "Cooperation has to earn its coordination cost" } },
+      },
+      {
+        score: 0.92,
+        text: "Spotify reports platform context for migrations.",
+        item: { key: urls[1], metadata: { title: "Spotify migration context" } },
+      },
+      {
+        score: 0.9,
+        text: "Verification feedback from Spotify background agents.",
+        item: { key: urls[2], metadata: { title: "Verification feedback" } },
+      },
+      {
+        score: 0.88,
+        text: "Human review remains important.",
+        item: { key: urls[3], metadata: { title: "Human review" } },
+      },
+      {
+        score: 0.84,
+        text: "Fleet-scale maintenance at Spotify.",
+        item: { key: urls[4], metadata: { title: "Spotify fleet maintenance" } },
+      },
+    ],
+  }));
+
+  const response = await worker.fetch(request("/api/search?q=What%20has%20Spotify%20reported%3F"), env);
+  const data = await body(response);
+
+  assert.equal(data.results.length, 5);
+  assert.deepEqual(data.results.map((result) => new URL(result.url).pathname), [
+    "/signals/spotify-one/",
+    "/signals/spotify-three/",
+    "/signals/spotify-two/",
+    "/signals/cursor/",
+    "/signals/other/",
+  ]);
+  assert.deepEqual(new Set(data.results.map((result) => new URL(result.url).pathname)), new Set(urls));
+  assert.equal(data.results[0].score, 0.92);
+  assert.equal(data.results[1].score, 0.84);
+  assert.equal(data.results[2].score, 0.9);
+}
+
+{
+  const { env } = fakeEnv(async () => ({
+    chunks: [
+      {
+        score: 0.9,
+        text: "No matching content here.",
+        item: { key: "/signals/first/", metadata: { title: "First" } },
+      },
+      {
+        score: 0.8,
+        text: "Still no matching content.",
+        item: { key: "/signals/second/", metadata: { title: "Second" } },
+      },
+    ],
+  }));
+
+  const response = await worker.fetch(request("/api/search?q=what%20has%20the%20evidence"), env);
+  const data = await body(response);
+  assert.deepEqual(data.results.map((result) => new URL(result.url).pathname), ["/signals/first/", "/signals/second/"]);
+}
+
+{
   const uglyTableChunk = "| Company | Specific use case being solved | Problem encountered | Reported practice | Selection condition |";
   const { env } = fakeEnv(async () => ({
     chunks: [
