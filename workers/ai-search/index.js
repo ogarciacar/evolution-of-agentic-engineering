@@ -115,6 +115,11 @@ export async function handleRequest(request, env) {
     const instance = env.AI_SEARCH.get(AI_SEARCH_INSTANCE);
     const search = await instance.search({
       messages: [{ role: "user", content: query }],
+      ai_search_options: {
+        retrieval: {
+          keyword_match_mode: "or",
+        },
+      },
     });
 
     const candidates = search?.chunks || [];
