@@ -119,11 +119,6 @@ export async function handleRequest(request, env) {
         retrieval: {
           keyword_match_mode: "or",
         },
-        reranking: {
-          enabled: true,
-          model: "@cf/baai/bge-reranker-base",
-          match_threshold: 0,
-        },
       },
     });
 
