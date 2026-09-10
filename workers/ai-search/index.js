@@ -1,6 +1,7 @@
 const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
+const AI_SEARCH_INSTANCE = "agentic-engineering-search";
 const PRACTICES_PATH = "/practices";
 const PRACTICES_TITLE = "Practice Observations";
 const PRACTICES_EXCERPT = "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.";
@@ -111,15 +112,13 @@ export async function handleRequest(request, env) {
 
   const startedAt = Date.now();
   try {
-    const search = await env.AI_SEARCH.search({
-      query,
+    const instance = env.AI_SEARCH.get(AI_SEARCH_INSTANCE);
+    const search = await instance.search({
+      messages: [{ role: "user", content: query }],
       ai_search_options: {
         retrieval: {
-          max_num_results: MAX_RESULTS,
-          context_expansion: 0,
+          keyword_match_mode: "or",
         },
-        query_rewrite: { enabled: false },
-        reranking: { enabled: false },
       },
     });
 

@@ -7,13 +7,20 @@ function request(path, init = {}) {
 
 function fakeEnv(searchImpl = async () => ({ chunks: [] })) {
   const calls = [];
+  const instanceGets = [];
   return {
     calls,
+    instanceGets,
     env: {
       AI_SEARCH: {
-        async search(options) {
-          calls.push(options);
-          return searchImpl(options);
+        get(name) {
+          instanceGets.push(name);
+          return {
+            async search(options) {
+              calls.push(options);
+              return searchImpl(options);
+            },
+          };
         },
       },
     },
@@ -62,7 +69,7 @@ async function body(response) {
 }
 
 {
-  const { env, calls } = fakeEnv(async () => ({
+  const { env, calls, instanceGets } = fakeEnv(async () => ({
     chunks: [
       {
         id: "internal-chunk-id",
@@ -104,13 +111,12 @@ async function body(response) {
   assert.equal(response.headers.get("Cache-Control"), "no-store");
   assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
 
+  assert.deepEqual(instanceGets, ["agentic-engineering-search"]);
   assert.equal(calls.length, 1);
   assert.deepEqual(calls[0], {
-    query: "Spotify",
+    messages: [{ role: "user", content: "Spotify" }],
     ai_search_options: {
-      retrieval: { max_num_results: 5, context_expansion: 0 },
-      query_rewrite: { enabled: false },
-      reranking: { enabled: false },
+      retrieval: { keyword_match_mode: "or" },
     },
   });
 
