@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "queries": [
+    {
+      "id": "Q01",
+      "query": "Spotify"
+    },
+    {
+      "id": "Q02",
+      "query": "What has Spotify reported?"
+    }
+  ]
+}
