@@ -1,0 +1,76 @@
+# Slice 5J — Rerank OR candidates without reranker filtering
+
+## Question
+
+Can semantic reranking improve ordering on top of the reliable Slice 5H `keyword_match_mode: "or"` baseline if we remove the reranker's result-filtering effect?
+
+## Starting condition
+
+Slice 5H is restored in production and revalidated:
+
+- full corpus: 30/30 non-zero attempts
+- 10/10 stable-nonzero queries
+- Playground parity: `Spotify` 10/10 and `What has Spotify reported?` 10/10
+- 0 API errors
+- full-corpus latency P50 ~1.0 s, P90 ~1.1 s
+
+Its remaining weakness is precision: for `What has Spotify reported?`, an unrelated Cursor/pstack signal can rank ahead of Spotify evidence.
+
+Slice 5I enabled reranking with Cloudflare's default reranking match threshold of `0.4`. It improved the targeted Spotify ordering but reduced the full corpus to 15/30 non-zero attempts and produced five persistent-zero queries.
+
+## Change
+
+Keep Slice 5H retrieval and enable the same reranker used in 5I, but explicitly set the reranking match threshold to `0`:
+
+```js
+reranking: {
+  enabled: true,
+  model: "@cf/baai/bge-reranker-base",
+  match_threshold: 0,
+}
+```
+
+Cloudflare documents `reranking.match_threshold` as the minimum reranking score and allows values from `0` to `1`; the default is `0.4`. Setting it to `0` is intentionally maximally permissive so this experiment tests reranking primarily as an ordering step rather than as an additional result filter.
+
+The retrieval-stage match threshold remains unchanged at the instance default.
+
+## Hypothesis
+
+The 5I recall regression was caused mainly by the reranker's default `0.4` threshold filtering candidates after semantic scoring, not by semantic reordering itself.
+
+If that is true, a zero reranking threshold should preserve the 5H non-zero reliability while still allowing the reranker to place semantically relevant Spotify evidence ahead of unrelated OR-retrieved candidates.
+
+## Acceptance
+
+After deployment, rerun:
+
+1. the 10-query × 3-round production reliability characterization, and
+2. the 10-round Playground-parity probe for `Spotify` and `What has Spotify reported?`.
+
+Keep Slice 5J only if:
+
+- the full corpus remains effectively at the 5H reliability level with no material return of zero-result failures
+- both parity queries remain stable
+- `What has Spotify reported?` ranks Spotify evidence ahead of clearly unrelated evidence in the representative output
+- the representative outputs for the broader corpus remain plausible
+- latency remains acceptable relative to the ~1 second 5H baseline and does not reproduce 5I's pathological tail behavior
+
+## Deliberately unchanged
+
+- AI Search index / sync
+- corpus and path filters
+- namespace binding
+- `messages` input
+- `keyword_match_mode: "or"`
+- retrieval-stage match threshold
+- retrieval result count / instance defaults
+- embedding model
+- hybrid retrieval/fusion
+- query rewriting
+- reranking model
+- source normalization and deduplication
+- public response schema
+- UI
+- visitor retry behavior
+
+No AI Search sync is required.
