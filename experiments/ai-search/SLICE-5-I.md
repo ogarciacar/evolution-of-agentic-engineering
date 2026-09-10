@@ -6,7 +6,7 @@ Can AI Search reranking recover semantic precision after Slice 5H changed keywor
 
 ## Starting condition
 
-Slice 5H is the current deployed condition:
+Slice 5H was the deployed starting condition:
 
 - namespace binding with `env.AI_SEARCH.get("agentic-engineering-search")`
 - `messages` input
@@ -21,7 +21,7 @@ Observed Slice 5H production result:
 - full-corpus latency P50 915 ms, P90 964 ms, max 3,668 ms
 - parity latency P50 956 ms, P90 1,025 ms, max 2,343 ms
 
-Slice 5H restored recall but admitted broader results. In the parity run, `What has Spotify reported?` ranked the unrelated Cursor/pstack signal `Cooperation has to earn its coordination cost` first in the representative attempt.
+Slice 5H restored recall but admitted broader results. In one parity run, `What has Spotify reported?` ranked the unrelated Cursor/pstack signal `Cooperation has to earn its coordination cost` first in the representative attempt.
 
 ## Change
 
@@ -34,42 +34,40 @@ reranking: {
 }
 ```
 
-Do not set a reranking match threshold in this slice; use Cloudflare's default. Do not change candidate retrieval, keyword OR matching, query rewrite, index configuration, corpus, or source normalization.
+No reranking match threshold override. Candidate retrieval, keyword OR matching, query rewrite, index configuration, corpus, and source normalization remained unchanged.
 
-## Why this variable
+## Production result
 
-Cloudflare describes reranking as a secondary semantic relevance pass over retrieved results. This is a direct fit for the current failure mode: Slice 5H supplies enough candidates reliably, but the order can be semantically weak for natural-language questions.
+Post-deployment full-corpus characterization:
 
-## Acceptance
+- 15/30 non-zero attempts
+- 15/30 zero-result attempts
+- 0 request/API errors
+- 5/10 stable-nonzero queries
+- 5/10 persistent-zero queries
+- persistent-zero: Q05, Q07, Q08, Q09, Q10
+- latency P50 1,777 ms, P90 1,937 ms, max 4,825 ms in one run
+- a parallel characterization reproduced the same 15/30 split, with P50 1,662 ms, P90 2,158 ms, max 8,045 ms
 
-After deployment, rerun:
+Post-deployment Playground-parity probe:
 
-1. the 10-query × 3-round reliability characterization, and
-2. the 10-round Playground-parity probe for `Spotify` and `What has Spotify reported?`.
+- `Spotify`: 10/10 non-zero
+- `What has Spotify reported?`: 10/10 non-zero
+- the natural-language Spotify query now ranks Spotify evidence first, second, and third in the representative output
+- parity latency P50 1,587 ms, P90 2,650 ms, max 15,748 ms
 
-Keep Slice 5I only if:
+## Interpretation
 
-- the full corpus remains effectively stable with no material return of zero-result failures
-- both parity queries remain stable
-- the natural-language Spotify query ranks Spotify evidence ahead of clearly unrelated evidence in the representative output
-- broader representative outputs remain plausible for their questions
-- reranking latency remains acceptable relative to the ~1 second Slice 5H baseline
+Reranking improved semantic ordering for the specific Spotify natural-language query, but it materially regressed corpus-wide recall. Five evaluation queries that were stable under Slice 5H became persistent-zero under Slice 5I. The effect was reproduced in two overlapping characterization runs, with 0 API errors in both.
 
-## Deliberately unchanged
+Reranking also increased normal latency from roughly 1 second under Slice 5H to roughly 1.6–1.8 seconds, with a much worse observed tail.
 
-- AI Search index / sync
-- corpus and path filters
-- namespace binding
-- `messages` input
-- `keyword_match_mode: "or"`
-- embedding model
-- hybrid retrieval/fusion
-- candidate result count
-- query rewriting
-- reranking match threshold
-- source deduplication and normalization
-- public response schema
-- UI
-- visitor retry behavior
+This means the default reranking behavior is too aggressive for the current small corpus and query set. The precision gain does not justify losing half of the corpus-level retrieval attempts.
+
+## Decision
+
+Reject Slice 5I and do not merge it.
+
+Restore the deployed Worker to Slice 5H (`keyword_match_mode: "or"`, reranking disabled). Any future precision experiment should preserve the 5H recall baseline and test a narrower relevance intervention.
 
 No AI Search sync is required.
