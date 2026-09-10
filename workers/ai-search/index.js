@@ -1,4 +1,5 @@
 const SITE_ORIGIN = "https://agenticengineering.science";
+const AI_SEARCH_INSTANCE = "agentic-engineering-search";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
 const PRACTICES_PATH = "/practices";
@@ -111,7 +112,7 @@ export async function handleRequest(request, env) {
 
   const startedAt = Date.now();
   try {
-    const search = await env.AI_SEARCH.search({
+    const search = await env.AI_SEARCH.get(AI_SEARCH_INSTANCE).search({
       query,
       ai_search_options: {
         retrieval: {
