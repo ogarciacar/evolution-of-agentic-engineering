@@ -23,7 +23,7 @@ Keep the existing 5H AI Search request unchanged:
 
 - hybrid retrieval at instance defaults
 - `keyword_match_mode: "or"`
-- no reranker
+- no Cloudflare reranker
 - no query rewriting
 - no index or corpus changes
 
@@ -55,6 +55,56 @@ Accept only if:
 
 A precision result inside the 5H variance range is inconclusive, not an improvement.
 
+## Production results
+
+Five independent post-deploy runs completed successfully.
+
+### Reliability
+
+- 150/150 non-zero
+- 0 zero-result attempts
+- 0 request/API errors
+- Hit@5: 1.000 in every run
+
+### Precision
+
+| Run | Hit@1 | MRR |
+| --- | ---: | ---: |
+| 1 | 0.733 | 0.837 |
+| 2 | 0.767 | 0.848 |
+| 3 | 0.733 | 0.837 |
+| 4 | 0.767 | 0.853 |
+| 5 | 0.667 | 0.792 |
+
+- aggregate Hit@1: **0.733 (110/150)**
+- Hit@1 run range: **0.667–0.767**
+- mean MRR: **0.833**
+- MRR run range: **0.792–0.853**
+
+### Latency
+
+- P50 run range: **901–1024 ms**; mean **936 ms**
+- P90 run range: **949–1309 ms**; mean **1042 ms**
+- maximum observed request: **3188 ms**
+- 0 attempts >= 7000 ms
+
+### Query-level behavior
+
+The lexical rule produced useful targeted gains but also a repeatable regression:
+
+- Q06 (`What has Spotify reported?`) moved to a relevant Spotify source at rank 1 in every measured attempt.
+- Q09 improved materially relative to 5H but still varied between ranks 1 and 2.
+- Q07 (`What practices relate to code search?`) regressed from the 5H rank-1 behavior to a relevant source at rank 2 in repeated 5N runs.
+- Q10 remained weak, with the first accepted relevant result consistently at rank 5.
+
+## Decision — reject
+
+5N does not meet its acceptance criterion.
+
+Although mean MRR (0.833) is slightly above the 5H maximum observed run value (0.827), the aggregate Hit@1 of 0.733 is exactly the upper edge of the 5H baseline range rather than clearly above it. Individual 5N runs also overlap substantially with the 5H variance envelope. The deterministic regression on Q07 further shows that the generic lexical rule trades ranking quality between query types rather than providing a robust overall improvement.
+
+The experiment is therefore rejected. Keep 5H as the production baseline and do not merge the lexical reranking behavior.
+
 ## Scope
 
-This slice changes only application-side ordering of the already-selected top five source pages. It does not change AI Search retrieval options, indexing, corpus, judgments, source diversity, result count, or visitor retry behavior.
+This slice changed only application-side ordering of the already-selected top five source pages. It did not change AI Search retrieval options, indexing, corpus, judgments, source diversity, result count, or visitor retry behavior.
