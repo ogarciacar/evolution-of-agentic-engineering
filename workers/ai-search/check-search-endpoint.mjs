@@ -117,10 +117,6 @@ async function body(response) {
     messages: [{ role: "user", content: "Spotify" }],
     ai_search_options: {
       retrieval: { keyword_match_mode: "or" },
-      reranking: {
-        enabled: true,
-        model: "@cf/baai/bge-reranker-base",
-      },
     },
   });
 
