@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "judgments": [
+    {
+      "id": "Q01",
+      "relevant_paths": [
+        "/signals/2026-06-03-spotify-code-with-claude"
+      ],
+      "rationale": "This evidence directly reports the claim that coding is no longer the constraint."
+    },
+    {
+      "id": "Q02",
+      "relevant_paths": [
+        "/practices",
+        "/signals/2026-01-28-lulla-et-al-agents-md-efficiency",
+        "/signals/2026-02-12-gloaguen-et-al-context-files-evaluation",
+        "/signals/2025-11-24-spotify-honk-part-2",
+        "/signals/2026-04-22-spotify-honk-part-4",
+        "/signals/2026-08-31-infobip-phased-workflow-coding-agents"
+      ],
+      "rationale": "These sources directly evaluate or describe repository instructions, context files, platform context, context assembly, or repository discovery practices. Negative findings still materially answer the question and count as relevant."
+    },
+    {
+      "id": "Q03",
+      "relevant_paths": [
+        "/practices",
+        "/signals/2026-04-22-spotify-honk-part-4"
+      ],
+      "rationale": "These sources directly connect Spotify's migration workflow with Backstage/dependency lineage used to identify affected repositories."
+    },
+    {
+      "id": "Q04",
+      "relevant_paths": [
+        "/signals/2025-11-06-spotify-honk-part-1",
+        "/signals/2025-12-09-spotify-honk-part-3",
+        "/signals/2026-04-24-cursor-agents-window",
+        "/signals/2026-06-03-spotify-code-with-claude",
+        "/signals/2026-08-27-uber-efficient-software-factory",
+        "/signals/2026-09-06-openai-research-acceleration"
+      ],
+      "rationale": "These sources contain concrete scale signals about background-agent sessions, agent-attributed pull requests, many-agent operation, or aggregate agent execution."
+    },
+    {
+      "id": "Q05",
+      "relevant_paths": [
+        "/practices",
+        "/signals/2025-12-09-spotify-honk-part-3",
+        "/signals/2026-08-27-uber-efficient-software-factory",
+        "/signals/2026-09-03-cursor-pstack"
+      ],
+      "rationale": "These sources directly describe verification, feedback loops, judges, quality/reliability signals, visual validation, or durable verification state for agent work."
+    },
+    {
+      "id": "Q06",
+      "relevant_paths": [
+        "/signals/2025-11-06-spotify-honk-part-1",
+        "/signals/2025-11-24-spotify-honk-part-2",
+        "/signals/2025-12-09-spotify-honk-part-3",
+        "/signals/2026-04-22-spotify-honk-part-4",
+        "/signals/2026-06-03-spotify-code-with-claude"
+      ],
+      "rationale": "The question asks specifically for Spotify reporting, so the known Spotify evidence records are relevant."
+    },
+    {
+      "id": "Q07",
+      "relevant_paths": [
+        "/practices",
+        "/signals/2026-04-22-spotify-honk-part-4"
+      ],
+      "rationale": "These sources directly describe cross-repository code search/Codesearch as a practice for locating migration targets."
+    },
+    {
+      "id": "Q08",
+      "relevant_paths": [
+        "/signals/2026-04-27-openai-symphony",
+        "/signals/2026-09-06-openai-research-acceleration"
+      ],
+      "rationale": "These sources directly describe human attention or human labor becoming a constraint as agent execution scales."
+    },
+    {
+      "id": "Q09",
+      "relevant_paths": [
+        "/signals/2025-11-24-spotify-honk-part-2",
+        "/signals/2026-04-22-spotify-honk-part-4",
+        "/signals/2026-08-27-uber-efficient-software-factory",
+        "/signals/2026-08-31-infobip-phased-workflow-coding-agents"
+      ],
+      "rationale": "These sources directly describe organizational, platform, repository, task, or context-graph knowledge being assembled, discovered, or supplied to coding agents."
+    },
+    {
+      "id": "Q10",
+      "relevant_paths": [
+        "/signals/2025-11-24-spotify-honk-part-2",
+        "/signals/2025-12-09-spotify-honk-part-3",
+        "/signals/2026-06-16-anthropic-agentic-coding-persistent-returns-to-expertise",
+        "/signals/2026-09-06-openai-research-acceleration"
+      ],
+      "rationale": "These sources document continuing dependence on engineered feedback, constrained context, human expertise, or human steering rather than unconstrained autonomy."
+    }
+  ]
+}
