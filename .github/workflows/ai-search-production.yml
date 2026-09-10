@@ -1,0 +1,50 @@
+name: AI Search production benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      attempts:
+        description: Attempts per benchmark query
+        required: true
+        default: "3"
+        type: string
+      slow_ms:
+        description: Reliability slow-attempt threshold in milliseconds
+        required: true
+        default: "7000"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Run production retrieval reliability characterization
+        run: >-
+          node experiments/ai-search/evaluate.mjs
+          --attempts "${{ inputs.attempts }}"
+          --slow-ms "${{ inputs.slow_ms }}"
+          --output .artifacts/ai-search-reliability.md
+      - name: Show retrieval reliability characterization
+        run: cat .artifacts/ai-search-reliability.md
+      - name: Run production retrieval precision benchmark
+        run: >-
+          node experiments/ai-search/evaluate-precision.mjs
+          --attempts "${{ inputs.attempts }}"
+          --output .artifacts/ai-search-precision.md
+      - name: Show retrieval precision benchmark
+        run: cat .artifacts/ai-search-precision.md
+      - name: Upload retrieval evaluation reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-search-production-benchmark
+          path: |
+            .artifacts/ai-search-reliability.md
+            .artifacts/ai-search-precision.md
+          if-no-files-found: error
