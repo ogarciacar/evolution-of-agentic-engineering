@@ -29,6 +29,7 @@ Post-deployment Playground-parity probe:
 - `Spotify`: 10/10 non-zero
 - `What has Spotify reported?`: 10/10 non-zero
 - 0 request/API errors
+- parity latency P50 956 ms, P90 1,025 ms, max 2,343 ms
 
 This is a complete reliability recovery in the observed sample and strongly supports `and` keyword matching as the cause of the natural-language zero-result behavior.
 
