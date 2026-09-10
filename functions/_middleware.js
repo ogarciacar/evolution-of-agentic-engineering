@@ -11,12 +11,12 @@ export function injectPracticeNavigation(html, projectionId = "main") {
   const marker = html.indexOf(LANDSCAPE_END);
   if (marker === -1) return html;
   const insertionPoint = marker + LANDSCAPE_END.length;
-  const navigation = `<div class="links practice-navigation"><a href="/evidence">Explore evidence →</a><a href="${practicesHref(projectionId)}">Practice observations →</a></div>`;
+  const navigation = `<div class="links practice-navigation"><a href="/evidence">Explore evidence →</a><a href="${practicesHref(projectionId)}">Practice observations →</a><a href="evaluate.html">Evaluate the model →</a></div>`;
 
-  // The Evidence Landscape owns this navigation pair. Remove the older
-  // evidence-only link immediately following the landscape if present.
+  // The Evidence Landscape owns the homepage navigation immediately after it.
+  // Replace the older evidence/evaluation links so evidence is exposed once.
   const tail = html.slice(insertionPoint);
-  const legacy = tail.match(/^\s*<div class="links"><a href="evidence\.html">Explore evidence →<\/a><\/div>/);
+  const legacy = tail.match(/^\s*<div class="links"><a href="evidence\.html">Explore (?:the )?evidence →<\/a>(?:<a href="evaluate\.html">Evaluate the model →<\/a>)?<\/div>/);
   const afterLegacy = legacy ? insertionPoint + legacy[0].length : insertionPoint;
   return html.slice(0, insertionPoint) + navigation + html.slice(afterLegacy);
 }
