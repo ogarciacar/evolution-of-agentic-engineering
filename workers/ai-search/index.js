@@ -117,7 +117,7 @@ export async function handleRequest(request, env) {
       messages: [{ role: "user", content: query }],
       ai_search_options: {
         retrieval: {
-          keyword_match_mode: "or",
+          retrieval_type: "vector",
         },
       },
     });
