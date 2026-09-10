@@ -7,8 +7,8 @@ These documents describe the active research and publication architecture.
 - [Evidence claim mapping decisions](evidence-claim-mapping-decisions.md) — active interpretation rules for mapping evidence to model claims.
 - [CI-owned derived artifacts](ci-owned-derived-artifacts.md) — ownership boundaries between authored files, generated artifacts, and runtime publication.
 - [Rebuild invariant](rebuild-invariant.md) — recovery contract requiring the D1 projection to be reproducible from canonical repository state.
-- [AI Search experiment](ai-search-experiment.md) — isolated Cloudflare AI Search retrieval experiment over the published evidence corpus.
-- [AI Search retrieval evaluation](../experiments/ai-search/README.md) — stable evaluation queries, reproducible report runner, and the current retrieval baseline.
+- [AI Search](ai-search.md) — current Cloudflare AI Search architecture, corpus boundary, public retrieval contract, and deployment model.
+- [AI Search retrieval evaluation](../experiments/ai-search/README.md) — stable evaluation queries, relevance judgments, production baseline, and benchmark contract.
 - [Query examples](query-examples.sql) — example SQL for interrogating the evidence projection.
 
-Historical implementation-slice notes have been removed from `docs/`; Git history remains the source for those decisions.
+Historical implementation-slice notes are consolidated outside maintained architecture docs; Git and pull-request history preserve detailed implementation decisions.
