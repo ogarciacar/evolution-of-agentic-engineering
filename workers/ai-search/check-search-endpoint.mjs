@@ -13,7 +13,7 @@ function fakeEnv(searchImpl = async () => ({ chunks: [] })) {
       AI_SEARCH: {
         async search(options) {
           calls.push(options);
-          return searchImpl(options);
+          return searchImpl(options, calls.length);
         },
       },
     },
@@ -23,6 +23,15 @@ function fakeEnv(searchImpl = async () => ({ chunks: [] })) {
 async function body(response) {
   return response.json();
 }
+
+const expectedSearchOptions = {
+  query: "Spotify",
+  ai_search_options: {
+    retrieval: { max_num_results: 5, context_expansion: 0 },
+    query_rewrite: { enabled: false },
+    reranking: { enabled: false },
+  },
+};
 
 {
   const { env } = fakeEnv();
@@ -105,14 +114,7 @@ async function body(response) {
   assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
 
   assert.equal(calls.length, 1);
-  assert.deepEqual(calls[0], {
-    query: "Spotify",
-    ai_search_options: {
-      retrieval: { max_num_results: 5, context_expansion: 0 },
-      query_rewrite: { enabled: false },
-      reranking: { enabled: false },
-    },
-  });
+  assert.deepEqual(calls[0], expectedSearchOptions);
 
   const data = await body(response);
   assert.equal(data.query, "Spotify");
@@ -183,9 +185,58 @@ async function body(response) {
 }
 
 {
-  const { env } = fakeEnv(async () => { throw new Error("secret Cloudflare failure detail"); });
+  const recoveredChunk = {
+    score: 0.88,
+    text: "Recovered on the bounded second attempt.",
+    item: {
+      key: "https://agenticengineering.science/signals/recovered/",
+      metadata: { title: "Recovered evidence" },
+    },
+  };
+  const { env, calls } = fakeEnv(async (_options, callNumber) => callNumber === 1 ? { chunks: [] } : { chunks: [recoveredChunk] });
+  const response = await worker.fetch(request("/api/search?q=Spotify"), env);
+  const data = await body(response);
+
+  assert.equal(response.status, 200);
+  assert.equal(calls.length, 2);
+  assert.deepEqual(calls[0], expectedSearchOptions);
+  assert.deepEqual(calls[1], expectedSearchOptions);
+  assert.deepEqual(data.results, [{
+    title: "Recovered evidence",
+    url: "https://agenticengineering.science/signals/recovered/",
+    excerpt: "Recovered on the bounded second attempt.",
+    score: 0.88,
+  }]);
+}
+
+{
+  const { env, calls } = fakeEnv(async () => ({ chunks: [] }));
+  const response = await worker.fetch(request("/api/search?q=Spotify"), env);
+  const data = await body(response);
+
+  assert.equal(response.status, 200);
+  assert.equal(calls.length, 2);
+  assert.deepEqual(data, { query: "Spotify", results: [] });
+}
+
+{
+  const { env, calls } = fakeEnv(async (_options, callNumber) => {
+    if (callNumber === 1) return { chunks: [] };
+    throw new Error("retry failed");
+  });
+  const response = await worker.fetch(request("/api/search?q=Spotify"), env);
+  const data = await body(response);
+
+  assert.equal(response.status, 200);
+  assert.equal(calls.length, 2);
+  assert.deepEqual(data, { query: "Spotify", results: [] });
+}
+
+{
+  const { env, calls } = fakeEnv(async () => { throw new Error("secret Cloudflare failure detail"); });
   const response = await worker.fetch(request("/api/search?q=Spotify"), env);
   assert.equal(response.status, 503);
+  assert.equal(calls.length, 1);
   const data = await body(response);
   assert.deepEqual(data, { error: "Search is temporarily unavailable" });
   assert.doesNotMatch(JSON.stringify(data), /secret Cloudflare failure detail/);
