@@ -78,7 +78,7 @@ Reject Slice 5J.
 
 The experiment confirms that the 5I recall loss was largely caused by reranker filtering: setting the reranking threshold to `0` restores 30/30 retrieval reliability. But the reranker still produces unacceptable ordering regressions on broader benchmark questions, so the targeted Spotify improvement does not satisfy the predeclared corpus-wide precision acceptance criterion.
 
-Return production to Slice 5H. Before another retrieval change, add an explicit precision benchmark so ranking experiments can be evaluated across all benchmark queries rather than optimized around one Spotify example.
+The branch Worker and endpoint contract are restored to the Slice 5H condition after documenting the result. Production should also return to Slice 5H. Before another retrieval change, add an explicit precision benchmark so ranking experiments can be evaluated across all benchmark queries rather than optimized around one Spotify example.
 
 ## Deliberately unchanged
 
