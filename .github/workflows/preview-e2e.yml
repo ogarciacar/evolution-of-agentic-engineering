@@ -1,0 +1,75 @@
+name: Preview browser E2E
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+    paths:
+      - "evidence/**"
+      - "schema/**"
+      - "migrations/**"
+      - "functions/**"
+      - "index.html"
+      - "evidence.html"
+      - "evaluate.html"
+      - "evidence-query.js"
+      - "pipeline/projection/**"
+      - "pipeline/preview/**"
+      - "pipeline/browser/**"
+      - ".github/workflows/preview-smoke.yml"
+      - ".github/workflows/preview-e2e.yml"
+      - ".github/workflows/sync-preview-evidence-d1.yml"
+
+concurrency:
+  group: preview-browser-e2e-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: preview
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PAGES_PROJECT: evolution-of-agentic-engineering
+      PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      PREVIEW_E2E_TIMEOUT_SECONDS: "600"
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Resolve deployed preview context
+        run: python pipeline/browser/resolve_preview_context.py
+
+      - name: Install Playwright
+        run: npm install --no-save --package-lock=false @playwright/test@1.62.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run projected reader journey
+        run: npx playwright test --config pipeline/browser/playwright.config.mjs
+
+      - name: Upload browser diagnostics
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: preview-browser-e2e-${{ github.event.pull_request.head.sha }}
+          path: |
+            playwright-report/
+            test-results/browser-e2e/
+          if-no-files-found: ignore
+          retention-days: 14

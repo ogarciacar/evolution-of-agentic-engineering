@@ -7,6 +7,29 @@ function practicesHref(projectionId) {
   return `/practices?projection_id=${encodeURIComponent(projectionId)}`;
 }
 
+export function withProjectionHref(href, projectionId) {
+  const value = String(href ?? "");
+  if (projectionId === "main" || !value) return value;
+  if (value.startsWith("#") || value.startsWith("//") || /^[a-z][a-z0-9+.-]*:/i.test(value)) return value;
+
+  const hashIndex = value.indexOf("#");
+  const hash = hashIndex === -1 ? "" : value.slice(hashIndex);
+  const withoutHash = hashIndex === -1 ? value : value.slice(0, hashIndex);
+  const queryIndex = withoutHash.indexOf("?");
+  const path = queryIndex === -1 ? withoutHash : withoutHash.slice(0, queryIndex);
+  const params = new URLSearchParams(queryIndex === -1 ? "" : withoutHash.slice(queryIndex + 1));
+  params.set("projection_id", projectionId);
+  return `${path}?${params.toString()}${hash}`;
+}
+
+export function injectProjectionNavigation(html, projectionId = "main") {
+  if (projectionId === "main") return html;
+  return html.replace(/<a\b[^>]*>/gi, (anchor) => anchor.replace(/href=(["'])([^"']*)\1/i, (match, quote, href) => {
+    const projected = withProjectionHref(href, projectionId);
+    return projected === href ? match : `href=${quote}${projected}${quote}`;
+  }));
+}
+
 export function injectPracticeNavigation(html, projectionId = "main") {
   const marker = html.indexOf(LANDSCAPE_END);
   if (marker === -1) return html;
@@ -24,7 +47,7 @@ export function injectPracticeNavigation(html, projectionId = "main") {
 export async function onRequest(context) {
   const response = await context.next();
   const url = new URL(context.request.url);
-  if ((url.pathname !== "/" && url.pathname !== "/index.html") || context.request.method !== "GET" || !response.ok) return response;
+  if (context.request.method !== "GET" || !response.ok) return response;
 
   const contentType = response.headers.get("Content-Type") || "";
   if (!contentType.includes("text/html")) return response;
@@ -33,7 +56,12 @@ export async function onRequest(context) {
   if (projection.error) return response;
 
   const html = await response.text();
-  const body = injectPracticeNavigation(html, projection.id);
+  let body = html;
+  if (url.pathname === "/" || url.pathname === "/index.html") {
+    body = injectPracticeNavigation(body, projection.id);
+  }
+  body = injectProjectionNavigation(body, projection.id);
+
   if (body === html) return new Response(html, response);
 
   const headers = new Headers(response.headers);
