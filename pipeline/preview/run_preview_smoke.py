@@ -9,7 +9,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from preview_smoke import run_smoke, wait_for_preview
+try:
+    from .preview_smoke import run_smoke, wait_for_preview
+except ImportError:  # Support direct execution: python pipeline/preview/run_preview_smoke.py
+    from preview_smoke import run_smoke, wait_for_preview
 
 DEFAULT_PROJECT = "evolution-of-agentic-engineering"
 SHA_RE = re.compile(r"^[0-9a-f]{12,64}$")
@@ -64,6 +67,58 @@ def resolve_smoke_target(base_ref: str, head_sha: str, explicit_evidence_id: str
     return evidence_files[0].stem, False
 
 
+def run_from_context(
+    *,
+    head_sha: str | None = None,
+    base_ref: str | None = None,
+    preview_url: str | None = None,
+    project: str | None = None,
+    evidence_id: str | None = None,
+    timeout: int = 600,
+) -> tuple[str, str]:
+    """Resolve repository/deployment context and execute the deployed smoke assertions."""
+    if not Path("evidence").is_dir():
+        raise SystemExit("Run preview smoke from the repository root")
+
+    resolved_head = resolve_head_sha(head_sha)
+    resolved_base = resolve_base_ref(base_ref)
+    projection_id = resolved_head[:12]
+    expected_count = len(list(Path("evidence").glob("*.yaml")))
+    target_evidence_id, evidence_is_new = resolve_smoke_target(resolved_base, resolved_head, evidence_id)
+
+    print(f"Head SHA: {resolved_head}")
+    print(f"Base ref: {resolved_base}")
+    print(f"Projection: {projection_id}")
+    print(f"Evidence records: {expected_count}")
+    print(f"Signal smoke target: {target_evidence_id} (new={str(evidence_is_new).lower()})")
+
+    if preview_url:
+        resolved_preview_url = preview_url.rstrip("/")
+        print(f"Using supplied preview: {resolved_preview_url}")
+    else:
+        account_id = require_env("CLOUDFLARE_ACCOUNT_ID")
+        api_token = require_env("CLOUDFLARE_API_TOKEN")
+        resolved_preview_url = wait_for_preview(
+            account_id,
+            api_token,
+            project or os.environ.get("CLOUDFLARE_PAGES_PROJECT", DEFAULT_PROJECT),
+            resolved_head,
+            timeout,
+        )
+
+    run_smoke(
+        preview_url=resolved_preview_url,
+        projection_id=projection_id,
+        evidence_id=target_evidence_id,
+        expected_count=expected_count,
+        evidence_is_new=evidence_is_new,
+        timeout_seconds=timeout,
+    )
+
+    print(f"Preview smoke passed: projection={projection_id} preview={resolved_preview_url}")
+    return resolved_preview_url, projection_id
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(
         description="Smoke-test the deployed Cloudflare Pages preview for the current PR/commit.",
@@ -84,39 +139,14 @@ def parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = parser().parse_args()
-    if not Path("evidence").is_dir():
-        raise SystemExit("Run preview smoke from the repository root")
-
-    head_sha = resolve_head_sha(args.head_sha)
-    base_ref = resolve_base_ref(args.base_ref)
-    projection_id = head_sha[:12]
-    expected_count = len(list(Path("evidence").glob("*.yaml")))
-    evidence_id, evidence_is_new = resolve_smoke_target(base_ref, head_sha, args.evidence_id)
-
-    print(f"Head SHA: {head_sha}")
-    print(f"Base ref: {base_ref}")
-    print(f"Projection: {projection_id}")
-    print(f"Evidence records: {expected_count}")
-    print(f"Signal smoke target: {evidence_id} (new={str(evidence_is_new).lower()})")
-
-    if args.preview_url:
-        preview_url = args.preview_url.rstrip("/")
-        print(f"Using supplied preview: {preview_url}")
-    else:
-        account_id = require_env("CLOUDFLARE_ACCOUNT_ID")
-        api_token = require_env("CLOUDFLARE_API_TOKEN")
-        preview_url = wait_for_preview(account_id, api_token, args.project, head_sha, args.timeout)
-
-    run_smoke(
-        preview_url=preview_url,
-        projection_id=projection_id,
-        evidence_id=evidence_id,
-        expected_count=expected_count,
-        evidence_is_new=evidence_is_new,
-        timeout_seconds=args.timeout,
+    run_from_context(
+        head_sha=args.head_sha,
+        base_ref=args.base_ref,
+        preview_url=args.preview_url,
+        project=args.project,
+        evidence_id=args.evidence_id,
+        timeout=args.timeout,
     )
-
-    print(f"Preview smoke passed: projection={projection_id} preview={preview_url}")
     return 0
 
 
