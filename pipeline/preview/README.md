@@ -26,11 +26,57 @@ The runner polls both D1 projection readiness and the publication routes because
 
 Projection selection in this smoke layer intentionally uses the `X-Evidence-Projection` header. Browser navigation with `?projection_id=<SHA-12>` belongs to the browser E2E layer.
 
+## Presentation contract
+
+The smoke runner is also the reporter. The same check results drive both the console log and the GitHub Job Summary so the two views cannot drift.
+
+Console output is grouped for quick scanning:
+
+```text
+PREVIEW SMOKE
+=============
+
+CONTEXT
+  Head               <full-sha>
+  Base               <base-sha>
+  Projection         <sha-12>
+  Evidence           20
+  Signal             <evidence-id>
+  New evidence       false
+
+READINESS
+  … Pages deployment           build active
+  ✓ Pages deployment — https://<deployment>.pages.dev
+  … D1 projection              0/20 evidence records
+  ✓ D1 projection — 20/20 evidence records
+
+ACCEPTANCE
+  ✓ Evidence API — <evidence-id>
+  ✓ Scale Signal — D1 render /signals/<evidence-id>/
+  ✓ Route / — healthy HTML
+  ✓ Route /evidence.html — healthy HTML
+  ✓ Route /evaluate.html — healthy HTML
+  ✓ Default projection — main (20 evidence records)
+
+RESULT
+  ✓ PASSED — 8 checks
+```
+
+Repeated identical polling states are suppressed. State changes remain visible, so readiness races are still diagnosable without flooding the log.
+
+When GitHub Actions provides `GITHUB_STEP_SUMMARY`, the runner also writes a Markdown Job Summary containing:
+
+- context as a compact table;
+- every completed acceptance check;
+- the final passed/failed result.
+
+Failures produce the same structured `RESULT` section and a failed Job Summary before the process exits non-zero.
+
 ## Files
 
 - `run_preview_smoke.py` — CLI/CI entrypoint. Resolves Git context, derives SHA-12, counts the local evidence corpus, chooses a signal target, and optionally discovers the Cloudflare Pages deployment.
-- `preview_smoke.py` — reusable HTTP, Cloudflare deployment discovery, projection-readiness, publication-readiness, and assertion functions.
-- `test_preview_smoke.py` — unit tests plus an opt-in deployed acceptance test.
+- `preview_smoke.py` — reusable HTTP, Cloudflare deployment discovery, projection-readiness, publication-readiness, assertions, and shared console/Job Summary reporter.
+- `test_preview_smoke.py` — unit tests plus an opt-in deployed acceptance test, including reporting behavior.
 
 No smoke-test Python is embedded in the GitHub Actions workflow; CI invokes these files directly.
 
