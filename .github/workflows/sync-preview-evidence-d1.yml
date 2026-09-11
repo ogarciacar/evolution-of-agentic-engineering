@@ -13,6 +13,8 @@ on:
       - "practices.html"
       - "pipeline/projection/export-evidence-sql.py"
       - "pipeline/validation/validate-evidence.py"
+      - "pipeline/preview/**"
+      - ".github/workflows/preview-smoke.yml"
       - ".github/workflows/sync-preview-evidence-d1.yml"
 
 concurrency:
