@@ -1,0 +1,149 @@
+source:
+  title: "Building an open Agentic Internet: readable, discoverable, callable, and payable"
+  producer: "Cloudflare"
+  producer_type: organization
+  date: "2026-08-06"
+  url: "https://blog.cloudflare.com/the-agentic-internet/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "The Internet becomes part of the agent fitness function"
+  summary: >
+    Cloudflare reports billions of requests from well-behaved bots re-fetching
+    unchanged pages, then proposes agent-native primitives for reading,
+    discovery, identity, invocation, and payment. The signal suggests that as
+    agent populations grow, selection pressure moves outward from individual
+    agent configurations toward shared infrastructure and protocols.
+
+observed:
+  - >
+    Cloudflare reports that well-behaved bots generate billions of requests
+    re-fetching pages that have not changed, creating machine effort and cost
+    without a useful outcome for either side.
+  - >
+    Cloudflare describes agents as a new class of Internet actor and argues that
+    the human-oriented web creates unnecessary context, interaction, and
+    economic friction for them.
+  - >
+    Markdown for Agents is presented as a server-side way to reduce bandwidth,
+    token use, and irrelevant HTML in agent context windows; AI Search is
+    presented as an agent-oriented discovery interface and AEO as a way for
+    resource owners to measure whether agents can discover them.
+  - >
+    WebMCP lets sites expose explicit tool contracts to agents instead of
+    requiring DOM parsing and synthesized clicks, while also providing clearer
+    signals to content owners about what resources agents actually use.
+  - >
+    Web Bot Auth and PACT are presented as identity and access primitives that
+    let agents identify themselves and let sites decide which agents they trust
+    or admit.
+  - >
+    Cloudflare presents x402-compatible payments, wallets, and receipts as a way
+    for agents to transact directly with sites and for both sides to account for
+    what was used and paid for.
+  - >
+    Cloudflare says these mechanisms are intended to help agents and domain
+    owners cooperate on the open Internet rather than collide, and emphasizes
+    open standards including MCP, x402, Web Bot Auth, and PACT.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Cloudflare reports billions of redundant requests from well-behaved bots
+    re-fetching unchanged pages. This establishes Internet-scale environmental
+    friction for machine actors, but does not establish that Cloudflare's
+    proposed agent-native protocols have already removed that friction at
+    comparable scale.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: INCONCLUSIVE
+
+interpretation: >
+  The source extends the Selection hypothesis beyond repositories and engineering
+  organizations. When agents interact with infrastructure designed for humans,
+  the environment imposes measurable context, execution, and economic waste.
+  Cloudflare's proposed agent-native interfaces make those environmental
+  constraints more explicit through machine-readable content, discovery,
+  identity, callable contracts, observability, and transaction rails. The
+  source also points toward Cooperation between independent agents and domain
+  owners, but does not yet demonstrate that this cooperation provides a durable
+  fitness advantage over ad-hoc interaction.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Selection pressure may be scale-recursive. As agent populations grow, the
+    relevant fitness environment can move outward from the agent configuration
+    to the repository, organization, platform, and shared Internet protocols.
+    Agent-native standards may create preconditions for Cooperation by reducing
+    ambiguity and coordination cost across organizational boundaries, but the
+    source does not yet establish a durable cooperation advantage.
+
+what_this_does_not_establish:
+  - >
+    It does not establish that Cloudflare's proposed agent-native protocols
+    outperform conventional web interaction across repeated real-world agent
+    tasks.
+  - >
+    It does not establish a durable Cooperation advantage relative to isolated
+    or ad-hoc interaction.
+  - >
+    It does not establish stable Specialization or a higher-order agentic
+    engineering object.
+  - >
+    Cloudflare's architectural and product claims are first-party. The reported
+    redundant-request traffic establishes environmental friction, not the
+    effectiveness of every proposed remedy.
+  - >
+    The source concerns Internet-scale agent interaction broadly; coding agents
+    are identified as a mature form of this actor, but the reported billions of
+    requests are not specifically attributed to coding agents.
+
+open_question: >
+  As agent populations grow across organizational boundaries, which shared
+  protocols reduce context, coordination, and economic cost enough for
+  cooperation between independent agents and systems to become fitter than
+  ad-hoc interaction?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: agent-native-readable-content
+    use_case: "Let agents consume web content without paying to parse human-oriented presentation markup."
+    problem: "HTML intended for humans consumes bandwidth, tokens, and context-window capacity that does not contribute to the agent's task."
+    reported_practice: "Cloudflare presents Markdown for Agents as a server-side representation optimized for machine consumption."
+    selection_conditions: [context, economics]
+  - id: agent-native-discovery
+    use_case: "Help agents find resources and help resource owners understand whether agents can discover them."
+    problem: "Human-oriented search and visibility mechanisms do not directly expose what agents can find or how visible a resource is to them."
+    reported_practice: "Cloudflare presents AI Search for agent-oriented retrieval and AEO for measuring visibility to models and agents."
+    selection_conditions: [context, observability]
+  - id: explicit-callable-contracts
+    use_case: "Let agents perform actions on websites without reverse-engineering the DOM."
+    problem: "DOM parsing, guessed form fields, and synthesized clicks are brittle interfaces for machine actors."
+    reported_practice: "WebMCP lets sites register explicit tools and schemas that agents can invoke using the user's existing session and state."
+    selection_conditions: [execution, coordination, observability]
+  - id: agent-identity-and-admission
+    use_case: "Let sites identify and selectively admit legitimate agents."
+    problem: "Sites cannot reliably make policy decisions when machine actors are indistinguishable, spoofed, or treated as generic bots."
+    reported_practice: "Cloudflare presents Web Bot Auth and PACT as cryptographic identity and delegated trust mechanisms for agents."
+    selection_conditions: [execution, coordination]
+  - id: agent-native-payments
+    use_case: "Let agents compensate resource owners directly for content, APIs, or excess resource consumption."
+    problem: "Advertising and seat-based business models do not map cleanly to software actors that consume resources without rendering human interfaces."
+    reported_practice: "Cloudflare presents x402-compatible payments, agent wallets, monetization gateways, and receipts as transaction rails for agent interactions."
+    selection_conditions: [economics, coordination, observability]
+
+assessment:
+  assisted_by_ai: true
