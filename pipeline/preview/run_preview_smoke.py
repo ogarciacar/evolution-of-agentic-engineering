@@ -10,9 +10,9 @@ import sys
 from pathlib import Path
 
 try:
-    from .preview_smoke import run_smoke, wait_for_preview
+    from .preview_smoke import SmokeReporter, run_smoke, wait_for_preview
 except ImportError:  # Support direct execution: python pipeline/preview/run_preview_smoke.py
-    from preview_smoke import run_smoke, wait_for_preview
+    from preview_smoke import SmokeReporter, run_smoke, wait_for_preview
 
 DEFAULT_PROJECT = "evolution-of-agentic-engineering"
 SHA_RE = re.compile(r"^[0-9a-f]{12,64}$")
@@ -77,46 +77,58 @@ def run_from_context(
     timeout: int = 600,
 ) -> tuple[str, str]:
     """Resolve repository/deployment context and execute the deployed smoke assertions."""
-    if not Path("evidence").is_dir():
-        raise SystemExit("Run preview smoke from the repository root")
+    reporter = SmokeReporter()
+    reporter.banner()
 
-    resolved_head = resolve_head_sha(head_sha)
-    resolved_base = resolve_base_ref(base_ref)
-    projection_id = resolved_head[:12]
-    expected_count = len(list(Path("evidence").glob("*.yaml")))
-    target_evidence_id, evidence_is_new = resolve_smoke_target(resolved_base, resolved_head, evidence_id)
+    try:
+        if not Path("evidence").is_dir():
+            raise SystemExit("Run preview smoke from the repository root")
 
-    print(f"Head SHA: {resolved_head}")
-    print(f"Base ref: {resolved_base}")
-    print(f"Projection: {projection_id}")
-    print(f"Evidence records: {expected_count}")
-    print(f"Signal smoke target: {target_evidence_id} (new={str(evidence_is_new).lower()})")
+        resolved_head = resolve_head_sha(head_sha)
+        resolved_base = resolve_base_ref(base_ref)
+        projection_id = resolved_head[:12]
+        expected_count = len(list(Path("evidence").glob("*.yaml")))
+        target_evidence_id, evidence_is_new = resolve_smoke_target(resolved_base, resolved_head, evidence_id)
 
-    if preview_url:
-        resolved_preview_url = preview_url.rstrip("/")
-        print(f"Using supplied preview: {resolved_preview_url}")
-    else:
-        account_id = require_env("CLOUDFLARE_ACCOUNT_ID")
-        api_token = require_env("CLOUDFLARE_API_TOKEN")
-        resolved_preview_url = wait_for_preview(
-            account_id,
-            api_token,
-            project or os.environ.get("CLOUDFLARE_PAGES_PROJECT", DEFAULT_PROJECT),
-            resolved_head,
-            timeout,
+        reporter.section("Context")
+        reporter.context_item("Head", resolved_head)
+        reporter.context_item("Base", resolved_base)
+        reporter.context_item("Projection", projection_id)
+        reporter.context_item("Evidence", str(expected_count))
+        reporter.context_item("Signal", target_evidence_id)
+        reporter.context_item("New evidence", str(evidence_is_new).lower())
+
+        if preview_url:
+            resolved_preview_url = preview_url.rstrip("/")
+            reporter.context_item("Preview", resolved_preview_url)
+        else:
+            reporter.section("Readiness")
+            account_id = require_env("CLOUDFLARE_ACCOUNT_ID")
+            api_token = require_env("CLOUDFLARE_API_TOKEN")
+            resolved_preview_url = wait_for_preview(
+                account_id,
+                api_token,
+                project or os.environ.get("CLOUDFLARE_PAGES_PROJECT", DEFAULT_PROJECT),
+                resolved_head,
+                timeout,
+                reporter,
+            )
+            reporter.context.append(("Preview", resolved_preview_url))
+
+        run_smoke(
+            preview_url=resolved_preview_url,
+            projection_id=projection_id,
+            evidence_id=target_evidence_id,
+            expected_count=expected_count,
+            evidence_is_new=evidence_is_new,
+            timeout_seconds=timeout,
+            reporter=reporter,
         )
-
-    run_smoke(
-        preview_url=resolved_preview_url,
-        projection_id=projection_id,
-        evidence_id=target_evidence_id,
-        expected_count=expected_count,
-        evidence_is_new=evidence_is_new,
-        timeout_seconds=timeout,
-    )
-
-    print(f"Preview smoke passed: projection={projection_id} preview={resolved_preview_url}")
-    return resolved_preview_url, projection_id
+        reporter.finish(passed=True)
+        return resolved_preview_url, projection_id
+    except (AssertionError, SystemExit) as error:
+        reporter.finish(passed=False, error=str(error))
+        raise
 
 
 def parser() -> argparse.ArgumentParser:
