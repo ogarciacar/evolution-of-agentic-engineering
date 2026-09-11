@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { injectPracticeNavigation } from "../../functions/_middleware.js";
+import { injectPracticeNavigation, injectProjectionNavigation, withProjectionHref } from "../../functions/_middleware.js";
 
 const shell = `<section><!-- HOMEPAGE_EVIDENCE_START --><div>landscape</div><!-- HOMEPAGE_EVIDENCE_END --></section>`;
 const main = injectPracticeNavigation(shell, "main");
@@ -28,4 +28,20 @@ assert.equal((consolidated.match(/class="links/g) || []).length, 1);
 const unrelated = `<section>No evidence landscape</section>`;
 assert.equal(injectPracticeNavigation(unrelated, "main"), unrelated);
 
-console.log("Practice Observations navigation contract is stable");
+assert.equal(withProjectionHref("/evidence", "deadbeefcafe"), "/evidence?projection_id=deadbeefcafe");
+assert.equal(withProjectionHref("evaluate.html#claims", "deadbeefcafe"), "evaluate.html?projection_id=deadbeefcafe#claims");
+assert.equal(withProjectionHref("/evidence?stage=Selection", "deadbeefcafe"), "/evidence?stage=Selection&projection_id=deadbeefcafe");
+assert.equal(withProjectionHref("/evidence?projection_id=aaaaaaaaaaaa", "deadbeefcafe"), "/evidence?projection_id=deadbeefcafe");
+assert.equal(withProjectionHref("https://example.com/source", "deadbeefcafe"), "https://example.com/source");
+assert.equal(withProjectionHref("#details", "deadbeefcafe"), "#details");
+assert.equal(withProjectionHref("/evidence", "main"), "/evidence");
+
+const projectedHtml = injectProjectionNavigation(
+  `<nav><a href="/evidence">Evidence</a><a href="evaluate.html">Evaluate</a><a href="https://example.com/source">Source</a></nav>`,
+  "deadbeefcafe",
+);
+assert.match(projectedHtml, /href="\/evidence\?projection_id=deadbeefcafe"/);
+assert.match(projectedHtml, /href="evaluate\.html\?projection_id=deadbeefcafe"/);
+assert.match(projectedHtml, /href="https:\/\/example\.com\/source"/);
+
+console.log("Practice Observations and projection navigation contracts are stable");
