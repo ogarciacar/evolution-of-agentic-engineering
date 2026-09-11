@@ -37,9 +37,11 @@ assert.equal(withProjectionHref("#details", "deadbeefcafe"), "#details");
 assert.equal(withProjectionHref("/evidence", "main"), "/evidence");
 
 const projectedHtml = injectProjectionNavigation(
-  `<nav><a href="/evidence">Evidence</a><a href="evaluate.html">Evaluate</a><a href="https://example.com/source">Source</a></nav>`,
+  `<link rel="stylesheet" href="site.css"><nav><a href="/evidence">Evidence</a><a href="evaluate.html">Evaluate</a><a href="https://example.com/source">Source</a></nav>`,
   "deadbeefcafe",
 );
+assert.match(projectedHtml, /href="site\.css"/);
+assert.doesNotMatch(projectedHtml, /site\.css\?projection_id=/);
 assert.match(projectedHtml, /href="\/evidence\?projection_id=deadbeefcafe"/);
 assert.match(projectedHtml, /href="evaluate\.html\?projection_id=deadbeefcafe"/);
 assert.match(projectedHtml, /href="https:\/\/example\.com\/source"/);
