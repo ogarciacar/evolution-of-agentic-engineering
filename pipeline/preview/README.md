@@ -18,16 +18,18 @@ For the PR/head projection it verifies:
 - `/api/evidence` reports `X-Evidence-Projection: <SHA-12>` and the expected corpus count;
 - a concrete evidence record is available through the projected API;
 - the corresponding `/signals/<evidence-id>/` page is rendered from D1;
-- `/`, `/evidence.html`, and `/evaluate.html` return healthy HTML responses;
+- `/`, `/evidence.html`, and `/evaluate.html` become healthy HTML responses;
 - `/api/evidence` without a selector resolves to `main`;
 - when the branch adds a new evidence file, that evidence is absent from default `main`.
+
+The runner polls both D1 projection readiness and the publication routes because Cloudflare can expose the deployment before every static route is consistently available at the edge.
 
 Projection selection in this smoke layer intentionally uses the `X-Evidence-Projection` header. Browser navigation with `?projection_id=<SHA-12>` belongs to the browser E2E layer.
 
 ## Files
 
 - `run_preview_smoke.py` — CLI/CI entrypoint. Resolves Git context, derives SHA-12, counts the local evidence corpus, chooses a signal target, and optionally discovers the Cloudflare Pages deployment.
-- `preview_smoke.py` — reusable HTTP, Cloudflare deployment discovery, projection-readiness, and assertion functions.
+- `preview_smoke.py` — reusable HTTP, Cloudflare deployment discovery, projection-readiness, publication-readiness, and assertion functions.
 
 No smoke-test Python is embedded in the GitHub Actions workflow; CI invokes these files directly.
 
@@ -65,7 +67,7 @@ By default the runner uses:
 - signal target: the first newly added `evidence/*.yaml`, otherwise the first evidence record in the corpus;
 - readiness timeout: `PREVIEW_SMOKE_TIMEOUT_SECONDS`, otherwise 600 seconds.
 
-The runner waits for both the atomic Pages deployment and the matching D1 projection, so it is safe to start immediately after pushing a commit.
+The runner waits for the atomic Pages deployment, matching D1 projection, and publication routes, so it is safe to start immediately after pushing a commit.
 
 ## Run locally with a known preview URL
 
@@ -98,7 +100,7 @@ Useful options:
 --preview-url    Atomic Pages preview URL; bypasses Cloudflare deployment discovery.
 --project        Cloudflare Pages project name.
 --evidence-id    Evidence record to use for API and signal-page assertions.
---timeout        Seconds to wait for deployment/projection readiness.
+--timeout        Seconds to wait for deployment/projection/publication readiness.
 ```
 
 ## CI
