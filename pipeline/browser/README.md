@@ -35,34 +35,66 @@ No global `X-Evidence-Projection` header is injected by Playwright. The URL quer
 
 ## Files
 
-- `resolve_preview_context.py` — discovers the exact atomic Pages deployment for the PR head, waits for its SHA-12 D1 projection and publication routes, and exports browser context to GitHub Actions.
+- `run_preview_e2e.py` — one-command local runner: resolves the deployed preview context and launches the same Playwright journey used in CI.
+- `resolve_preview_context.py` — discovers the exact atomic Pages deployment for the PR head, waits for its SHA-12 D1 projection and publication routes, and returns/exports the browser context.
 - `playwright.config.mjs` — Chromium, reporters, timeout, and retained failure diagnostics.
 - `preview-e2e.spec.mjs` — projected reader journey, default-main isolation, browser diagnostics, readable console output, and GitHub Job Summary.
 
 ## Run locally
 
-Use Python 3.12+ and Node 24+. From the repository root:
+Use Python 3.12+ and Node 24+. Run from the repository root.
+
+Fetch the base branch once so the runner can identify newly added evidence:
 
 ```bash
 git fetch origin main
-npm install --no-save --package-lock=false @playwright/test@1.62.1
-npx playwright install chromium
 ```
 
-If you already know the atomic Pages preview URL, resolve the browser context with:
+### First run
+
+If Playwright is not installed yet, the wrapper can install the pinned test package and Chromium before running:
+
+```bash
+python pipeline/browser/run_preview_e2e.py \
+  --install \
+  --preview-url 'https://<deployment>.evolution-of-agentic-engineering.pages.dev'
+```
+
+### Subsequent runs
+
+After Playwright is installed, the local acceptance journey is a single command:
+
+```bash
+python pipeline/browser/run_preview_e2e.py \
+  --preview-url 'https://<deployment>.evolution-of-agentic-engineering.pages.dev'
+```
+
+The wrapper resolves `PREVIEW_URL`, `PROJECTION_ID`, `EVIDENCE_ID`, `EVIDENCE_IS_NEW`, and `EXPECTED_EVIDENCE_COUNT` internally and passes them directly to Playwright. No shell exports are required.
+
+To watch the journey in a visible Chromium window:
+
+```bash
+python pipeline/browser/run_preview_e2e.py \
+  --headed \
+  --preview-url 'https://<deployment>.evolution-of-agentic-engineering.pages.dev'
+```
+
+For automatic preview discovery, export `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then omit `--preview-url`:
+
+```bash
+export CLOUDFLARE_ACCOUNT_ID='<account-id>'
+export CLOUDFLARE_API_TOKEN='<api-token>'
+python pipeline/browser/run_preview_e2e.py
+```
+
+The token needs Pages Read (or Pages Write).
+
+The lower-level resolver remains available independently when needed:
 
 ```bash
 python pipeline/browser/resolve_preview_context.py \
   --preview-url 'https://<deployment>.evolution-of-agentic-engineering.pages.dev'
 ```
-
-The resolver prints the values required by Playwright. Export `PREVIEW_URL`, `PROJECTION_ID`, `EVIDENCE_ID`, `EVIDENCE_IS_NEW`, and `EXPECTED_EVIDENCE_COUNT`, then run:
-
-```bash
-npx playwright test --config pipeline/browser/playwright.config.mjs
-```
-
-For automatic preview discovery, export `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` before running the resolver. The token needs Pages Read (or Pages Write).
 
 ## CI
 
