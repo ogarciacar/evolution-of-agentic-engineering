@@ -60,33 +60,46 @@ function assertProjectedUrl(page) {
 
 function installDiagnostics(page) {
   const origin = new URL(previewUrl).origin;
-  const errors = [];
+  const diagnostics = { errors: [], ignoredThirdPartyConsole: 0 };
   const relevantTypes = new Set(["document", "script", "fetch", "xhr"]);
 
+  function isExternal(urlValue) {
+    if (!urlValue) return false;
+    try { return new URL(urlValue, previewUrl).origin !== origin; } catch { return false; }
+  }
+
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(`console: ${message.text()}`);
+    if (message.type() !== "error") return;
+    const text = message.text();
+    const sourceUrl = message.location().url;
+    const cloudflareRum = text.includes("cloudflareinsights.com/cdn-cgi/rum");
+    if (isExternal(sourceUrl) || cloudflareRum) {
+      diagnostics.ignoredThirdPartyConsole += 1;
+      return;
+    }
+    diagnostics.errors.push(`console: ${text}`);
   });
-  page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+  page.on("pageerror", (error) => diagnostics.errors.push(`pageerror: ${error.message}`));
   page.on("response", (response) => {
     const request = response.request();
     let url;
     try { url = new URL(response.url()); } catch { return; }
     if (url.origin !== origin || !relevantTypes.has(request.resourceType())) return;
-    if (response.status() >= 400) errors.push(`${request.resourceType()} HTTP ${response.status()}: ${url.pathname}${url.search}`);
+    if (response.status() >= 400) diagnostics.errors.push(`${request.resourceType()} HTTP ${response.status()}: ${url.pathname}${url.search}`);
   });
   page.on("requestfailed", (request) => {
     let url;
     try { url = new URL(request.url()); } catch { return; }
     if (url.origin !== origin || !relevantTypes.has(request.resourceType())) return;
-    errors.push(`${request.resourceType()} failed: ${url.pathname}${url.search} — ${request.failure()?.errorText || "unknown"}`);
+    diagnostics.errors.push(`${request.resourceType()} failed: ${url.pathname}${url.search} — ${request.failure()?.errorText || "unknown"}`);
   });
 
-  return errors;
+  return diagnostics;
 }
 
 test("projected reader journey preserves context and renders from D1", async ({ page }, testInfo) => {
   const checks = [];
-  const browserErrors = installDiagnostics(page);
+  const diagnostics = installDiagnostics(page);
   let failure = null;
 
   console.log("\nPREVIEW BROWSER E2E");
@@ -179,8 +192,11 @@ test("projected reader journey preserves context and renders from D1", async ({ 
       pass(checks, "Default isolation", "unselected browser traffic resolves to main");
     }
 
-    expect(browserErrors, `browser/runtime errors:\n${browserErrors.join("\n")}`).toEqual([]);
-    pass(checks, "Browser health", "no first-party console, page, request, or HTTP errors");
+    expect(diagnostics.errors, `first-party browser/runtime errors:\n${diagnostics.errors.join("\n")}`).toEqual([]);
+    const ignoredDetail = diagnostics.ignoredThirdPartyConsole
+      ? `; ignored ${diagnostics.ignoredThirdPartyConsole} third-party telemetry console messages`
+      : "";
+    pass(checks, "Browser health", `no first-party console, page, request, or HTTP errors${ignoredDetail}`);
 
     console.log("\nRESULT");
     console.log(`  ✓ PASSED — ${checks.length} checks`);
@@ -190,9 +206,9 @@ test("projected reader journey preserves context and renders from D1", async ({ 
     console.log(`  ✗ FAILED — ${error.message}`);
     throw error;
   } finally {
-    if (browserErrors.length) {
+    if (diagnostics.errors.length) {
       await testInfo.attach("browser-errors", {
-        body: Buffer.from(browserErrors.join("\n"), "utf8"),
+        body: Buffer.from(diagnostics.errors.join("\n"), "utf8"),
         contentType: "text/plain",
       });
     }
