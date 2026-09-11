@@ -26,6 +26,8 @@ jobs:
           node-version: "22"
       - name: Install dependencies
         run: pip install -r pipeline/requirements.txt
+      - name: Test preview smoke helpers
+        run: python -m unittest pipeline.preview.test_preview_smoke
       - name: Validate model claims
         run: python pipeline/validation/validate-model-claims.py
       - name: Validate research gaps

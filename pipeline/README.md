@@ -6,6 +6,7 @@ This directory contains the deterministic tooling that validates canonical resea
 - `build/` — generators for the research frontier, sitemap-backed evidence routes, model evaluation, and synthesis.
 - `validation/` — canonical research integrity and publication-safety checks.
 - `projection/` — D1 projection, synchronization export, deterministic rebuild, and runtime read-model contract checks.
+- `preview/` — deployed Cloudflare Pages preview verification against SHA-scoped D1 projections; see [`preview/README.md`](preview/README.md) for local and CI usage.
 - `evaluate-model-claims.py`, `evidence_claims.py`, `synthesis-state.py` — shared research helpers used across pipeline responsibilities.
 - `templates/` — templates consumed by pipeline generators.
 - `requirements.txt` — Python dependencies for the pipeline.
