@@ -123,6 +123,7 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
             preview_smoke.assert_default_main("https://preview.pages.dev")
 
     def test_run_smoke_composes_all_acceptance_checks(self) -> None:
+        reporter = preview_smoke.SmokeReporter()
         with (
             patch.object(preview_smoke, "wait_for_projection") as wait_projection,
             patch.object(preview_smoke, "assert_api_item") as assert_item,
@@ -138,13 +139,50 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
                 expected_count=21,
                 evidence_is_new=True,
                 timeout_seconds=30,
+                reporter=reporter,
             )
-        wait_projection.assert_called_once()
-        assert_item.assert_called_once()
-        assert_signal.assert_called_once()
-        wait_routes.assert_called_once()
-        assert_main.assert_called_once()
-        assert_isolated.assert_called_once_with("https://preview.pages.dev", "new-evidence")
+        wait_projection.assert_called_once_with(
+            "https://preview.pages.dev", "abcdef123456", 21, 30, reporter
+        )
+        assert_item.assert_called_once_with(
+            "https://preview.pages.dev", "abcdef123456", "new-evidence", reporter
+        )
+        assert_signal.assert_called_once_with(
+            "https://preview.pages.dev", "abcdef123456", "new-evidence", reporter
+        )
+        wait_routes.assert_called_once_with(
+            "https://preview.pages.dev", "abcdef123456", 30, reporter
+        )
+        assert_main.assert_called_once_with("https://preview.pages.dev", reporter)
+        assert_isolated.assert_called_once_with(
+            "https://preview.pages.dev", "new-evidence", reporter
+        )
+
+
+class PreviewSmokeReporterTest(unittest.TestCase):
+    def test_reporter_writes_github_job_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            summary_path = Path(directory) / "summary.md"
+            with patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": str(summary_path)}):
+                reporter = preview_smoke.SmokeReporter()
+                reporter.context_item("Projection", "abcdef123456")
+                reporter.context_item("Evidence", "20")
+                reporter.passed("D1 projection", "20/20 evidence records")
+                reporter.passed("Route /", "healthy HTML")
+                reporter.finish(passed=True)
+
+            summary = summary_path.read_text(encoding="utf-8")
+            self.assertIn("## ✅ Preview smoke", summary)
+            self.assertIn("`abcdef123456`", summary)
+            self.assertIn("**D1 projection** — 20/20 evidence records", summary)
+            self.assertIn("**Passed — 2 checks.**", summary)
+
+    def test_reporter_collapses_duplicate_wait_states(self) -> None:
+        reporter = preview_smoke.SmokeReporter()
+        with patch("builtins.print") as print_mock:
+            reporter.waiting("D1 projection", "0/20 evidence records")
+            reporter.waiting("D1 projection", "0/20 evidence records")
+        self.assertEqual(print_mock.call_count, 1)
 
 
 @unittest.skipUnless(
