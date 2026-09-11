@@ -10,10 +10,18 @@
   const stages = ["Apparition", "Selection", "Cooperation", "Specialization"];
   const conditions = ["Context", "Execution", "Verification", "Coordination", "Observability", "Economics", "Learning"];
   const verdicts = ["SUPPORTS", "REFINES", "CONTRADICTS", "INCONCLUSIVE"];
+  const projectionCandidate = new URLSearchParams(window.location.search).get("projection_id");
+  const projectionId = /^(?:main|[0-9a-f]{12})$/.test(projectionCandidate || "") ? projectionCandidate : null;
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[char]);
 
+  function withProjection(path) {
+    if (!projectionId) return path;
+    const url = new URL(path, window.location.origin);
+    url.searchParams.set("projection_id", projectionId);
+    return `${url.pathname}${url.search}${url.hash}`;
+  }
   function transitionLabel(mapping) {
     const transition = mapping?.transition;
     if (transition?.from && transition?.to) return `${transition.from} → ${transition.to}${transition.adjacent_stage ? ` / ${transition.adjacent_stage}` : ""}`;
@@ -22,7 +30,8 @@
   function render(record) {
     const chips = [transitionLabel(record.mapping), ...(record.mapping?.conditions || [])].filter(Boolean);
     const date = new Date(`${record.source.date}T00:00:00`).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-    return `<article class="query-result"><div class="date">${esc(date)} · ${esc(record.source.producer)}</div><h3>${esc(record.presentation.headline)}</h3><div class="meta">${chips.map((chip, index) => `<span class="chip${index === 0 ? " transition" : ""}">${esc(chip)}</span>`).join("")}</div><p>${esc(record.presentation.summary)}</p><div class="query-result-foot"><strong>${esc(record.model_implication.verdict)}</strong><a class="source" href="/signals/${encodeURIComponent(record.id)}/">Read Scale Signal →</a></div></article>`;
+    const signalHref = withProjection(`/signals/${encodeURIComponent(record.id)}/`);
+    return `<article class="query-result"><div class="date">${esc(date)} · ${esc(record.source.producer)}</div><h3>${esc(record.presentation.headline)}</h3><div class="meta">${chips.map((chip, index) => `<span class="chip${index === 0 ? " transition" : ""}">${esc(chip)}</span>`).join("")}</div><p>${esc(record.presentation.summary)}</p><div class="query-result-foot"><strong>${esc(record.model_implication.verdict)}</strong><a class="source" href="${esc(signalHref)}">Read Scale Signal →</a></div></article>`;
   }
   function countsFor(records, values, readValues) { return values.map((value) => ({ value, count: records.filter((record) => readValues(record).includes(value)).length })); }
   function strongest(items) { return [...items].sort((a,b) => b.count-a.count || a.value.localeCompare(b.value))[0]; }
@@ -36,8 +45,9 @@
     return `<aside class="query-result" aria-labelledby="synthesis-title"><div class="date">Evidence synthesis · computed from this query</div><h3 id="synthesis-title">What this evidence currently says</h3><p>The strongest concentration is <strong>${esc(leadStage.value)}</strong> (${leadStage.count}) and <strong>${esc(leadCondition.value)}</strong> (${leadCondition.count}). ${esc(verdictStatement)}</p><p><strong>${esc(weakCondition.value)}</strong> is the least represented condition (${weakCondition.count}), making it the clearest evidence gap in this result set.</p><div class="meta">${verdictCounts.filter(({count:n})=>n).map(({value,count:n})=>`<span class="chip">${esc(value)} ${n}</span>`).join("")}</div></aside>`;
   }
   function formParams(){const params=new URLSearchParams(new FormData(form));for(const [key,value] of [...params])if(!value||!queryKeys.includes(key))params.delete(key);return params;}
+  function apiParams(params){const api=new URLSearchParams(params);if(projectionId)api.set("projection_id",projectionId);return api;}
   function restoreQueryFromUrl(){const params=new URLSearchParams(window.location.search);for(const key of queryKeys){const field=form.elements.namedItem(key),value=params.get(key);if(field&&value&&[...field.options].some((option)=>option.value===value))field.value=value;}}
   function syncUrl(params){const url=new URL(window.location.href);for(const key of queryKeys)url.searchParams.delete(key);for(const [key,value] of params)url.searchParams.set(key,value);window.history.replaceState(null,"",`${url.pathname}${url.search}${url.hash}`);}
-  async function runQuery({updateUrl=true}={}){const params=formParams(),query=params.toString();if(updateUrl)syncUrl(params);status.textContent="Querying evidence…";results.innerHTML="";count.textContent="";try{const response=await fetch(`/api/evidence${query?`?${query}`:""}`,{headers:{Accept:"application/json"}});if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();count.textContent=`${data.count} ${data.count===1?"signal":"signals"}`;status.textContent=data.count?"":"No evidence matches this query.";results.innerHTML=`${synthesis(data.evidence)}${data.evidence.map(render).join("")}`;}catch(_){count.textContent="";status.textContent="The evidence query is temporarily unavailable. The complete static evidence record remains below.";}}
+  async function runQuery({updateUrl=true}={}){const params=formParams(),query=apiParams(params).toString();if(updateUrl)syncUrl(params);status.textContent="Querying evidence…";results.innerHTML="";count.textContent="";try{const response=await fetch(`/api/evidence${query?`?${query}`:""}`,{headers:{Accept:"application/json"}});if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.json();count.textContent=`${data.count} ${data.count===1?"signal":"signals"}`;status.textContent=data.count?"":"No evidence matches this query.";results.innerHTML=`${synthesis(data.evidence)}${data.evidence.map(render).join("")}`;}catch(_){count.textContent="";status.textContent="The evidence query is temporarily unavailable. The complete static evidence record remains below.";}}
   form.addEventListener("change",()=>runQuery());form.addEventListener("submit",(event)=>{event.preventDefault();runQuery();});reset.addEventListener("click",()=>{form.reset();runQuery();});window.addEventListener("popstate",()=>{form.reset();restoreQueryFromUrl();runQuery({updateUrl:false});});restoreQueryFromUrl();runQuery({updateUrl:false});
 })();
