@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from pipeline.preview.preview_smoke import SmokeReporter, wait_for_preview, wait_for_projection, wait_for_static_routes
 from pipeline.preview.run_preview_smoke import DEFAULT_PROJECT, added_evidence_paths, require_env, resolve_base_ref, resolve_head_sha
