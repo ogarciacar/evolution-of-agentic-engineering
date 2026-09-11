@@ -49,6 +49,57 @@ def export_context(values: dict[str, str]) -> None:
         print(f"  {key:<22} {value}")
 
 
+def resolve_context(
+    *,
+    head_sha: str | None = None,
+    base_ref: str | None = None,
+    preview_url: str | None = None,
+    project: str | None = None,
+    evidence_id: str | None = None,
+    timeout: int = 600,
+    reporter: SmokeReporter | None = None,
+) -> dict[str, str]:
+    """Resolve and wait for the deployed browser context, then return its environment values."""
+    if not Path("evidence").is_dir():
+        raise SystemExit("Run browser E2E from the repository root")
+
+    resolved_head_sha = resolve_head_sha(head_sha)
+    resolved_base_ref = resolve_base_ref(base_ref)
+    projection_id = resolved_head_sha[:12]
+    expected_count = len(list(Path("evidence").glob("*.yaml")))
+    resolved_evidence_id, evidence_is_new = resolve_browser_target(
+        resolved_base_ref,
+        resolved_head_sha,
+        evidence_id,
+    )
+
+    active_reporter = reporter or SmokeReporter()
+    active_reporter.section("Browser readiness")
+    if preview_url:
+        resolved_preview_url = preview_url.rstrip("/")
+        active_reporter.passed("Pages deployment", resolved_preview_url)
+    else:
+        resolved_preview_url = wait_for_preview(
+            require_env("CLOUDFLARE_ACCOUNT_ID"),
+            require_env("CLOUDFLARE_API_TOKEN"),
+            project or os.environ.get("CLOUDFLARE_PAGES_PROJECT", DEFAULT_PROJECT),
+            resolved_head_sha,
+            timeout,
+            active_reporter,
+        )
+
+    wait_for_projection(resolved_preview_url, projection_id, expected_count, timeout, active_reporter)
+    wait_for_static_routes(resolved_preview_url, projection_id, timeout, active_reporter)
+
+    return {
+        "PREVIEW_URL": resolved_preview_url,
+        "PROJECTION_ID": projection_id,
+        "EVIDENCE_ID": resolved_evidence_id,
+        "EVIDENCE_IS_NEW": str(evidence_is_new).lower(),
+        "EXPECTED_EVIDENCE_COUNT": str(expected_count),
+    }
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description="Resolve and wait for the deployed preview used by browser E2E.")
     result.add_argument("--head-sha", help="PR head commit. Defaults to PR_HEAD_SHA or local HEAD.")
@@ -67,42 +118,15 @@ def parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = parser().parse_args()
-    if not Path("evidence").is_dir():
-        raise SystemExit("Run browser E2E from the repository root")
-
-    head_sha = resolve_head_sha(args.head_sha)
-    base_ref = resolve_base_ref(args.base_ref)
-    projection_id = head_sha[:12]
-    expected_count = len(list(Path("evidence").glob("*.yaml")))
-    evidence_id, evidence_is_new = resolve_browser_target(base_ref, head_sha, args.evidence_id)
-
-    reporter = SmokeReporter()
-    reporter.section("Browser readiness")
-    if args.preview_url:
-        preview_url = args.preview_url.rstrip("/")
-        reporter.passed("Pages deployment", preview_url)
-    else:
-        preview_url = wait_for_preview(
-            require_env("CLOUDFLARE_ACCOUNT_ID"),
-            require_env("CLOUDFLARE_API_TOKEN"),
-            args.project,
-            head_sha,
-            args.timeout,
-            reporter,
-        )
-
-    wait_for_projection(preview_url, projection_id, expected_count, args.timeout, reporter)
-    wait_for_static_routes(preview_url, projection_id, args.timeout, reporter)
-
-    export_context(
-        {
-            "PREVIEW_URL": preview_url,
-            "PROJECTION_ID": projection_id,
-            "EVIDENCE_ID": evidence_id,
-            "EVIDENCE_IS_NEW": str(evidence_is_new).lower(),
-            "EXPECTED_EVIDENCE_COUNT": str(expected_count),
-        }
+    values = resolve_context(
+        head_sha=args.head_sha,
+        base_ref=args.base_ref,
+        preview_url=args.preview_url,
+        project=args.project,
+        evidence_id=args.evidence_id,
+        timeout=args.timeout,
     )
+    export_context(values)
     return 0
 
 
