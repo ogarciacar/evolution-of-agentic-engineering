@@ -1,15 +1,11 @@
 # Deployed preview smoke tests
 
-This directory contains the deployed acceptance-smoke layer for Cloudflare Pages PR previews plus fast unit tests for the smoke-test machinery itself.
+This directory contains the deployed acceptance-smoke layer for Cloudflare Pages PR previews.
 
-There are two interfaces over the same implementation:
+The same Python entrypoint is used by GitHub Actions and local development:
 
 ```bash
-# Operational/deployed acceptance runner
 python pipeline/preview/run_preview_smoke.py
-
-# Normal Python test runner
-python -m unittest pipeline.preview.test_preview_smoke
 ```
 
 The smoke test verifies that the deployed preview for a commit can serve its SHA-12 evidence projection through the runtime, while requests without a projection selector still resolve to canonical `main`.
@@ -32,31 +28,21 @@ Projection selection in this smoke layer intentionally uses the `X-Evidence-Proj
 
 ## Files
 
-- `run_preview_smoke.py` — CLI/CI entrypoint and reusable context resolver. Resolves Git context, derives SHA-12, counts the local evidence corpus, chooses a signal target, optionally discovers the Cloudflare Pages deployment, and invokes the shared assertions.
+- `run_preview_smoke.py` — CLI/CI entrypoint. Resolves Git context, derives SHA-12, counts the local evidence corpus, chooses a signal target, and optionally discovers the Cloudflare Pages deployment.
 - `preview_smoke.py` — reusable HTTP, Cloudflare deployment discovery, projection-readiness, publication-readiness, and assertion functions.
-- `test_preview_smoke.py` — standard-library `unittest` coverage for context resolution and smoke primitives, plus an opt-in real deployed acceptance test.
+- `test_preview_smoke.py` — unit tests plus an opt-in deployed acceptance test.
 
-No smoke-test Python is embedded in the GitHub Actions workflow; CI invokes these repository files directly.
+No smoke-test Python is embedded in the GitHub Actions workflow; CI invokes these files directly.
 
-## Run the normal Python tests
+## Run the Python tests
 
-The ordinary test suite is fast and offline. It mocks Cloudflare/HTTP and verifies context derivation, deployment selection, projection readiness, publication readiness, canonical `main`, and composition of the acceptance checks.
-
-Run it through Python's standard test runner:
+From the repository root:
 
 ```bash
 python -m unittest pipeline.preview.test_preview_smoke
 ```
 
-The test file can also be executed directly:
-
-```bash
-python pipeline/preview/test_preview_smoke.py
-```
-
-The real deployed test is skipped by default, so normal unit-test discovery never makes external Cloudflare calls.
-
-`Evidence integrity` runs these tests in CI on every PR and on `main`.
+The deployed Cloudflare acceptance case is skipped unless `RUN_DEPLOYED_PREVIEW_SMOKE=1` is set.
 
 ## Run locally with automatic preview discovery
 
@@ -105,32 +91,9 @@ python pipeline/preview/run_preview_smoke.py \
 
 The runner still derives the projection from local `HEAD` and waits for that SHA-12 projection to become ready.
 
-## Run the real deployed smoke through unittest
-
-The same deployed acceptance check is also exposed as a Python test. It is intentionally opt-in.
-
-With a known preview URL:
-
-```bash
-RUN_DEPLOYED_PREVIEW_SMOKE=1 \
-PREVIEW_URL='https://<deployment>.evolution-of-agentic-engineering.pages.dev' \
-python -m unittest pipeline.preview.test_preview_smoke.DeployedPreviewSmokeTest
-```
-
-With automatic Cloudflare Pages discovery:
-
-```bash
-export CLOUDFLARE_ACCOUNT_ID='<account-id>'
-export CLOUDFLARE_API_TOKEN='<api-token>'
-RUN_DEPLOYED_PREVIEW_SMOKE=1 \
-python -m unittest pipeline.preview.test_preview_smoke.DeployedPreviewSmokeTest
-```
-
-The deployed unittest calls the same `run_from_context()` path used by the CLI, so the test and operational interfaces do not duplicate the smoke semantics.
-
 ## Test a specific PR commit or evidence record
 
-You can override the inferred context through the CLI:
+You can override the inferred context:
 
 ```bash
 python pipeline/preview/run_preview_smoke.py \
@@ -151,20 +114,12 @@ Useful options:
 --timeout        Seconds to wait for deployment/projection/publication readiness.
 ```
 
-Equivalent deployed-unittest overrides use environment variables such as `PR_HEAD_SHA`, `PR_BASE_SHA`, `PREVIEW_URL`, `EVIDENCE_ID`, and `PREVIEW_SMOKE_TIMEOUT_SECONDS`.
-
 ## CI
 
-`.github/workflows/preview-smoke.yml` supplies `PR_HEAD_SHA` and `PR_BASE_SHA` from the pull request event and calls:
+`.github/workflows/preview-smoke.yml` supplies `PR_HEAD_SHA` and `PR_BASE_SHA` from the pull request event and calls the same command:
 
 ```bash
 python pipeline/preview/run_preview_smoke.py
 ```
 
-`.github/workflows/evidence.yml` runs the fast/offline tests:
-
-```bash
-python -m unittest pipeline.preview.test_preview_smoke
-```
-
-This keeps local, unit-test, and CI smoke semantics centered on the same implementation.
+This keeps local and CI smoke semantics identical.
