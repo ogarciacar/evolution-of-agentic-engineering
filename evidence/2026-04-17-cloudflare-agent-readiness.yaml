@@ -1,0 +1,145 @@
+source:
+  title: "Introducing the Agent Readiness score. Is your site agent-ready?"
+  producer: "Cloudflare"
+  producer_type: organization
+  date: "2026-04-17"
+  url: "https://blog.cloudflare.com/agent-readiness/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Agent fitness becomes measurable at the environment boundary"
+  summary: >
+    Cloudflare introduces an Agent Readiness score that evaluates whether websites
+    expose agent-friendly discovery, content, access-control, and capability
+    standards. Cloudflare applies the scanner across 200,000 high-traffic domains
+    and reports that an agent using its redesigned developer documentation consumed
+    31% fewer tokens and reached the correct answer 66% faster than the average
+    comparison documentation site.
+
+observed:
+  - >
+    Cloudflare Radar scanned 200,000 of the most visited domains after excluding
+    categories where agent readiness was not relevant, and published adoption data
+    for agent-facing standards by domain category.
+  - >
+    Cloudflare reports that 78% of scanned sites expose robots.txt, 4% declare AI
+    usage preferences using Content Signals, 3.9% support Markdown content
+    negotiation, and fewer than 15 sites in the dataset expose either MCP Server
+    Cards or API Catalogs.
+  - >
+    The Agent Readiness scanner scores sites across four dimensions:
+    Discoverability, Content, Bot Access Control, and Capabilities. Checks include
+    robots.txt, sitemaps, Link headers, Markdown for Agents, Content Signals, Web
+    Bot Auth, Agent Skills, API Catalogs, OAuth discovery, MCP Server Cards, and
+    WebMCP.
+  - >
+    For each failing readiness check, Cloudflare provides a prompt that can be
+    given to a coding agent to implement support. The scanner is also available
+    programmatically through an MCP server and URL Scanner API.
+  - >
+    Cloudflare reports that serving Markdown rather than HTML reduced token usage
+    by up to 80% in some cases, making agent consumption faster and cheaper.
+  - >
+    In a documentation benchmark using Kimi-k2.5 through OpenCode, Cloudflare
+    reports that the agent pointed at Cloudflare documentation consumed 31% fewer
+    tokens and arrived at the correct answer 66% faster than the average comparison
+    documentation site that had not been similarly refined for agents.
+  - >
+    Cloudflare attributes poorer performance on other documentation sets to large
+    context files that force repeated grep/search loops, fragmented context,
+    additional thinking tokens, more requests, and higher latency and cost.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Cloudflare evaluates agent-readiness traits across 200,000 high-traffic domains
+    and reports low adoption of several emerging agent-native standards. In a
+    separate first-party documentation benchmark, deliberate environmental
+    restructuring reduced agent token consumption by 31% and time to the correct
+    answer by 66% relative to the average comparison site.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Execution, Observability, Economics, Learning]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
+interpretation: >
+  The record operationalizes environmental fitness rather than treating it only
+  as an explanatory concept. Discoverability and agent-readable content affect the
+  cost of acquiring sufficient context; callable capabilities and authentication
+  metadata affect executable interaction; readiness scores and Internet-wide
+  adoption data make environmental traits observable; token and latency results
+  expose economic consequences; and failing checks can be turned directly into
+  coding-agent remediation work. The documentation benchmark provides first-party
+  evidence that changing the environment can improve agent efficiency without
+  changing the agent itself.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Selection can be made measurable and intervention-driven. Environmental traits
+    can be defined, assessed across a population, exposed as gaps, changed, and
+    reassessed. This suggests a concrete Selection loop: define desirable
+    environmental traits, measure their presence, intervene where the environment
+    is weak, and then evaluate whether agent cost or task performance improves.
+    The evidence also sharpens the model's claim that the environment belongs in
+    the fitness function by attaching measurable context, latency, and token costs
+    to different environmental designs.
+
+what_this_does_not_establish:
+  - >
+    The 200,000-domain scan measures adoption of selected standards and readiness
+    checks; it does not measure end-to-end agent task success across those domains.
+  - >
+    The 31% token reduction and 66% faster correct-answer result are Cloudflare's
+    first-party benchmark and are not an independently replicated causal study of
+    every readiness check in the score.
+  - >
+    The source does not establish that the Agent Readiness score predicts agent
+    engineering success across arbitrary agents, tasks, repositories, or domains.
+  - >
+    Some scored standards are emerging, and the source does not establish which
+    of them will achieve broad adoption or remain durable parts of the agentic Web.
+  - >
+    The source does not establish Cooperation, Specialization, 1,000-agent
+    operation, or the model's proposed evolutionary sequence.
+
+open_question: >
+  Which measurable environmental traits best predict an agent's cost and
+  probability of reaching sufficient context and completing useful work?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: agent-readiness-score
+    use_case: "Assess whether a web environment exposes the information and capabilities agents need to operate efficiently."
+    problem: "Agent compatibility remains difficult to improve when discoverability, content access, permissions, and callable capabilities are implicit or unmeasured."
+    reported_practice: "Score sites across Discoverability, Content, Bot Access Control, and Capabilities using machine-checkable standards."
+    selection_conditions: [context, execution, observability]
+  - id: internet-readiness-adoption-dataset
+    use_case: "Measure how widely agent-friendly environmental traits are spreading across the Web."
+    problem: "Individual site assessments do not show whether agent-compatible traits are becoming common across the wider environment."
+    reported_practice: "Scan 200,000 high-traffic domains and publish standards-adoption data in Cloudflare Radar with weekly updates and API access."
+    selection_conditions: [observability, learning]
+  - id: agent-readable-documentation
+    use_case: "Reduce the exploration required for agents to find precise technical documentation."
+    problem: "Large or HTML-heavy documentation forces iterative search, fragments context, and increases token and latency cost."
+    reported_practice: "Restructure documentation into bounded agent-readable Markdown paths and context-sized product directories."
+    selection_conditions: [context, economics]
+  - id: failing-check-to-agent-remediation
+    use_case: "Turn an environmental readiness gap into an actionable implementation task."
+    problem: "A readiness assessment has limited value if teams must independently determine how to repair every failing condition."
+    reported_practice: "For each failed readiness check, generate a prompt that can be given to a coding agent to implement the missing support."
+    selection_conditions: [execution, learning]
+  - id: agent-environment-benchmark
+    use_case: "Evaluate whether documentation restructuring changes agent cost and task speed."
+    problem: "Standards conformance alone does not demonstrate that the environment actually improves agent efficiency."
+    reported_practice: "Run the same agent architecture against multiple technical documentation sites and compare token use and time to the correct answer."
+    selection_conditions: [context, observability, economics]
+
+assessment:
+  assisted_by_ai: true
