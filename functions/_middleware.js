@@ -24,10 +24,10 @@ export function withProjectionHref(href, projectionId) {
 
 export function injectProjectionNavigation(html, projectionId = "main") {
   if (projectionId === "main") return html;
-  return html.replace(/href=(["'])([^"']*)\1/g, (match, quote, href) => {
+  return html.replace(/<a\b[^>]*>/gi, (anchor) => anchor.replace(/href=(["'])([^"']*)\1/i, (match, quote, href) => {
     const projected = withProjectionHref(href, projectionId);
     return projected === href ? match : `href=${quote}${projected}${quote}`;
-  });
+  }));
 }
 
 export function injectPracticeNavigation(html, projectionId = "main") {
