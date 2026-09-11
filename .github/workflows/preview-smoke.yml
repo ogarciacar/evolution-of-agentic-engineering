@@ -45,39 +45,5 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Resolve smoke context
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          PROJECTION_ID="${PR_HEAD_SHA:0:12}"
-          [[ "$PROJECTION_ID" =~ ^[0-9a-f]{12}$ ]] || { echo "Invalid PR projection id: $PROJECTION_ID"; exit 1; }
-
-          EXPECTED_EVIDENCE_COUNT=$(find evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
-          test "$EXPECTED_EVIDENCE_COUNT" -gt 0 || { echo "Evidence corpus is empty"; exit 1; }
-
-          NEW_EVIDENCE_PATH=$(git diff --name-only --diff-filter=A "$PR_BASE_SHA" "$PR_HEAD_SHA" -- 'evidence/*.yaml' | head -n 1 || true)
-          if [ -n "$NEW_EVIDENCE_PATH" ]; then
-            EVIDENCE_PATH="$NEW_EVIDENCE_PATH"
-            EVIDENCE_IS_NEW=true
-          else
-            EVIDENCE_PATH=$(find evidence -maxdepth 1 -name '*.yaml' -type f | sort | head -n 1)
-            EVIDENCE_IS_NEW=false
-          fi
-
-          EVIDENCE_ID=$(basename "$EVIDENCE_PATH" .yaml)
-          test -n "$EVIDENCE_ID" || { echo "Could not resolve an evidence id for smoke testing"; exit 1; }
-
-          {
-            echo "PROJECTION_ID=$PROJECTION_ID"
-            echo "EXPECTED_EVIDENCE_COUNT=$EXPECTED_EVIDENCE_COUNT"
-            echo "EVIDENCE_ID=$EVIDENCE_ID"
-            echo "EVIDENCE_IS_NEW=$EVIDENCE_IS_NEW"
-          } >> "$GITHUB_ENV"
-
-          echo "Projection: $PROJECTION_ID"
-          echo "Evidence records: $EXPECTED_EVIDENCE_COUNT"
-          echo "Signal smoke target: $EVIDENCE_ID (new=$EVIDENCE_IS_NEW)"
-
       - name: Verify deployed preview
-        run: python pipeline/preview/check-preview-smoke.py
+        run: python pipeline/preview/run_preview_smoke.py
