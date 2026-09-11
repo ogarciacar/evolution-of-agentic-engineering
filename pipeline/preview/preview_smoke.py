@@ -152,13 +152,39 @@ def assert_signal_page(preview_url: str, projection_id: str, evidence_id: str) -
     print(f"Signal page rendered from D1: /signals/{evidence_id}/")
 
 
-def assert_static_routes(preview_url: str, projection_id: str) -> None:
-    for path in ("/", "/evidence.html", "/evaluate.html"):
-        status, headers, _ = request(urljoin(preview_url + "/", path.lstrip("/")), {PROJECTION_HEADER: projection_id})
-        assert status == 200, f"Preview route {path} returned HTTP {status}"
-        content_type = headers.get("Content-Type", "")
-        assert "text/html" in content_type, f"Preview route {path} did not return HTML: {content_type!r}"
-        print(f"Preview route healthy: {path}")
+def wait_for_static_routes(preview_url: str, projection_id: str, timeout_seconds: int) -> None:
+    paths = ("/", "/evidence.html", "/evaluate.html")
+    deadline = time.monotonic() + timeout_seconds
+    last_state = "not checked"
+
+    while time.monotonic() < deadline:
+        failures = []
+        for path in paths:
+            try:
+                status, headers, _ = request(
+                    api_url(preview_url, path),
+                    {PROJECTION_HEADER: projection_id},
+                )
+            except URLError as error:
+                failures.append(f"{path}=network error: {error}")
+                continue
+
+            content_type = headers.get("Content-Type", "")
+            if status != 200:
+                failures.append(f"{path}=HTTP {status}")
+            elif "text/html" not in content_type:
+                failures.append(f"{path}=content-type {content_type!r}")
+
+        if not failures:
+            for path in paths:
+                print(f"Preview route healthy: {path}")
+            return
+
+        last_state = ", ".join(failures)
+        print(f"Waiting for preview publication routes: {last_state}")
+        time.sleep(10)
+
+    raise SystemExit(f"Timed out waiting for preview publication routes: {last_state}")
 
 
 def assert_default_main(preview_url: str) -> None:
@@ -190,7 +216,7 @@ def run_smoke(
     wait_for_projection(preview_url, projection_id, expected_count, timeout_seconds)
     assert_api_item(preview_url, projection_id, evidence_id)
     assert_signal_page(preview_url, projection_id, evidence_id)
-    assert_static_routes(preview_url, projection_id)
+    wait_for_static_routes(preview_url, projection_id, timeout_seconds)
     assert_default_main(preview_url)
     if evidence_is_new:
         assert_new_evidence_isolated(preview_url, evidence_id)
