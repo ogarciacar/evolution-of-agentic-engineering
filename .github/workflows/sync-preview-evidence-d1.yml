@@ -4,23 +4,6 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
-    paths:
-      - "evidence/**"
-      - "schema/**"
-      - "migrations/**"
-      - "functions/**"
-      - "index.html"
-      - "evidence.html"
-      - "evaluate.html"
-      - "evidence-query.js"
-      - "practices.html"
-      - "pipeline/projection/**"
-      - "pipeline/validation/validate-evidence.py"
-      - "pipeline/preview/**"
-      - "pipeline/browser/**"
-      - ".github/workflows/preview-smoke.yml"
-      - ".github/workflows/preview-e2e.yml"
-      - ".github/workflows/sync-preview-evidence-d1.yml"
 
 concurrency:
   group: evidence-d1-preview-${{ github.event.pull_request.number }}
@@ -31,6 +14,7 @@ permissions:
 
 jobs:
   sync:
+    name: Sync preview evidence to D1
     runs-on: ubuntu-latest
     environment: preview
     env:
@@ -39,29 +23,44 @@ jobs:
       EVIDENCE_DB_NAME: ${{ vars.EVIDENCE_DB_NAME }}
       EVIDENCE_DB_ID: ${{ vars.EVIDENCE_DB_ID }}
       PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Determine deployed preview relevance
+        id: scope
+        run: python pipeline/preview/change_scope.py
+
       - uses: actions/setup-python@v7
+        if: steps.scope.outputs.relevant == 'true'
         with:
           python-version: "3.12"
           cache: pip
+
       - uses: actions/setup-node@v6
+        if: steps.scope.outputs.relevant == 'true'
         with:
           node-version: "24"
+
       - name: Resolve preview projection id
+        if: steps.scope.outputs.relevant == 'true'
         shell: bash
         run: |
           PROJECTION_ID="${PR_HEAD_SHA:0:12}"
           [[ "$PROJECTION_ID" =~ ^[0-9a-f]{12}$ ]] || { echo "Invalid PR projection id: $PROJECTION_ID"; exit 1; }
           echo "PROJECTION_ID=$PROJECTION_ID" >> "$GITHUB_ENV"
           echo "Preview projection: $PROJECTION_ID"
+
       - name: Require preview D1 configuration
+        if: steps.scope.outputs.relevant == 'true'
         run: |
           test -n "$EVIDENCE_DB_NAME" || { echo "Missing preview environment variable EVIDENCE_DB_NAME"; exit 1; }
           test -n "$EVIDENCE_DB_ID" || { echo "Missing preview environment variable EVIDENCE_DB_ID"; exit 1; }
+
       - name: Build ephemeral Wrangler D1 configuration
+        if: steps.scope.outputs.relevant == 'true'
         shell: bash
         run: |
           python - <<'PY'
@@ -79,30 +78,48 @@ jobs:
           with open("wrangler-d1.json", "w", encoding="utf-8") as f:
               json.dump(config, f)
           PY
+
       - name: Install Python dependencies
+        if: steps.scope.outputs.relevant == 'true'
         run: pip install -r pipeline/requirements.txt
+
       - name: Validate evidence records
+        if: steps.scope.outputs.relevant == 'true'
         run: python pipeline/validation/validate-evidence.py
+
       # Rebuild `main` from GitHub main on every preview sync so the default
       # preview view cannot inherit data from another contribution.
       - name: Materialize canonical main source
+        if: steps.scope.outputs.relevant == 'true'
         shell: bash
         run: |
           git fetch origin main
           rm -rf .artifacts/main-source
           mkdir -p .artifacts/main-source
           git archive origin/main evidence | tar -x -C .artifacts/main-source
+
       - name: Export canonical main projection SQL
+        if: steps.scope.outputs.relevant == 'true'
         run: python pipeline/projection/export-evidence-sql.py --projection main --source-root .artifacts/main-source --output .artifacts/main-evidence-sync.sql
+
       - name: Export PR projection SQL
+        if: steps.scope.outputs.relevant == 'true'
         run: python pipeline/projection/export-evidence-sql.py --projection "$PROJECTION_ID" --output .artifacts/evidence-sync.sql
+
       - name: Apply D1 migrations
+        if: steps.scope.outputs.relevant == 'true'
         run: npx --yes wrangler@4 d1 migrations apply EVIDENCE_DB --remote --config wrangler-d1.json
+
       - name: Rebuild canonical main projection
+        if: steps.scope.outputs.relevant == 'true'
         run: npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --file=.artifacts/main-evidence-sync.sql
+
       - name: Synchronize contribution projection
+        if: steps.scope.outputs.relevant == 'true'
         run: npx --yes wrangler@4 d1 execute EVIDENCE_DB --remote --yes --config wrangler-d1.json --file=.artifacts/evidence-sync.sql
+
       - name: Verify main and preview projection counts
+        if: steps.scope.outputs.relevant == 'true'
         shell: bash
         run: |
           EXPECTED_MAIN=$(find .artifacts/main-source/evidence -maxdepth 1 -name '*.yaml' -type f | wc -l | tr -d ' ')
@@ -124,3 +141,7 @@ jobs:
           print(f"Preview D1 main contains {actual_main} canonical records")
           print(f"Preview D1 projection {projection_id} contains {actual_pr} contribution records")
           PY
+
+      - name: Deployed preview not applicable
+        if: steps.scope.outputs.relevant == 'false'
+        run: echo "No publication, projection, or deployed-acceptance files changed; preview D1 sync is not applicable."
