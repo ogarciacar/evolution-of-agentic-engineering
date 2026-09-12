@@ -2,6 +2,7 @@
 """Unit tests plus an opt-in deployed acceptance test for preview smoke verification."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -12,10 +13,12 @@ from unittest.mock import patch
 
 try:
     from pipeline.preview import preview_smoke
+    from pipeline.preview import publication_build
     from pipeline.preview import run_preview_smoke
 except ModuleNotFoundError:  # Support direct execution from the repository root.
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     from pipeline.preview import preview_smoke
+    from pipeline.preview import publication_build
     from pipeline.preview import run_preview_smoke
 
 
@@ -121,6 +124,37 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
             return_value=(200, {preview_smoke.PROJECTION_HEADER: "main"}, body),
         ):
             preview_smoke.assert_default_main("https://preview.pages.dev")
+
+    def test_publication_build_manifest_verifies_deployed_artifacts(self) -> None:
+        artifact_bodies = {
+            "research-frontier.json": b'{"claims": []}\n',
+            "evaluate.html": b"<html>evaluate</html>\n",
+            "synthesis.html": b"<html>synthesis</html>\n",
+            "sitemap.xml": b"<urlset></urlset>\n",
+        }
+        manifest = {
+            "version": 1,
+            "generator": publication_build.PUBLICATION_GENERATOR,
+            "artifacts": {
+                name: {
+                    "sha256": hashlib.sha256(body).hexdigest(),
+                    "bytes": len(body),
+                }
+                for name, body in artifact_bodies.items()
+            },
+        }
+        responses = [(200, {}, json.dumps(manifest).encode("utf-8"))]
+        responses.extend((200, {}, artifact_bodies[name]) for name in publication_build.REQUIRED_ARTIFACTS)
+
+        with patch.object(publication_build, "request", side_effect=responses) as request_mock:
+            publication_build.assert_publication_build("https://preview.pages.dev")
+
+        self.assertEqual(request_mock.call_count, 1 + len(publication_build.REQUIRED_ARTIFACTS))
+
+    def test_publication_build_manifest_is_required(self) -> None:
+        with patch.object(publication_build, "request", return_value=(404, {}, b"")):
+            with self.assertRaisesRegex(AssertionError, "Publication build manifest is missing"):
+                publication_build.assert_publication_build("https://preview.pages.dev")
 
     def test_run_smoke_composes_all_acceptance_checks(self) -> None:
         reporter = preview_smoke.SmokeReporter()
