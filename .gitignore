@@ -5,4 +5,10 @@ __pycache__/
 node_modules/
 playwright-report/
 test-results/
+
+# Build-time publication outputs. Canonical state lives in evidence/, model/, and schema/.
 publication-manifest.json
+research-frontier.json
+evaluate.html
+synthesis.html
+sitemap.xml

@@ -76,18 +76,17 @@ jobs:
         run: node pipeline/projection/check-practice-navigation.mjs
       - name: Check Practice Observations integration
         run: node pipeline/projection/check-practice-observations-integration.mjs
-      - name: Build publication
-        run: python pipeline/build-publication.py
-      - name: Upload generated evidence artifacts
+      - name: Verify publication determinism
+        run: python pipeline/validation/check-publication-determinism.py
+      - name: Check research frontier
+        run: python pipeline/validation/check-research-frontier.py
+      - name: Upload generated publication artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: generated-evidence-artifacts
+          name: generated-publication-artifacts
           path: |
             research-frontier.json
             evaluate.html
             synthesis.html
             sitemap.xml
-      - name: Verify derived artifacts are committed
-        run: git diff --exit-code -- research-frontier.json evaluate.html sitemap.xml synthesis.html
-      - name: Check research frontier
-        run: python pipeline/validation/check-research-frontier.py
+            publication-manifest.json
