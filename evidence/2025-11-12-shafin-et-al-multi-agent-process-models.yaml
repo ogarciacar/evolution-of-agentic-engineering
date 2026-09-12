@@ -1,0 +1,153 @@
+source:
+  title: "Evaluating Software Process Models for Multi-Agent Class-Level Code Generation"
+  producer: "Shafin et al."
+  producer_type: authors
+  date: "2025-11-12"
+  url: "https://arxiv.org/abs/2511.09794"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Role-specialized cooperation changes engineering fitness rather than uniformly improving it"
+  summary: >
+    Shafin et al. compare a role-specialized Waterfall-style multi-agent workflow
+    with direct prompting across 100 ClassEval Python tasks and three LLM backends.
+    The cooperating workflow improves some structural and cleanliness properties,
+    but its effect on functional correctness is model-dependent: full Waterfall
+    lowers class-level Pass@1 for GPT-4o-mini and DeepSeek-Chat while slightly
+    improving it for Claude-3.5-Haiku.
+
+observed:
+  - >
+    The study assigns four specialized LLM agents to Requirement Engineer,
+    Architect, Developer, and Tester roles. Their work is coordinated through
+    sequential artifacts and formal handoffs from requirements to design,
+    implementation, and testing, with feedback used for self-refinement between
+    stages.
+  - >
+    The evaluation uses 100 human-curated ClassEval Python class-generation tasks,
+    three LLM backends (GPT-4o-mini, DeepSeek-Chat, and Claude-3.5-Haiku), a direct
+    RawPrompt baseline, and four Waterfall configurations: full workflow and
+    variants omitting Requirement, Design, or Testing.
+  - >
+    The authors manually evaluated 1,500 generated code samples across the 100
+    tasks, three models, and five workflows, executing each sample against the
+    corresponding ClassEval unit tests and separately analyzing code quality with
+    SonarQube.
+  - >
+    On class-level Pass@1, the RawPrompt baseline scored 0.35 for GPT-4o-mini,
+    0.46 for DeepSeek-Chat, and 0.21 for Claude-3.5-Haiku. The full Waterfall
+    workflow scored 0.21, 0.32, and 0.22 respectively, showing large regressions
+    for the first two models and a small improvement for Claude-3.5-Haiku.
+  - >
+    Waterfall workflows changed code-quality characteristics even when correctness
+    regressed. The authors report cleaner and more maintainable outputs overall,
+    while detailed SonarQube results show the effect varies by quality attribute
+    and model; consistency issue density improves across the full Waterfall setup,
+    while reliability and adaptability often worsen.
+  - >
+    Activity ablations show that process structure materially changes outcomes.
+    Requirement and Design have comparatively modest effects, while Testing has
+    the strongest influence on verification behavior and failure characteristics.
+  - >
+    The Testing stage generates test cases and executable tests, produces a test
+    report, and allows the Developer agent up to three bug-fix cycles. Removing
+    Testing produces the highest runtime-error counts in several configurations,
+    while including structured testing can also introduce additional reasoning
+    and validation failures.
+  - >
+    Across Waterfall variants, the study reports that runtime-error profiles shift:
+    some structural failures such as missing code decline, while semantic failures,
+    return mismatches, and validation-related errors become more prominent.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The evidence covers 100 Python class-generation tasks, three LLM backends and
+    five workflow configurations, yielding 1,500 generated samples. It is a
+    controlled benchmark comparison rather than a production deployment or a
+    longitudinal study of repeated engineering work.
+
+mapping:
+  stages: [Cooperation]
+  conditions: [Context, Verification, Coordination]
+
+claims:
+  - id: C03
+    relationship: REFINES
+
+interpretation: >
+  This is direct comparative evidence for the Cooperation claim because the same
+  coding problem is attempted either through a direct single-model prompt or through
+  a coordinated system of specialized roles with artifact handoffs and feedback.
+  Cooperation is not uniformly fitter: two model backends lose substantial
+  class-level correctness under the full workflow, while one improves slightly,
+  even as several cleanliness and structural properties improve. The result makes
+  cooperation a multi-objective, model-dependent engineering configuration rather
+  than an automatic progression toward higher fitness. It also shows that adding
+  verification and coordination can shift failure modes instead of simply removing
+  them.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    The study materially advances C03 by providing a cooperating-versus-isolated
+    comparison and showing that cooperation can improve some dimensions of software
+    quality while harming others. Whether cooperation increases engineering fitness
+    depends on the model, workflow structure, verification design, and which outcome
+    is optimized. A useful Cooperation claim therefore needs to account for
+    coordination and verification trade-offs rather than treating role specialization
+    or additional process structure as inherently beneficial.
+
+what_this_does_not_establish:
+  - >
+    The study uses ClassEval Python class-generation tasks rather than sustained work
+    in production repositories, so it does not establish that the observed trade-offs
+    persist in real software-development organizations.
+  - >
+    The RawPrompt baseline is not compute-matched to the multi-agent workflow. The
+    paper does not report a normalized token, latency, or monetary coordination cost,
+    so it cannot establish net economic fitness.
+  - >
+    The role-specialized agents use the same underlying model backend within a given
+    experiment. The study therefore evaluates process and role specialization, not a
+    heterogeneous population of independently optimized agent capabilities.
+  - >
+    The benchmark measures single-run task outcomes across a fixed dataset and does
+    not establish that any cooperation advantage or disadvantage persists across
+    longitudinal, repeated engineering work.
+  - >
+    The authors report manually correcting simple syntax errors before rerunning some
+    evaluations, which limits how directly the reported benchmark outcomes represent
+    fully unattended end-to-end execution.
+  - >
+    Differentiated roles and integration are present, but the source does not
+    establish persistent higher-order organization sufficient for C04
+    Specialization in the model's stronger sense.
+
+open_question: >
+  Under equal compute and supervision budgets, which forms of role specialization,
+  handoff structure, and verification make cooperating agents outperform useful
+  isolated operation across repeated repository-level engineering work?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: role-specialized-waterfall-handoffs
+    use_case: "Generate complete classes through a structured multi-agent software-development process."
+    problem: "Direct code generation does not separate requirements, design, implementation, and verification responsibilities, making it difficult to study how process structure changes outcomes."
+    reported_practice: "Assign Requirement Engineer, Architect, Developer, and Tester agents distinct responsibilities and pass artifacts sequentially between them with feedback-based refinement."
+    selection_conditions: [coordination, context]
+  - id: workflow-stage-ablation
+    use_case: "Identify which parts of a multi-agent development process materially change correctness and code quality."
+    problem: "A complete multi-agent workflow can change outcomes without revealing which development activity caused the effect."
+    reported_practice: "Remove Requirement, Design, or Testing one stage at a time and compare each configuration with the full workflow and RawPrompt baseline."
+    selection_conditions: [observability, learning, verification]
+  - id: tester-report-bugfix-loop
+    use_case: "Use verification results to refine generated implementation code before the workflow finishes."
+    problem: "Generated implementations can fail executable tests even after requirements and design stages have completed."
+    reported_practice: "Have a Tester agent create and execute tests, emit a test report, and allow the Developer agent up to three bug-fix cycles from that feedback."
+    selection_conditions: [verification, execution, coordination]
+
+assessment:
+  assisted_by_ai: true
