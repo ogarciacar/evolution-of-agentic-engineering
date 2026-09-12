@@ -145,7 +145,6 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
                 for name, body in built_bodies.items()
             },
         }
-        # HTML responses may be reserialized or link-rewritten by Pages middleware.
         served_bodies = {
             "evaluate.html": b"<html><a href='/?projection_id=abc'>evaluate</a></html>\n",
             "synthesis.html": b"<!doctype html><html>synthesis</html>\n",
@@ -166,8 +165,8 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
 
     def test_publication_build_manifest_is_required(self) -> None:
         with patch.object(publication_build, "request", return_value=(404, {}, b"")):
-            with self.assertRaisesRegex(AssertionError, "Publication build manifest is missing"):
-                publication_build.assert_publication_build(
+            with self.assertRaisesRegex(AssertionError, "manifest is not available"):
+                publication_build._assert_publication_build_once(
                     "https://preview.pages.dev",
                     "a" * 40,
                 )
@@ -185,10 +184,28 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
             return_value=(200, {}, json.dumps(manifest).encode("utf-8")),
         ):
             with self.assertRaisesRegex(AssertionError, "expected"):
-                publication_build.assert_publication_build(
+                publication_build._assert_publication_build_once(
                     "https://preview.pages.dev",
                     "a" * 40,
                 )
+
+    def test_publication_build_retries_transient_edge_readiness(self) -> None:
+        commit_sha = "a" * 40
+        with (
+            patch.object(
+                publication_build,
+                "_assert_publication_build_once",
+                side_effect=[AssertionError("manifest is not available yet"), None],
+            ) as check_mock,
+            patch.object(publication_build.time, "sleep") as sleep_mock,
+        ):
+            publication_build.assert_publication_build(
+                "https://preview.pages.dev",
+                commit_sha,
+                timeout_seconds=10,
+            )
+        self.assertEqual(check_mock.call_count, 2)
+        sleep_mock.assert_called_once_with(5)
 
     def test_run_smoke_composes_all_acceptance_checks(self) -> None:
         reporter = preview_smoke.SmokeReporter()
