@@ -1,0 +1,166 @@
+source:
+  title: "Introducing Codex"
+  producer: "OpenAI"
+  producer_type: organization
+  date: "2025-05-16"
+  url: "https://openai.com/index/introducing-codex/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Codex launched as a cloud software-engineering agent that could independently edit repositories, execute checks, and return reviewable evidence"
+  summary: >
+    OpenAI's May 2025 Codex research preview describes a cloud software-engineering
+    agent that executes each assigned task in its own isolated environment preloaded
+    with the repository. The agent can read and edit files, run test harnesses,
+    linters and type checkers, commit its changes, and return terminal and test
+    evidence for human review. OpenAI also states that Codex performs best when the
+    surrounding repository supplies a configured development environment, reliable
+    tests, clear documentation, and repository-local AGENTS.md instructions.
+
+observed:
+  - >
+    OpenAI launched Codex as a research-preview cloud software-engineering agent that
+    could be assigned tasks such as writing features, answering questions about a
+    codebase, fixing bugs, and proposing pull requests, with multiple tasks able to
+    run in parallel.
+  - >
+    Each Codex task was processed independently in a separate isolated cloud
+    environment preloaded with the user's codebase.
+  - >
+    Within its task environment, Codex could read and edit files and execute commands
+    including test harnesses, linters, and type checkers.
+  - >
+    OpenAI reported that task completion typically took between 1 and 30 minutes at
+    launch, depending on complexity, while users could monitor progress.
+  - >
+    When a task completed, Codex committed its changes in the task environment and
+    provided citations to terminal logs and test outputs as verifiable evidence of
+    the work performed. Users could review the result, request revisions, open a
+    GitHub pull request, or integrate the changes locally.
+  - >
+    The Codex environment could be configured to resemble the repository's real
+    development environment, including dependencies and tooling prepared by the user.
+  - >
+    Repository-local AGENTS.md files could tell Codex how to navigate the codebase,
+    which testing commands to run, and how to follow project-specific practices.
+    OpenAI states that Codex agents perform best with configured development
+    environments, reliable testing setups, and clear documentation.
+  - >
+    In the May 16 launch configuration, agent execution occurred in a secure isolated
+    container with internet access disabled after setup, limiting the task trajectory
+    to the supplied repository and pre-installed dependencies.
+  - >
+    OpenAI explicitly stated that users should manually review and validate
+    agent-generated code before integration and execution, even though Codex exposes
+    terminal logs, test results, and other evidence for review.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The source documents a product research preview capable of running multiple
+    independent software-engineering tasks in parallel, with individual tasks
+    typically taking 1 to 30 minutes. It does not report a representative production
+    success rate, sustained organizational workload, or reliability distribution, so
+    this evidence establishes an operational agent configuration rather than
+    production-scale fitness.
+
+mapping:
+  stages: [Apparition, Selection]
+  conditions: [Context, Execution, Verification, Observability]
+
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  Codex provides direct first-party evidence for Apparition. The described object
+  combines a model, repository context, an isolated execution environment, file and
+  command tools, permissions to modify and commit code, and feedback from tests and
+  other checks. Once assigned a task, it can take meaningful repository-level action
+  without continuous human operation and return a reviewable result. The source also
+  refines Selection because OpenAI explicitly ties better agent performance to
+  environmental conditions outside the model itself: configured development
+  environments, reliable tests, clear documentation, AGENTS.md instructions, and
+  inspectable execution evidence. However, the launch post does not quantitatively
+  isolate how much each condition changes task success or persistence.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    The source supports C01 by documenting a concrete software-engineering actor that
+    can independently inspect and modify a repository, execute verification commands,
+    iterate toward completion, commit changes, and expose evidence for review. It
+    refines C02 by making the surrounding engineering environment part of the stated
+    fitness envelope: repository instructions, development-environment fidelity,
+    reliable tests, clear documentation, and observable command results are described
+    as material to effective operation. The evidence therefore sharpens the
+    distinction between agent capability existing and that capability being reliably
+    usable within a particular repository environment.
+
+what_this_does_not_establish:
+  - >
+    The source is a first-party launch post for a research preview and does not
+    independently validate Codex's effectiveness, productivity impact, or reliability.
+  - >
+    The launch post does not provide a representative task-level success rate,
+    production defect rate, review burden, cost-per-successful-change, or longitudinal
+    persistence measure for Codex use.
+  - >
+    OpenAI's statement that configured environments, reliable tests, and clear
+    documentation improve agent performance is not presented as a controlled
+    comparison, so this source does not isolate the causal contribution of any one
+    context or verification mechanism.
+  - >
+    The launch architecture changed shortly afterward: the same page notes that users
+    were later allowed to enable internet access during task execution. The no-network
+    configuration therefore describes the launch state, not a permanent Codex
+    architecture.
+  - >
+    Human review remained explicitly required before integrating and executing
+    agent-generated code, so the source does not establish unattended production
+    deployment or end-to-end autonomous software delivery.
+  - >
+    Independent parallel tasks do not establish cooperation among agents under C03,
+    and the source does not establish persistent differentiated roles or a
+    higher-order engineering object under C04.
+
+open_question: >
+  How much do repository-local instructions, development-environment fidelity,
+  executable verification, and observable task evidence reduce failed exploration,
+  review effort, and unsuccessful coding-agent runs across heterogeneous production
+  repositories?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: isolated-per-task-agent-environment
+    use_case: "Delegate repository changes to a background coding agent without sharing mutable execution state across tasks."
+    problem: "Concurrent coding tasks can interfere with one another or with a developer's local workspace when they share execution state."
+    reported_practice: "Run each delegated coding task independently in its own isolated cloud environment preloaded with the target repository."
+    selection_conditions: [execution, context]
+  - id: repository-agent-instructions
+    use_case: "Give a coding agent repository-specific navigation, testing, and convention guidance before it edits code."
+    problem: "A generic agent prompt does not encode how a particular repository is organized, tested, or expected to be changed."
+    reported_practice: "Store repository-local AGENTS.md files that tell the agent how to navigate the codebase, which commands to run, and which project practices to follow."
+    selection_conditions: [context]
+  - id: configured-agent-development-environment
+    use_case: "Make delegated agent execution resemble the repository's real engineering environment."
+    problem: "An agent can produce misleading results when dependencies, tooling, or environment setup differ from the environment in which the code is normally built and tested."
+    reported_practice: "Configure the agent sandbox with the repository's dependencies, tooling, and setup so execution matches the real development environment as closely as practical."
+    selection_conditions: [context, execution, verification]
+  - id: verifiable-agent-execution-evidence
+    use_case: "Review background agent work without trusting only the agent's natural-language summary."
+    problem: "A reviewer needs evidence that the claimed edits and checks actually occurred before accepting an asynchronously produced change."
+    reported_practice: "Return citations to terminal logs and test outputs alongside the generated change so reviewers can trace and validate the agent's actions."
+    selection_conditions: [observability, verification]
+  - id: human-review-before-agent-integration
+    use_case: "Integrate agent-generated code into normal software-delivery workflows."
+    problem: "Passing checks and agent-generated evidence do not guarantee that a generated change is safe or correct for production use."
+    reported_practice: "Require human review and validation of agent-generated code before integration and execution."
+    selection_conditions: [verification]
+
+assessment:
+  assisted_by_ai: true
