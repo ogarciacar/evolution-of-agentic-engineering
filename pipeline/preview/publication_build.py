@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+import time
 
 try:
     from .preview_smoke import SmokeReporter, api_url, parse_json, request
@@ -28,16 +29,10 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
-def assert_publication_build(
-    preview_url: str,
-    expected_commit: str,
-    reporter: SmokeReporter | None = None,
-) -> None:
-    """Require build provenance and verify the public publication surfaces."""
-    reporter = reporter or SmokeReporter()
+def _assert_publication_build_once(preview_url: str, expected_commit: str) -> None:
     status, _, body = request(api_url(preview_url, PUBLICATION_MANIFEST_PATH))
     assert status == 200, (
-        "Publication build manifest is missing. Cloudflare Pages must run "
+        "Publication build manifest is not available yet. Cloudflare Pages must run "
         "pipeline/build-publication.py before deployment."
     )
 
@@ -45,7 +40,7 @@ def assert_publication_build(
         payload = parse_json(body, "publication build manifest")
     except AssertionError as error:
         raise AssertionError(
-            "Publication build manifest was not generated as JSON. Cloudflare Pages must run "
+            "Publication build manifest is not valid JSON yet. Cloudflare Pages must run "
             "pipeline/build-publication.py before deployment."
         ) from error
 
@@ -80,12 +75,12 @@ def assert_publication_build(
     for artifact in PUBLISHED_ARTIFACTS:
         metadata = artifacts[artifact]
         artifact_status, artifact_headers, artifact_body = request(api_url(preview_url, f"/{artifact}"))
-        assert artifact_status == 200, f"Published artifact returned HTTP {artifact_status}: /{artifact}"
+        assert artifact_status == 200, f"Published artifact is not available yet: /{artifact} (HTTP {artifact_status})"
 
         if artifact in EXACT_BYTE_ARTIFACTS:
             actual_sha = hashlib.sha256(artifact_body).hexdigest()
-            assert actual_sha == metadata["sha256"], f"Published artifact hash does not match build manifest: {artifact}"
-            assert len(artifact_body) == metadata["bytes"], f"Published artifact size does not match build manifest: {artifact}"
+            assert actual_sha == metadata["sha256"], f"Published artifact hash does not match build manifest yet: {artifact}"
+            assert len(artifact_body) == metadata["bytes"], f"Published artifact size does not match build manifest yet: {artifact}"
             continue
 
         content_type = artifact_headers.get("Content-Type", "")
@@ -93,7 +88,29 @@ def assert_publication_build(
         html = artifact_body.decode("utf-8", errors="replace").lower()
         assert "<html" in html or "<!doctype html" in html, f"Published HTML artifact is not HTML: {artifact}"
 
-    reporter.passed(
-        "Publication build",
-        f"commit {expected_commit[:12]} + 4 generated outputs + 3 published surfaces",
-    )
+
+def assert_publication_build(
+    preview_url: str,
+    expected_commit: str,
+    timeout_seconds: int = 90,
+    reporter: SmokeReporter | None = None,
+) -> None:
+    """Wait for exact-head build provenance and public publication surfaces."""
+    reporter = reporter or SmokeReporter()
+    deadline = time.monotonic() + timeout_seconds
+    last_error = "not checked"
+
+    while time.monotonic() < deadline:
+        try:
+            _assert_publication_build_once(preview_url, expected_commit)
+            reporter.passed(
+                "Publication build",
+                f"commit {expected_commit[:12]} + 4 generated outputs + 3 published surfaces",
+            )
+            return
+        except AssertionError as error:
+            last_error = str(error)
+            reporter.waiting("Publication build", last_error)
+            time.sleep(5)
+
+    raise AssertionError(f"Timed out waiting for publication build readiness: {last_error}")
