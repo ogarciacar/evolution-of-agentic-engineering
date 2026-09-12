@@ -31,13 +31,17 @@ pip install -r pipeline/requirements.txt && python pipeline/build-publication.py
 
 This migration changes the Pages **build command only**. Keep the existing root directory and build output directory that currently publish the repository-root static site.
 
-`pipeline/build-publication.py` emits `publication-manifest.json` after generating the four derived surfaces. The manifest is intentionally ignored by Git and therefore can exist in a deployed preview only when the Pages build actually ran. It contains SHA-256 and byte-size evidence for each generated publication artifact.
+`pipeline/build-publication.py` emits `publication-manifest.json` after generating the four derived surfaces. The manifest is intentionally ignored by Git and therefore can exist in a deployed preview only when the Pages build actually ran. It contains the Pages source commit plus SHA-256 and byte-size evidence for each generated publication artifact.
 
 Required Preview Smoke verifies:
 
 1. `/publication-manifest.json` exists and names `pipeline/build-publication.py` as its generator;
-2. all four expected generated artifacts are represented;
-3. every deployed artifact's bytes and SHA-256 match the build manifest.
+2. the manifest's `source_commit` is the exact PR head being deployed;
+3. all four expected generated artifacts are represented and reachable;
+4. non-HTML generated artifacts match their manifest bytes and SHA-256 exactly;
+5. generated HTML surfaces remain healthy HTML after Pages middleware processing.
+
+HTML is not compared byte-for-byte at the HTTP boundary because `functions/_middleware.js` reads and reconstructs HTML responses to own runtime navigation/projection behavior. Build provenance therefore comes from the build-only manifest bound to the exact Pages commit, while deployed HTML is checked semantically as a healthy surface.
 
 This turns the Pages cutover into an observable acceptance condition rather than a dashboard configuration assumption. After changing the Pages build setting, validate it with a fresh commit deployment so the preview proves the new configuration rather than reusing an older deployment.
 
