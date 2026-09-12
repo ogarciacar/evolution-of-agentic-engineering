@@ -125,8 +125,9 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
         ):
             preview_smoke.assert_default_main("https://preview.pages.dev")
 
-    def test_publication_build_manifest_verifies_deployed_artifacts(self) -> None:
-        artifact_bodies = {
+    def test_publication_build_manifest_verifies_commit_and_deployed_artifacts(self) -> None:
+        commit_sha = "a" * 40
+        built_bodies = {
             "research-frontier.json": b'{"claims": []}\n',
             "evaluate.html": b"<html>evaluate</html>\n",
             "synthesis.html": b"<html>synthesis</html>\n",
@@ -135,26 +136,59 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
         manifest = {
             "version": 1,
             "generator": publication_build.PUBLICATION_GENERATOR,
+            "source_commit": commit_sha,
             "artifacts": {
                 name: {
                     "sha256": hashlib.sha256(body).hexdigest(),
                     "bytes": len(body),
                 }
-                for name, body in artifact_bodies.items()
+                for name, body in built_bodies.items()
             },
         }
+        # HTML responses may be reserialized or link-rewritten by Pages middleware.
+        served_bodies = {
+            **built_bodies,
+            "evaluate.html": b"<html><a href='/?projection_id=abc'>evaluate</a></html>\n",
+            "synthesis.html": b"<!doctype html><html>synthesis</html>\n",
+        }
         responses = [(200, {}, json.dumps(manifest).encode("utf-8"))]
-        responses.extend((200, {}, artifact_bodies[name]) for name in publication_build.REQUIRED_ARTIFACTS)
+        for name in publication_build.REQUIRED_ARTIFACTS:
+            headers = {"Content-Type": "text/html; charset=utf-8"} if name.endswith(".html") else {}
+            responses.append((200, headers, served_bodies[name]))
 
         with patch.object(publication_build, "request", side_effect=responses) as request_mock:
-            publication_build.assert_publication_build("https://preview.pages.dev")
+            publication_build.assert_publication_build(
+                "https://preview.pages.dev",
+                commit_sha,
+            )
 
         self.assertEqual(request_mock.call_count, 1 + len(publication_build.REQUIRED_ARTIFACTS))
 
     def test_publication_build_manifest_is_required(self) -> None:
         with patch.object(publication_build, "request", return_value=(404, {}, b"")):
             with self.assertRaisesRegex(AssertionError, "Publication build manifest is missing"):
-                publication_build.assert_publication_build("https://preview.pages.dev")
+                publication_build.assert_publication_build(
+                    "https://preview.pages.dev",
+                    "a" * 40,
+                )
+
+    def test_publication_build_manifest_must_match_pr_head(self) -> None:
+        manifest = {
+            "version": 1,
+            "generator": publication_build.PUBLICATION_GENERATOR,
+            "source_commit": "b" * 40,
+            "artifacts": {},
+        }
+        with patch.object(
+            publication_build,
+            "request",
+            return_value=(200, {}, json.dumps(manifest).encode("utf-8")),
+        ):
+            with self.assertRaisesRegex(AssertionError, "expected"):
+                publication_build.assert_publication_build(
+                    "https://preview.pages.dev",
+                    "a" * 40,
+                )
 
     def test_run_smoke_composes_all_acceptance_checks(self) -> None:
         reporter = preview_smoke.SmokeReporter()
