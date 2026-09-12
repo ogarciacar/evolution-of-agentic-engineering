@@ -1,0 +1,128 @@
+source:
+  title: "Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity"
+  producer: "METR"
+  producer_type: organization
+  date: "2025-07-10"
+  url: "https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/"
+  type: report
+  provenance: primary
+
+presentation:
+  headline: "AI availability slowed experienced maintainers by 19% on familiar real-world tasks"
+  summary: >
+    METR reports a randomized controlled trial in which 16 experienced open-source
+    developers completed 246 real issues from repositories they knew well, with each
+    issue randomly assigned to allow or disallow AI tools. In the early-2025 treatment,
+    developers primarily used Cursor Pro with Claude 3.5/3.7 Sonnet. Allowing AI
+    increased measured completion time by 19%, even though participants expected a
+    speedup before the study and still believed AI had sped them up afterward.
+
+observed:
+  - >
+    METR recruited 16 experienced developers from large open-source repositories.
+    The study reports that participating repositories averaged more than 22,000 stars
+    and more than one million lines of code, and that developers had worked on their
+    projects for multiple years.
+  - >
+    Developers supplied 246 real issues that would ordinarily be valuable to their
+    repositories, including bug fixes, features, and refactors. Each issue was
+    randomly assigned to either allow or disallow generative-AI use.
+  - >
+    When AI was allowed, developers could use the tools they chose; usage was primarily
+    Cursor Pro with Claude 3.5 and Claude 3.7 Sonnet. The treatment therefore measured
+    common interactive and agent-assisted workflows rather than a single fixed
+    autonomous-agent scaffold.
+  - >
+    METR reports that allowing AI increased task completion time by 19% on average.
+    Before starting tasks, developers expected AI to reduce completion time by 24%;
+    after completing the study, they still estimated that AI had reduced their time
+    by 20%.
+  - >
+    The evaluated tasks were realistic repository work rather than self-contained
+    coding exercises. METR describes typical task duration as roughly 20 minutes to
+    four hours, with tasks averaging about two hours.
+  - >
+    Completion was judged by whether the developer was satisfied that the code would
+    pass review, including repository expectations around style, testing, and
+    documentation, rather than by a narrow benchmark test alone.
+  - >
+    METR reports that nearly all participants had substantial prior experience
+    prompting LLMs and that developers appeared qualitatively in-distribution for
+    Cursor Pro users, while also noting that additional learning or better prompting,
+    scaffolding, training, or repository-specific adaptation could change outcomes.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The result is a randomized comparison across 246 real software-engineering tasks
+    completed by 16 experienced maintainers in mature open-source repositories. It is
+    stronger as a comparative field result than as a population-scale signal: the
+    sample is narrow, the systems reflect the February-June 2025 frontier, and the
+    study does not claim representativeness for software development as a whole.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Verification, Economics]
+
+claims:
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  The study provides direct evidence that adding an AI-assisted configuration does
+  not automatically improve engineering fitness. In this setting, experienced humans
+  already possessed deep repository context and worked against review-quality
+  expectations rather than isolated benchmark tests; under those conditions, access
+  to early-2025 AI tools increased elapsed implementation cost. The result therefore
+  sharpens Selection around differential fitness in a concrete engineering
+  environment: an available variant can be technically capable and widely perceived
+  as useful while still being selected against by measured task economics. The study
+  does not isolate Context or Verification as causal mechanisms, but it demonstrates
+  why those environmental conditions must be evaluated rather than assumed.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    C02 should not imply that adding AI assistance is monotonically beneficial.
+    Selection can favor the human-only configuration for some task, developer, and
+    repository regimes. Real fitness must therefore be measured against the relevant
+    counterfactual and include time-to-acceptable-engineering-outcome, not only model
+    capability, benchmark success, adoption, or developer perception. The gap between
+    expected speedup and observed slowdown also makes direct outcome measurement an
+    important guard against selecting configurations on perceived productivity alone.
+
+what_this_does_not_establish:
+  - >
+    The study does not establish that AI slows most software developers or most
+    software-engineering tasks. METR explicitly limits the result to the sampled
+    experienced open-source developers and repositories.
+  - >
+    The treatment reflects early-2025 tools, primarily Cursor Pro with Claude 3.5/3.7
+    Sonnet, and does not establish the effect of later models, more autonomous agents,
+    or substantially different scaffolding.
+  - >
+    The study does not establish which specific mechanism caused the slowdown. Deep
+    repository familiarity, task length, model limitations, interaction overhead,
+    review-quality requirements, prompting, and other properties may all contribute.
+  - >
+    Developers volunteered for the study, so the source does not rule out participant
+    selection effects or establish population representativeness.
+  - >
+    The source does not show that better repository-specific context, prompting,
+    finetuning, or agent scaffolding could not produce a speedup in the same broad
+    setting; METR explicitly identifies these as plausible alternatives.
+  - >
+    Because the evaluated configuration is primarily a human using AI assistance,
+    this source does not by itself establish autonomous agentic actors under C01,
+    cooperation under C03, or specialization under C04.
+
+open_question: >
+  Which combinations of developer familiarity, task duration, repository context,
+  verification burden, and agent autonomy cause AI-assisted engineering to cross from
+  negative to positive measured fitness relative to human-only work?
+
+practice_assessment:
+  status: assessed
+
+assessment:
+  assisted_by_ai: true
