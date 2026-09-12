@@ -5,10 +5,12 @@ on:
     paths:
       - "workers/ai-search/**"
       - "experiments/ai-search/**"
+      - "evidence/**"
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
-      - "sitemap.xml"
+      - "pipeline/build/build-evidence.py"
+      - "pipeline/templates/sitemap.xml"
       - "docs/ai-search.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
@@ -18,10 +20,12 @@ on:
     paths:
       - "workers/ai-search/**"
       - "experiments/ai-search/**"
+      - "evidence/**"
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
-      - "sitemap.xml"
+      - "pipeline/build/build-evidence.py"
+      - "pipeline/templates/sitemap.xml"
       - "docs/ai-search.md"
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
@@ -38,6 +42,14 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: "22"
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install publication dependencies
+        run: pip install -r pipeline/requirements.txt
+      - name: Generate sitemap from canonical evidence
+        run: python pipeline/build/build-evidence.py
       - name: Check AI Search endpoint contract
         run: node workers/ai-search/check-search-endpoint.mjs
       - name: Check Ask the evidence UI contract
