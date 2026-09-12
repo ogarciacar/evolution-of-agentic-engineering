@@ -2,6 +2,7 @@
 """Unit tests plus an opt-in deployed acceptance test for preview smoke verification."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -12,10 +13,12 @@ from unittest.mock import patch
 
 try:
     from pipeline.preview import preview_smoke
+    from pipeline.preview import publication_build
     from pipeline.preview import run_preview_smoke
 except ModuleNotFoundError:  # Support direct execution from the repository root.
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     from pipeline.preview import preview_smoke
+    from pipeline.preview import publication_build
     from pipeline.preview import run_preview_smoke
 
 
@@ -121,6 +124,88 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
             return_value=(200, {preview_smoke.PROJECTION_HEADER: "main"}, body),
         ):
             preview_smoke.assert_default_main("https://preview.pages.dev")
+
+    def test_publication_build_manifest_verifies_commit_outputs_and_public_surfaces(self) -> None:
+        commit_sha = "a" * 40
+        built_bodies = {
+            "research-frontier.json": b'{"claims": []}\n',
+            "evaluate.html": b"<html>evaluate</html>\n",
+            "synthesis.html": b"<html>synthesis</html>\n",
+            "sitemap.xml": b"<urlset></urlset>\n",
+        }
+        manifest = {
+            "version": 1,
+            "generator": publication_build.PUBLICATION_GENERATOR,
+            "source_commit": commit_sha,
+            "artifacts": {
+                name: {
+                    "sha256": hashlib.sha256(body).hexdigest(),
+                    "bytes": len(body),
+                }
+                for name, body in built_bodies.items()
+            },
+        }
+        served_bodies = {
+            "evaluate.html": b"<html><a href='/?projection_id=abc'>evaluate</a></html>\n",
+            "synthesis.html": b"<!doctype html><html>synthesis</html>\n",
+            "sitemap.xml": built_bodies["sitemap.xml"],
+        }
+        responses = [(200, {}, json.dumps(manifest).encode("utf-8"))]
+        for name in publication_build.PUBLISHED_ARTIFACTS:
+            headers = {"Content-Type": "text/html; charset=utf-8"} if name.endswith(".html") else {}
+            responses.append((200, headers, served_bodies[name]))
+
+        with patch.object(publication_build, "request", side_effect=responses) as request_mock:
+            publication_build.assert_publication_build(
+                "https://preview.pages.dev",
+                commit_sha,
+            )
+
+        self.assertEqual(request_mock.call_count, 1 + len(publication_build.PUBLISHED_ARTIFACTS))
+
+    def test_publication_build_manifest_is_required(self) -> None:
+        with patch.object(publication_build, "request", return_value=(404, {}, b"")):
+            with self.assertRaisesRegex(AssertionError, "manifest is not available"):
+                publication_build._assert_publication_build_once(
+                    "https://preview.pages.dev",
+                    "a" * 40,
+                )
+
+    def test_publication_build_manifest_must_match_pr_head(self) -> None:
+        manifest = {
+            "version": 1,
+            "generator": publication_build.PUBLICATION_GENERATOR,
+            "source_commit": "b" * 40,
+            "artifacts": {},
+        }
+        with patch.object(
+            publication_build,
+            "request",
+            return_value=(200, {}, json.dumps(manifest).encode("utf-8")),
+        ):
+            with self.assertRaisesRegex(AssertionError, "expected"):
+                publication_build._assert_publication_build_once(
+                    "https://preview.pages.dev",
+                    "a" * 40,
+                )
+
+    def test_publication_build_retries_transient_edge_readiness(self) -> None:
+        commit_sha = "a" * 40
+        with (
+            patch.object(
+                publication_build,
+                "_assert_publication_build_once",
+                side_effect=[AssertionError("manifest is not available yet"), None],
+            ) as check_mock,
+            patch.object(publication_build.time, "sleep") as sleep_mock,
+        ):
+            publication_build.assert_publication_build(
+                "https://preview.pages.dev",
+                commit_sha,
+                timeout_seconds=10,
+            )
+        self.assertEqual(check_mock.call_count, 2)
+        sleep_mock.assert_called_once_with(5)
 
     def test_run_smoke_composes_all_acceptance_checks(self) -> None:
         reporter = preview_smoke.SmokeReporter()
