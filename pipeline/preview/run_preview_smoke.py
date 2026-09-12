@@ -11,8 +11,10 @@ from pathlib import Path
 
 try:
     from .preview_smoke import SmokeReporter, run_smoke, wait_for_preview
+    from .publication_build import assert_publication_build
 except ImportError:  # Support direct execution: python pipeline/preview/run_preview_smoke.py
     from preview_smoke import SmokeReporter, run_smoke, wait_for_preview
+    from publication_build import assert_publication_build
 
 DEFAULT_PROJECT = "evolution-of-agentic-engineering"
 SHA_RE = re.compile(r"^[0-9a-f]{12,64}$")
@@ -114,6 +116,9 @@ def run_from_context(
                 reporter,
             )
             reporter.context.append(("Preview", resolved_preview_url))
+
+        reporter.section("Publication build")
+        assert_publication_build(resolved_preview_url, reporter)
 
         run_smoke(
             preview_url=resolved_preview_url,
