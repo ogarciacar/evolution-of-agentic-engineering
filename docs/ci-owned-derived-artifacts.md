@@ -21,9 +21,29 @@ The S3 quality gate requires changes to `main` to arrive through a pull request.
 
 During the current migration, the four generated artifacts are still tracked in Git and CI requires regeneration to match their checked-in contents before merge. This is a temporary compatibility state while Cloudflare Pages is switched to execute the same publication build at deploy time.
 
+## Cloudflare Pages build contract
+
+The Pages Git integration must execute the publication builder before uploading the repository-root site:
+
+```bash
+pip install -r pipeline/requirements.txt && python pipeline/build-publication.py
+```
+
+This migration changes the Pages **build command only**. Keep the existing root directory and build output directory that currently publish the repository-root static site.
+
+`pipeline/build-publication.py` emits `publication-manifest.json` after generating the four derived surfaces. The manifest is intentionally ignored by Git and therefore can exist in a deployed preview only when the Pages build actually ran. It contains SHA-256 and byte-size evidence for each generated publication artifact.
+
+Required Preview Smoke verifies:
+
+1. `/publication-manifest.json` exists and names `pipeline/build-publication.py` as its generator;
+2. all four expected generated artifacts are represented;
+3. every deployed artifact's bytes and SHA-256 match the build manifest.
+
+This turns the Pages cutover into an observable acceptance condition rather than a dashboard configuration assumption.
+
 ## Target publication model
 
-After the Pages build is verified, the generated artifacts will stop being tracked in Git. Pages will materialize them from canonical research state during deployment, while CI will verify that the publication build succeeds and is deterministic.
+After the Pages build is verified in preview and production, the generated artifacts will stop being tracked in Git. Pages will materialize them from canonical research state during deployment, while CI will verify that the publication build succeeds and is deterministic.
 
 ```text
 canonical Git state
@@ -40,7 +60,8 @@ canonical Git state
               ├── research-frontier.json
               ├── evaluate.html
               ├── synthesis.html
-              └── sitemap.xml
+              ├── sitemap.xml
+              └── publication-manifest.json (build-only proof)
 ```
 
 Git remains canonical. D1 and generated publication artifacts are rebuildable projections.
