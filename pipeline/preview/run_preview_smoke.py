@@ -118,7 +118,12 @@ def run_from_context(
             reporter.context.append(("Preview", resolved_preview_url))
 
         reporter.section("Publication build")
-        assert_publication_build(resolved_preview_url, resolved_head, reporter)
+        assert_publication_build(
+            resolved_preview_url,
+            resolved_head,
+            timeout_seconds=min(timeout, 120),
+            reporter=reporter,
+        )
 
         run_smoke(
             preview_url=resolved_preview_url,
