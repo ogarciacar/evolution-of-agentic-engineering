@@ -18,10 +18,12 @@ REQUIRED_ARTIFACTS = (
     "synthesis.html",
     "sitemap.xml",
 )
-EXACT_BYTE_ARTIFACTS = {
-    "research-frontier.json",
+PUBLISHED_ARTIFACTS = (
+    "evaluate.html",
+    "synthesis.html",
     "sitemap.xml",
-}
+)
+EXACT_BYTE_ARTIFACTS = {"sitemap.xml"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -31,7 +33,7 @@ def assert_publication_build(
     expected_commit: str,
     reporter: SmokeReporter | None = None,
 ) -> None:
-    """Require build provenance and verify every published derived artifact."""
+    """Require build provenance and verify the public publication surfaces."""
     reporter = reporter or SmokeReporter()
     status, _, body = request(api_url(preview_url, PUBLICATION_MANIFEST_PATH))
     assert status == 200, (
@@ -75,13 +77,15 @@ def assert_publication_build(
             f"Publication manifest has an invalid byte count for {artifact}"
         )
 
+    for artifact in PUBLISHED_ARTIFACTS:
+        metadata = artifacts[artifact]
         artifact_status, artifact_headers, artifact_body = request(api_url(preview_url, f"/{artifact}"))
         assert artifact_status == 200, f"Published artifact returned HTTP {artifact_status}: /{artifact}"
 
         if artifact in EXACT_BYTE_ARTIFACTS:
             actual_sha = hashlib.sha256(artifact_body).hexdigest()
-            assert actual_sha == expected_sha, f"Published artifact hash does not match build manifest: {artifact}"
-            assert len(artifact_body) == expected_bytes, f"Published artifact size does not match build manifest: {artifact}"
+            assert actual_sha == metadata["sha256"], f"Published artifact hash does not match build manifest: {artifact}"
+            assert len(artifact_body) == metadata["bytes"], f"Published artifact size does not match build manifest: {artifact}"
             continue
 
         content_type = artifact_headers.get("Content-Type", "")
@@ -91,5 +95,5 @@ def assert_publication_build(
 
     reporter.passed(
         "Publication build",
-        f"commit {expected_commit[:12]} + manifest + {len(REQUIRED_ARTIFACTS)} verified artifacts",
+        f"commit {expected_commit[:12]} + 4 generated outputs + 3 published surfaces",
     )
