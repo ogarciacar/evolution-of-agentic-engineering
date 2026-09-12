@@ -14,7 +14,7 @@ The site combines authored model pages with runtime evidence views backed by the
 
 - `index.html` — the authored model shell; the bounded Evidence Landscape is rendered at runtime from D1 and shows up to the newest 24 accepted Scale Signals.
 - `evidence.html` — the living evidence record used to test, refine, and potentially contradict the model.
-- `evaluate.html` — deterministic evaluation of the active model claims against the mapped corpus.
+- `evaluate.html` — deterministic evaluation of the active model claims against the mapped corpus, generated at deploy time.
 - `/signals/<signal-id>/` — permanent Scale Signal routes rendered at runtime from D1.
 - `apply.html` — the protocol for evaluating a new source against the model.
 
@@ -31,19 +31,19 @@ evidence/ + model/ + schema/
 pipeline/
           │
           ├── validation
-          ├── derived-artifact generation
+          ├── deterministic publication build
           └── deterministic D1 projection
                   │
                   ▼
-functions/ + root publication files
+functions/ + Cloudflare Pages
 ```
 
 - `evidence/`, `model/`, and `schema/` hold canonical research state and contracts.
 - `pipeline/` contains repository infrastructure for validation, evaluation, publication generation, and D1 projection; it is not a user-facing Python application or CLI.
 - `migrations/` records D1 projection schema evolution.
 - `functions/` contains the Cloudflare runtime read model and dynamic publication routes.
-- root HTML, CSS, JavaScript, and generated artifacts form the deployed Cloudflare Pages publication surface.
-- `.github/workflows/` orchestrates the pipeline and D1 lifecycle.
+- authored root HTML, CSS, and JavaScript are tracked in Git; deterministic evaluation, synthesis, frontier, and sitemap outputs are materialized at build time and are not canonical Git state.
+- `.github/workflows/` orchestrates validation and the D1 lifecycle.
 
 See [`pipeline/README.md`](pipeline/README.md) and [`docs/README.md`](docs/README.md) for the maintained architecture documentation.
 
@@ -65,7 +65,13 @@ If the source contains meaningful evidence, the assessment can be proposed throu
 
 ## Publishing
 
-Deploy the repository root to Cloudflare Pages. Authored research pages are served alongside runtime evidence views and the read-only evidence API backed by the D1 projection.
+Cloudflare Pages deploys the repository root and materializes deterministic publication outputs first with:
+
+```bash
+pip install -r pipeline/requirements.txt && python pipeline/build-publication.py
+```
+
+Authored research pages are then served alongside generated evaluation/synthesis surfaces, runtime evidence views, and the read-only evidence API backed by the D1 projection. The generated publication outputs are ignored by Git and can always be rebuilt from canonical repository state.
 
 ## Evidence workflow
 

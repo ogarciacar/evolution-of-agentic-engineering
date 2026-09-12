@@ -8,7 +8,14 @@ Evolution of Agentic Engineering is a working model. Contributions are welcome w
 
 Before opening a pull request, evaluate the source using `https://agenticengineering.science/apply.html`.
 
-Assess the source against the active model and the current generated research frontier in `research-frontier.json`. For every frontier item the source materially bears on, report:
+Assess the source against the active model and the current generated research frontier. `research-frontier.json` is build output rather than tracked Git state; materialize it locally when needed with:
+
+```bash
+pip install -r pipeline/requirements.txt
+python pipeline/build/build-research-frontier.py
+```
+
+For every frontier item the source materially bears on, report:
 
 - claim and stage
 - current evaluation state
@@ -60,11 +67,11 @@ If CI reports `SYNTHESIS_REVIEW_REQUIRED`, that is an editorial boundary rather 
 
 - **Contributor surface — `evidence/*.yaml`**: ordinary evidence proposals are authored here.
 - **Maintainer surface**: schema, generators, workflows, protocols, model contracts, research gaps, synthesis findings, runtime functions, and editorial pages.
-- **CI-derived static/model artifacts**: `research-frontier.json`, `evaluate.html`, `synthesis.html`, and `sitemap.xml`.
+- **Build-time publication outputs**: `research-frontier.json`, `evaluate.html`, `synthesis.html`, `sitemap.xml`, and `publication-manifest.json`. These are ignored by Git and rebuilt from canonical state.
 - **Runtime evidence surfaces**: `/api/evidence`, `/signals/<signal-id>/`, and the homepage Evidence Landscape. These read from the D1 projection through the shared runtime evidence read model.
 - **Authored/static publication pages**: `index.html`, `evidence.html`, `apply.html`, and `contribute.html`.
 
-Contributors author canonical evidence records, not derived model bookkeeping, D1 projections, or publication surfaces.
+Contributors author canonical evidence records, not derived model bookkeeping, D1 projections, or publication outputs.
 
 ## Contribution format
 
@@ -148,25 +155,33 @@ semantic synthesis-drift check
       ▼
 projection/export validation
       │
-      ├── research frontier + static/model artifacts
+      ├── deterministic publication rebuild
       │
       └── D1 synchronization
 ```
 
-Pull-request validation does not mutate the contribution branch. Generated outputs may be uploaded as workflow artifacts for inspection. After canonical changes reach `main`, the workflow regenerates and may commit the known CI-owned static/model artifacts there. D1 synchronization projects the accepted corpus for runtime publication.
+Pull-request validation does not mutate the contribution branch. CI builds the publication twice, verifies that the deterministic outputs have identical hashes, and may upload them as workflow artifacts for inspection. After canonical changes reach `main`, Cloudflare Pages runs the same `pipeline/build-publication.py` entrypoint during deployment. CI does not push generated follow-up commits to `main`.
 
 The expected outcome for an ordinary compatible evidence contribution is therefore: **one evidence YAML in, green validation and derived outputs out**.
 
 ## Derived artifacts
 
-Generated artifacts must not be hand-edited. The current CI-owned generated paths are:
+Generated publication outputs must not be hand-edited or committed. The generated paths are:
 
 - `research-frontier.json`
 - `evaluate.html`
 - `synthesis.html`
 - `sitemap.xml`
+- `publication-manifest.json`
 
-For local inspection, maintainers may run `python pipeline/build-derived-artifacts.py`, but contributors do not need to commit its output before opening a pull request.
+They are ignored by Git. For local inspection, run:
+
+```bash
+pip install -r pipeline/requirements.txt
+python pipeline/build-publication.py
+```
+
+Delete the generated files at any time; they are rebuildable from canonical repository state.
 
 `evidence.html` and `index.html` are authored/static pages. Evidence-dependent runtime content is read from D1 rather than materialized into those files by CI.
 
@@ -180,6 +195,6 @@ A synthesis review is maintainer work. When CI identifies semantic synthesis dri
 
 ## Publication
 
-Accepted YAML evidence is projected into D1 after validation. The shared runtime evidence read model supplies the evidence API, Scale Signal routes, and the homepage Evidence Landscape. The homepage remains a bounded view of the corpus, while the evidence API and Scale Signal routes expose individual and queryable evidence for inspection.
+Accepted YAML evidence is projected into D1 after validation. The shared runtime evidence read model supplies the evidence API, Scale Signal routes, and the homepage Evidence Landscape. Cloudflare Pages separately materializes deterministic evaluation, synthesis, frontier, and sitemap outputs from the same canonical Git state at deployment time. The homepage remains a bounded view of the corpus, while the evidence API and Scale Signal routes expose individual and queryable evidence for inspection.
 
 **Evidence should accumulate. The homepage should remain legible.**
