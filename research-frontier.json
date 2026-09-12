@@ -7,7 +7,7 @@
       "stage": "Apparition",
       "claim": "Agentic engineering actors have appeared",
       "evaluation_state": "EMERGING",
-      "mapped_evidence_count": 3,
+      "mapped_evidence_count": 4,
       "research_question": "Under what conditions does an AI-enabled engineering configuration become a meaningful agentic engineering actor rather than remain an interactive tool?",
       "evidence_needed": [
         "Evidence of meaningful software-engineering action without continuous human operation",
@@ -19,7 +19,7 @@
       "stage": "Selection",
       "claim": "Engineering environments select among viable variants",
       "evaluation_state": "EMERGING",
-      "mapped_evidence_count": 21,
+      "mapped_evidence_count": 22,
       "research_question": "Which engineering-environment conditions materially determine which viable agent variants remain reliable and economical as scale and autonomy increase?",
       "evidence_needed": [
         "Comparative outcomes across materially different agent configurations",
