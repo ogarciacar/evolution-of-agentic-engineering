@@ -1,0 +1,154 @@
+source:
+  title: "Announcing the 2025 DORA Report: State of AI-Assisted Software Development"
+  producer: "Google Cloud / DORA"
+  producer_type: organization
+  date: "2025-09-23"
+  url: "https://cloud.google.com/blog/products/ai-machine-learning/announcing-the-2025-dora-report"
+  type: report
+  provenance: primary
+
+presentation:
+  headline: "DORA finds AI outcomes depend on the surrounding engineering system, not AI adoption alone"
+  summary: >
+    DORA's 2025 research draws on more than 100 hours of qualitative data and survey
+    responses from nearly 5,000 technology professionals. It reports that AI adoption
+    is associated with higher software-delivery throughput and product performance,
+    while still having a negative relationship with delivery stability. DORA frames
+    AI as an amplifier: teams with strong platforms, workflows, feedback loops, and
+    safety nets are better positioned to convert AI-assisted output into useful
+    outcomes, while weak systems can amplify instability.
+
+observed:
+  - >
+    DORA states that the 2025 report draws on more than 100 hours of qualitative data
+    and survey responses from nearly 5,000 technology professionals around the world.
+  - >
+    The report summary describes AI as an amplifier of the engineering system already
+    in place: strong teams can become more effective, while struggling teams can have
+    their existing weaknesses intensified.
+  - >
+    DORA reports a positive relationship between AI adoption and both software-delivery
+    throughput and product performance, while AI adoption continues to have a negative
+    relationship with software-delivery stability.
+  - >
+    DORA attributes the stability risk to increased change volume exposing downstream
+    weaknesses and identifies strong automated testing, mature version-control
+    practices, and fast feedback loops as examples of control systems needed to absorb
+    that acceleration.
+  - >
+    The report summary states that teams working in loosely coupled architectures with
+    fast feedback loops see gains, while teams constrained by tightly coupled systems
+    and slow processes see little or no benefit.
+  - >
+    Ninety percent of survey respondents report using AI at work, more than 80 percent
+    believe AI has increased their productivity, and 30 percent report little or no
+    trust in AI-generated code.
+  - >
+    DORA reports that user-centric focus amplifies AI's positive influence on team
+    performance by giving AI-assisted work a clearer problem and direction.
+  - >
+    DORA reports that 90 percent of organizations in the survey have adopted at least
+    one platform and describes a direct correlation between high-quality internal
+    platforms and an organization's ability to unlock value from AI.
+  - >
+    DORA's recommended starting points include connecting AI to internal context,
+    strengthening foundational engineering practices and safety nets, investing in
+    internal platforms, clarifying AI policies, and focusing on end users.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The evidence spans nearly 5,000 technology professionals and broad organizational
+    software-development outcomes. It is a large population-level signal about
+    AI-assisted engineering environments, not a benchmark of autonomous coding-agent
+    runs or concurrent agent operation.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Execution, Verification]
+
+claims:
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  DORA provides broad evidence that the fitness of AI-assisted engineering work is
+  conditional on the surrounding system rather than determined by model capability or
+  adoption alone. Internal context, execution architecture, testing, version control,
+  feedback speed, and platform quality change whether higher AI-assisted change volume
+  becomes throughput and product value or delivery instability. This is directionally
+  consistent with Selection, but the unit of analysis is AI-assisted professionals and
+  teams rather than isolated autonomous coding agents. The source therefore sharpens
+  C02 by showing that environment-dependent outcomes are already visible at the
+  organizational level while leaving agent-specific causal mechanisms unresolved.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    The evidence refines C02 because it connects variation in AI-assisted engineering
+    outcomes to Context, Execution, and Verification conditions in the surrounding
+    engineering environment. It strengthens the model's expectation that increasing
+    AI-generated change volume can expose selection pressure in downstream systems,
+    especially when feedback and control mechanisms are weak. However, the study does
+    not isolate autonomous agent configurations, so it should not be treated as direct
+    proof of agent-level viability or persistence.
+
+what_this_does_not_establish:
+  - >
+    The research concerns broad AI-assisted software development and does not isolate
+    autonomous coding agents, background agents, or multi-agent systems as the unit of
+    analysis.
+  - >
+    The reported relationships are observational survey and qualitative research
+    findings; they do not establish randomized causal effects for individual
+    capabilities or practices.
+  - >
+    Respondent reports of AI use, perceived productivity, and trust are not direct
+    measurements of autonomous task success, code correctness, or production impact.
+  - >
+    The source does not provide a compute-matched comparison of different coding-agent
+    architectures operating under the same repository and organizational conditions.
+  - >
+    The population-level scale does not establish persistent operation of hundreds or
+    thousands of concurrent coding agents, nor cost-per-task or review-attention
+    economics at that scale.
+  - >
+    The source does not establish Cooperation or Specialization under C03 or C04.
+
+open_question: >
+  As coding-agent capacity increases engineering change volume, which combinations of
+  repository context, platform capabilities, verification strength, architecture, and
+  feedback latency most reliably convert that capacity into stable delivery and
+  product outcomes rather than downstream instability?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: connect-ai-to-internal-context
+    use_case: "Improve the usefulness of AI-assisted engineering beyond generic model knowledge."
+    problem: "General-purpose AI lacks organization-specific repository, documentation, and workflow context."
+    reported_practice: "Invest in connecting AI tools to internal context so engineering assistance is grounded in company-specific information."
+    selection_conditions: [context]
+  - id: automated-testing-fast-feedback-safety-net
+    use_case: "Absorb higher change volume produced by AI-assisted development without losing delivery stability."
+    problem: "Faster code production can expose downstream weaknesses and increase instability when feedback is slow or controls are weak."
+    reported_practice: "Use strong automated testing and fast feedback loops as control systems around AI-assisted change."
+    selection_conditions: [verification, execution]
+  - id: mature-version-control-safety-net
+    use_case: "Keep rapidly produced changes recoverable when AI-assisted work introduces regressions."
+    problem: "Higher change velocity increases the need to isolate, inspect, and reverse unsafe changes."
+    reported_practice: "Maintain mature version-control practices as a safety net for accelerated AI-assisted development."
+    selection_conditions: [verification, execution]
+  - id: quality-internal-platform-for-ai
+    use_case: "Scale AI-assisted engineering across teams with shared capabilities and guardrails."
+    problem: "Local AI productivity does not automatically translate into reliable organizational outcomes when teams lack a strong execution platform."
+    reported_practice: "Invest in a high-quality internal platform that provides shared engineering capabilities and supports reliable AI-assisted workflows."
+    selection_conditions: [execution, verification]
+  - id: user-centric-direction-for-ai
+    use_case: "Keep accelerated AI-assisted work aligned with useful product outcomes."
+    problem: "Faster engineering output can move a team in the wrong direction when the problem and user outcome are unclear."
+    reported_practice: "Use explicit user-centric focus to provide direction for AI-assisted engineering work."
+    selection_conditions: [context]
+
+assessment:
+  assisted_by_ai: true
