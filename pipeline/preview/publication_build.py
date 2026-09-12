@@ -33,7 +33,14 @@ def assert_publication_build(
         "pipeline/build-publication.py before deployment."
     )
 
-    payload = parse_json(body, "publication build manifest")
+    try:
+        payload = parse_json(body, "publication build manifest")
+    except AssertionError as error:
+        raise AssertionError(
+            "Publication build manifest was not generated as JSON. Cloudflare Pages must run "
+            "pipeline/build-publication.py before deployment."
+        ) from error
+
     assert isinstance(payload, dict), "Publication build manifest must be a JSON object"
     assert payload.get("version") == 1, "Publication build manifest has an unsupported version"
     assert payload.get("generator") == PUBLICATION_GENERATOR, "Publication build manifest has the wrong generator"
