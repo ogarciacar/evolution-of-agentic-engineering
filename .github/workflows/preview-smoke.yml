@@ -4,17 +4,6 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened]
-    paths:
-      - "evidence/**"
-      - "schema/**"
-      - "migrations/**"
-      - "functions/**"
-      - "index.html"
-      - "evidence.html"
-      - "evaluate.html"
-      - "pipeline/projection/**"
-      - "pipeline/preview/**"
-      - ".github/workflows/preview-smoke.yml"
 
 concurrency:
   group: preview-smoke-${{ github.event.pull_request.number }}
@@ -25,6 +14,7 @@ permissions:
 
 jobs:
   smoke:
+    name: Preview smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: preview
@@ -41,9 +31,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Determine deployed preview relevance
+        id: scope
+        run: python pipeline/preview/change_scope.py
+
       - uses: actions/setup-python@v7
+        if: steps.scope.outputs.relevant == 'true'
         with:
           python-version: "3.12"
 
       - name: Verify deployed preview
+        if: steps.scope.outputs.relevant == 'true'
         run: python pipeline/preview/run_preview_smoke.py
+
+      - name: Deployed preview not applicable
+        if: steps.scope.outputs.relevant == 'false'
+        run: echo "No publication, projection, or deployed-acceptance files changed; preview smoke is not applicable."

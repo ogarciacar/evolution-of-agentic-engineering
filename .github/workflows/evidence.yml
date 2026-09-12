@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   evidence:
+    name: Evidence integrity
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -28,6 +29,8 @@ jobs:
         run: pip install -r pipeline/requirements.txt
       - name: Test preview smoke helpers
         run: python -m unittest pipeline.preview.test_preview_smoke
+      - name: Test preview change scope
+        run: python -m unittest pipeline.preview.test_change_scope
       - name: Test browser E2E runner
         run: python -m unittest pipeline.browser.test_run_preview_e2e
       - name: Validate model claims
