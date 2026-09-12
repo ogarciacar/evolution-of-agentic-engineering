@@ -125,7 +125,7 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
         ):
             preview_smoke.assert_default_main("https://preview.pages.dev")
 
-    def test_publication_build_manifest_verifies_commit_and_deployed_artifacts(self) -> None:
+    def test_publication_build_manifest_verifies_commit_outputs_and_public_surfaces(self) -> None:
         commit_sha = "a" * 40
         built_bodies = {
             "research-frontier.json": b'{"claims": []}\n',
@@ -147,12 +147,12 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
         }
         # HTML responses may be reserialized or link-rewritten by Pages middleware.
         served_bodies = {
-            **built_bodies,
             "evaluate.html": b"<html><a href='/?projection_id=abc'>evaluate</a></html>\n",
             "synthesis.html": b"<!doctype html><html>synthesis</html>\n",
+            "sitemap.xml": built_bodies["sitemap.xml"],
         }
         responses = [(200, {}, json.dumps(manifest).encode("utf-8"))]
-        for name in publication_build.REQUIRED_ARTIFACTS:
+        for name in publication_build.PUBLISHED_ARTIFACTS:
             headers = {"Content-Type": "text/html; charset=utf-8"} if name.endswith(".html") else {}
             responses.append((200, headers, served_bodies[name]))
 
@@ -162,7 +162,7 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
                 commit_sha,
             )
 
-        self.assertEqual(request_mock.call_count, 1 + len(publication_build.REQUIRED_ARTIFACTS))
+        self.assertEqual(request_mock.call_count, 1 + len(publication_build.PUBLISHED_ARTIFACTS))
 
     def test_publication_build_manifest_is_required(self) -> None:
         with patch.object(publication_build, "request", return_value=(404, {}, b"")):
