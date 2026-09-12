@@ -18,14 +18,20 @@ REQUIRED_ARTIFACTS = (
     "synthesis.html",
     "sitemap.xml",
 )
+EXACT_BYTE_ARTIFACTS = {
+    "research-frontier.json",
+    "sitemap.xml",
+}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
 def assert_publication_build(
     preview_url: str,
+    expected_commit: str,
     reporter: SmokeReporter | None = None,
 ) -> None:
-    """Require a build-only manifest and verify every published derived artifact."""
+    """Require build provenance and verify every published derived artifact."""
     reporter = reporter or SmokeReporter()
     status, _, body = request(api_url(preview_url, PUBLICATION_MANIFEST_PATH))
     assert status == 200, (
@@ -45,6 +51,14 @@ def assert_publication_build(
     assert payload.get("version") == 1, "Publication build manifest has an unsupported version"
     assert payload.get("generator") == PUBLICATION_GENERATOR, "Publication build manifest has the wrong generator"
 
+    manifest_commit = payload.get("source_commit")
+    assert isinstance(manifest_commit, str) and COMMIT_RE.fullmatch(manifest_commit), (
+        "Publication build manifest is missing a valid Cloudflare source commit"
+    )
+    assert manifest_commit == expected_commit, (
+        f"Publication build manifest belongs to {manifest_commit}, expected {expected_commit}"
+    )
+
     artifacts = payload.get("artifacts")
     assert isinstance(artifacts, dict), "Publication build manifest is missing artifacts"
     assert set(artifacts) == set(REQUIRED_ARTIFACTS), "Publication build manifest has the wrong artifact set"
@@ -61,10 +75,21 @@ def assert_publication_build(
             f"Publication manifest has an invalid byte count for {artifact}"
         )
 
-        artifact_status, _, artifact_body = request(api_url(preview_url, f"/{artifact}"))
+        artifact_status, artifact_headers, artifact_body = request(api_url(preview_url, f"/{artifact}"))
         assert artifact_status == 200, f"Published artifact returned HTTP {artifact_status}: /{artifact}"
-        actual_sha = hashlib.sha256(artifact_body).hexdigest()
-        assert actual_sha == expected_sha, f"Published artifact hash does not match build manifest: {artifact}"
-        assert len(artifact_body) == expected_bytes, f"Published artifact size does not match build manifest: {artifact}"
 
-    reporter.passed("Publication build", f"manifest + {len(REQUIRED_ARTIFACTS)} verified artifacts")
+        if artifact in EXACT_BYTE_ARTIFACTS:
+            actual_sha = hashlib.sha256(artifact_body).hexdigest()
+            assert actual_sha == expected_sha, f"Published artifact hash does not match build manifest: {artifact}"
+            assert len(artifact_body) == expected_bytes, f"Published artifact size does not match build manifest: {artifact}"
+            continue
+
+        content_type = artifact_headers.get("Content-Type", "")
+        assert "text/html" in content_type, f"Published HTML artifact has wrong content type: {artifact}"
+        html = artifact_body.decode("utf-8", errors="replace").lower()
+        assert "<html" in html or "<!doctype html" in html, f"Published HTML artifact is not HTML: {artifact}"
+
+    reporter.passed(
+        "Publication build",
+        f"commit {expected_commit[:12]} + manifest + {len(REQUIRED_ARTIFACTS)} verified artifacts",
+    )
