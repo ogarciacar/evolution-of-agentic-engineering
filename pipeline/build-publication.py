@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -29,10 +30,16 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def source_commit() -> str | None:
+    value = os.environ.get("CF_PAGES_COMMIT_SHA", "").strip().lower()
+    return value or None
+
+
 def write_publication_manifest() -> None:
     payload = {
         "version": MANIFEST_VERSION,
         "generator": "pipeline/build-publication.py",
+        "source_commit": source_commit(),
         "artifacts": {
             path.name: {"sha256": sha256(path), "bytes": path.stat().st_size}
             for path in DERIVED_ARTIFACTS
