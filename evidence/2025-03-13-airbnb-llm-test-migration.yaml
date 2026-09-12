@@ -1,0 +1,152 @@
+source:
+  title: "Accelerating Large-Scale Test Migration with LLMs"
+  producer: "Airbnb"
+  producer_type: organization
+  date: "2025-03-13"
+  url: "https://airbnb.tech/infrastructure/accelerating-large-scale-test-migration-with-llms/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Validation, context, and retries made an LLM migration viable at 3,500-file scale"
+  summary: >
+    Airbnb reports migrating nearly 3.5K Enzyme test files to React Testing
+    Library in six weeks using a staged validation pipeline, configurable retry
+    loops, expanded repository context, parallel execution, and repeated prompt
+    and tooling refinement. The automated pipeline completed 75% of target files
+    in four hours and reached 97% after four days of sample-tune-sweep iteration;
+    the remaining 3% required manual completion.
+
+observed:
+  - >
+    Airbnb reports that nearly 3.5K React component test files were migrated from
+    Enzyme to React Testing Library in six weeks, compared with an original
+    estimate of 1.5 years of engineering time for a manual migration.
+  - >
+    Airbnb structured the migration as discrete per-file validation and refactor
+    steps modeled as a state machine. A file advanced only after the previous
+    validation step passed, which allowed progress tracking, targeted reruns, and
+    hundreds of files to be processed concurrently.
+  - >
+    Failed steps entered configurable retry loops. Each retry supplied the LLM
+    with the validation errors and the most recent file version; Airbnb reports
+    that simple-to-medium files often completed after a few retries and most by
+    ten attempts.
+  - >
+    For harder files, Airbnb expanded prompts to roughly 40,000-100,000 tokens,
+    including as many as 50 related files, manually written examples, passing
+    project-local tests, source code, migration guidance, and validation failures.
+  - >
+    Airbnb reports that selecting the right related files and examples was more
+    important to success on complex cases than continued prompt wording changes
+    alone, and used a sample-tune-sweep loop to identify common failures, adjust
+    prompts and scripts, validate on representative samples, and rerun the
+    remaining corpus.
+  - >
+    With the validation pipeline, retries, and expanded context in place, Airbnb
+    automatically migrated 75% of target files in four hours. Four days of
+    sample-tune-sweep refinement raised completion to 97%, leaving just under 100
+    files for the long tail.
+  - >
+    Airbnb reports that many long-tail files had already been retried 50-100 times
+    when the team concluded that further automation was reaching a ceiling. The
+    remaining 3% were finished manually from the failing automated refactors.
+  - >
+    Airbnb states that the migration preserved the original test intent and overall
+    code coverage, and that total cost including LLM API usage and six weeks of
+    engineering time was more efficient than the original manual migration estimate.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The source reports a production migration of nearly 3.5K test files. Automated
+    completion reached 75% in four hours and 97% after four days of systematic
+    refinement, with the complete migration finished in six weeks versus a
+    1.5-year manual estimate. The final 3% remained a documented automation boundary.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Execution, Verification, Observability, Economics, Learning]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
+interpretation: >
+  This record provides a concrete example of engineering-environment conditions
+  materially changing the viability of an AI-assisted engineering configuration at
+  scale. The model alone was not the operative unit: staged execution constrained
+  work, validation gated progression, failures became retry feedback, repository
+  context was deliberately selected and expanded, progress and failure classes were
+  observable, and repeated corpus-level runs drove learning about where the system
+  still failed. The progression from 75% to 97% after changing prompts and tooling,
+  followed by a persistent manual long tail, is evidence of differential fitness
+  under different environmental conditions rather than uniform capability.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Airbnb's migration supports C02 by showing that Context, Execution,
+    Verification, Observability, Economics, and Learning conditions shaped whether
+    an LLM-driven migration could operate effectively across thousands of files.
+    It also exposes a selection boundary: increasing retries and context improved
+    viability for most files, but some cases remained uneconomical to automate and
+    were selected back to human completion.
+
+what_this_does_not_establish:
+  - >
+    The source describes one migration class inside Airbnb and does not establish
+    that the same pipeline or economics generalize to arbitrary repositories,
+    languages, models, or software-engineering tasks.
+  - >
+    The 1.5-year manual baseline is Airbnb's original estimate rather than a measured
+    randomized counterfactual against the completed six-week migration.
+  - >
+    The source does not isolate the causal contribution of any single intervention,
+    such as additional context, retries, validation structure, or prompt refinement.
+  - >
+    The LLM operated inside a purpose-built migration pipeline; this source does not
+    by itself establish a generally autonomous engineering actor under C01.
+  - >
+    The final 3% required manual intervention, and the source explicitly reports an
+    automation ceiling after repeated retries on the long tail.
+  - >
+    The source does not establish durable Cooperation or Specialization among
+    multiple agentic engineering actors.
+
+open_question: >
+  Across repeated repository-scale migrations, which combinations of context
+  selection, validation gates, retry policy, and feedback loops most improve task
+  completion per unit of engineering and inference cost?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: validation-state-machine
+    use_case: "Migrate thousands of tests while preserving test intent and code coverage."
+    problem: "An LLM-generated refactor cannot be treated as complete until repository-specific validation succeeds."
+    reported_practice: "Break migration into per-file refactor and validation states and advance a file only after the preceding check passes."
+    selection_conditions: [execution, verification, observability]
+  - id: feedback-driven-retries
+    use_case: "Recover automatically when an LLM-generated migration step fails validation."
+    problem: "A first attempt frequently leaves validation errors that require another targeted correction."
+    reported_practice: "Retry failed steps with dynamic prompts containing the validation errors and latest file version, up to a configurable limit."
+    selection_conditions: [verification, learning, execution]
+  - id: related-file-context-expansion
+    use_case: "Migrate complex tests with project-specific setup, indirection, and conventions."
+    problem: "Retrying alone stopped being effective when the model lacked the repository context needed to resolve complex test behavior."
+    reported_practice: "Expand prompts with selected source files, related tests, passing project-local examples, migration guidance, and validation failures, reaching roughly 40K-100K tokens and up to 50 related files."
+    selection_conditions: [context, economics]
+  - id: sample-tune-sweep
+    use_case: "Improve completion across the remaining long tail without tuning one file at a time."
+    problem: "Repeated failures clustered around common issues that required changes to prompts or migration tooling."
+    reported_practice: "Sample representative failures, tune prompts and scripts, verify the change on the sample, then sweep the remaining corpus again."
+    selection_conditions: [learning, observability, verification]
+  - id: automation-ceiling-handoff
+    use_case: "Finish residual migration work after automation stops being economical."
+    problem: "Some files remained failing after 50-100 retries despite expanded context and repeated tuning."
+    reported_practice: "Stop further automation tuning for the final long tail and complete those files manually using the failing automated refactor as a baseline."
+    selection_conditions: [economics, execution, verification]
+
+assessment:
+  assisted_by_ai: true
