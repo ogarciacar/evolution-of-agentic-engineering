@@ -1,0 +1,135 @@
+source:
+  title: "SWE-Bench Pro: Can AI Agents Solve Long-Horizon Software Engineering Tasks?"
+  producer: "Deng et al."
+  producer_type: authors
+  date: "2025-09-21"
+  url: "https://arxiv.org/abs/2509.16941"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Long-horizon repository work exposes both viable agentic action and a large reliability gap"
+  summary: >
+    SWE-Bench Pro evaluates coding agents on 1,865 human-verified software-engineering
+    problems drawn from 41 actively maintained repositories, including public,
+    held-out, and commercial codebases. Under a unified SWE-Agent scaffold, the
+    best public-set Pass@1 reported in the paper is 23.3%, while the best
+    commercial-set result is 17.8%, establishing meaningful autonomous task success
+    alongside a substantial long-horizon reliability boundary.
+
+observed:
+  - >
+    SWE-Bench Pro contains 1,865 human-verified and human-augmented problems from
+    41 actively maintained repositories spanning business applications, B2B
+    services, and developer tools.
+  - >
+    The benchmark is partitioned into 731 public problems from 11 repositories,
+    276 commercial problems from 18 proprietary startup repositories, and 858
+    held-out problems from 12 repositories.
+  - >
+    The selected tasks are intentionally long-horizon and non-trivial. Reference
+    solutions average 107.4 changed lines across 4.1 files, every problem requires
+    at least 10 lines of change, and more than 100 tasks require over 100 lines of
+    modification.
+  - >
+    Each task gives an agent a codebase and a human-augmented task description
+    containing the problem statement, requirements, and when relevant an explicit
+    interface. The agent must produce a patch that satisfies human-reviewed tests.
+  - >
+    The evaluation uses the SWE-Agent scaffold with the same basic prompt format
+    across models, enables tool use where possible, and allows a maximum of 200
+    turns per task.
+  - >
+    On the 731-problem public set, GPT-5 reached 23.3% Pass@1 and Claude Opus 4.1
+    reached 22.7%. All reported public-set model results remained below 25%.
+  - >
+    On the 276-problem commercial set, Claude Opus 4.1 reached 17.8% Pass@1 and
+    GPT-5 reached 14.9%, with all reported results below 20%.
+  - >
+    Resolution rates varied substantially by programming language and repository.
+    The paper reports generally stronger results on Python and Go, more variable
+    results on JavaScript and TypeScript, and repository-level rates ranging from
+    below 10% on some repositories to above 50% for some model-repository pairs.
+  - >
+    The authors' trajectory analysis reports that larger models often failed on
+    semantic or algorithmic correctness during large multi-file edits, while smaller
+    models more often failed through syntax or formatting errors, tool use, or
+    context-management problems.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The benchmark spans 1,865 problems and 41 repositories, but under a unified
+    scaffold the strongest reported public-set result is 23.3% Pass@1 and the
+    strongest commercial-set result is 17.8%. The source therefore documents both
+    repeated autonomous success and a large remaining reliability boundary on
+    long-horizon repository work.
+
+mapping:
+  stages: [Apparition, Selection]
+  conditions: [Context, Execution, Verification]
+
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  The benchmark provides direct evidence that agentic engineering actors can perform
+  meaningful repository-level work without continuous human operation: an agent is
+  given a codebase and task, operates through a software-engineering scaffold and
+  tools for up to 200 turns, and sometimes produces a patch that passes the task's
+  verification suite. At the same time, appearance is clearly not equivalent to
+  professional reliability. Most long-horizon tasks remain unresolved even for the
+  strongest evaluated models. The wide performance differences across repositories,
+  languages, public versus commercial codebases, and model sizes further refine
+  Selection: a fixed scaffold does not produce uniform viability when the engineering
+  environment and task distribution change.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    SWE-Bench Pro supports C01 by documenting repeated meaningful autonomous
+    software-engineering action, while refining C02 by showing strong differential
+    effectiveness across models and repository environments under a common scaffold.
+    It sharpens the boundary between an agentic actor existing and that actor being
+    reliable enough for broad long-horizon engineering work. It also suggests that
+    Context, Execution, and Verification conditions must be evaluated against the
+    repository and task regime rather than treated as universally sufficient once an
+    agent can act at all.
+
+what_this_does_not_establish:
+  - >
+    SWE-Bench Pro is an evaluation benchmark, not a report of sustained production
+    deployment, organizational adoption, or concurrent agent operation at scale.
+  - >
+    The benchmark does not establish that repository or language alone causes the
+    observed performance differences; task complexity, documentation, codebase
+    structure, model knowledge, and other factors can vary together.
+  - >
+    The public repositories and historical changes may still have some exposure to
+    model training despite the benchmark's contamination-mitigation strategy, while
+    the commercial and held-out subsets are not publicly inspectable in full.
+  - >
+    Pass@1 against benchmark tests measures task resolution under the benchmark
+    specification; it does not establish production maintainability, security,
+    operability, or user impact of generated patches.
+  - >
+    Human augmentation removes much of the ambiguity present in ordinary software
+    work by supplying requirements and interfaces, so the benchmark does not measure
+    the full cost of discovering underspecified requirements in production settings.
+  - >
+    The source does not establish Cooperation or Specialization among multiple
+    agentic engineering actors.
+
+open_question: >
+  Which repository, task, context, execution, and verification characteristics most
+  strongly determine whether long-horizon coding agents move from occasional
+  benchmark success to reliable repeated engineering operation?
+
+practice_assessment:
+  status: assessed
+
+assessment:
+  assisted_by_ai: true
