@@ -39,7 +39,7 @@ Required Preview Smoke verifies:
 2. all four expected generated artifacts are represented;
 3. every deployed artifact's bytes and SHA-256 match the build manifest.
 
-This turns the Pages cutover into an observable acceptance condition rather than a dashboard configuration assumption.
+This turns the Pages cutover into an observable acceptance condition rather than a dashboard configuration assumption. After changing the Pages build setting, validate it with a fresh commit deployment so the preview proves the new configuration rather than reusing an older deployment.
 
 ## Target publication model
 
