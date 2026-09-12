@@ -1,0 +1,181 @@
+source:
+  title: "At Google, the future is multiarch; AI and automation are helping us get there"
+  producer: "Google Cloud"
+  producer_type: organization
+  date: "2025-10-21"
+  url: "https://cloud.google.com/blog/topics/systems/using-ai-and-automation-to-migrate-between-instruction-sets"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Google paired nested coding-agent loops with build, test, monitoring, and fleet automation for an ISA migration spanning 100K+ applications"
+  summary: >
+    Google reports migrating production services toward x86/Arm multi-architecture
+    operation across an environment with more than 100,000 applications. The broader
+    migration analyzed 38,156 monorepo commits and had already moved more than 30,000
+    applications to Arm. For the long tail, Google built CogniPort, an agent composed
+    of nested orchestration, build-fixer, and test-fixer loops. On a benchmark of 245
+    historical non-AI migration commits that could be cleanly rolled back, early
+    evaluation fixed the rolled-back failures about 30% of the time.
+
+observed:
+  - >
+    Google states that its production environment contains more than 100,000
+    applications that increasingly need to compile and run on both x86 and Arm.
+    More than 30,000 applications had already been migrated to Arm at the time of
+    publication, and services including YouTube, Gmail, and BigQuery were serving
+    production traffic on both architectures.
+  - >
+    The migration team analyzed 38,156 commits from Google's monorepo covering about
+    700,000 changed lines. Early migration work emphasized tooling, test adaptation,
+    code changes, build and release systems, and production rollout issues; later
+    phases shifted heavily toward configuration and supporting-process changes as
+    migration volume increased.
+  - >
+    Google reports that coordinating directly with application owners for the full
+    long tail would have been cost-prohibitive, so the migration relied on automation
+    to reduce application-team involvement. Existing systems included Rosie for
+    generating and shepherding large numbers of code-review changes, sanitizers and
+    fuzzers for architecture-specific failures, and CHAMP for automated rollout and
+    health monitoring with eviction of unhealthy Arm jobs.
+  - >
+    CogniPort is an AI migration agent that responds to build and test failures. If a
+    target does not build or a test fails, the agent attempts to modify files until
+    the target succeeds or the agent gives up.
+  - >
+    CogniPort contains three nested agentic loops. An outer orchestrator repeatedly
+    invokes a build-fixer agent and a test-fixer agent. Each loop produces a reasoning
+    step and tool invocation, executes the tool, and attaches the result back into
+    agent context for the next iteration.
+  - >
+    The build-fixer repeatedly builds a target and edits files until the build passes
+    or it gives up. The test-fixer repeatedly runs a test and edits files until the
+    test passes or it gives up, and may invoke the build-fixer when test compilation
+    itself fails.
+  - >
+    Google created a benchmark of 245 historical Code & Test Adaptation commits that
+    had originally been produced without AI assistance and could be cleanly rolled
+    back. CogniPort was then evaluated on whether it could reproduce a successful
+    fix from the rolled-back state.
+  - >
+    Google reports that, without special prompts or other optimizations, the early
+    benchmark successfully fixed the rolled-back failures about 30% of the time.
+    The agent was particularly effective on test fixes, platform-specific
+    conditionals, and data-representation fixes.
+  - >
+    Google states that all new applications are now designed to be multiarch by
+    default, while tens of thousands of older applications remain to be addressed
+    through automation and application-owner involvement for more difficult cases.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The source describes a production migration spanning an environment of more than
+    100,000 applications, 38,156 analyzed monorepo commits and about 700K changed
+    lines, with more than 30,000 applications already migrated to Arm. CogniPort's
+    formal early benchmark contains 245 historical migration commits and reports
+    roughly 30% successful automated repair from rolled-back states.
+
+mapping:
+  stages: [Apparition, Selection]
+  conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
+
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: SUPPORTS
+
+interpretation: >
+  CogniPort is a bounded agentic engineering actor rather than an interactive coding
+  assistant: it receives build and test failures, invokes tools, edits repository
+  files, observes results, and iterates without continuous human operation until a
+  verification condition is met or the run terminates. Its viability is inseparable
+  from the surrounding engineering environment. Repository visibility supplies
+  context; build and test systems define executable feedback; the orchestrator
+  coordinates specialized repair loops; CHAMP and other automation provide
+  observability and rollout control; and the economics of coordinating across more
+  than 100,000 applications motivates automation in the first place. The 30% early
+  benchmark result also exposes a substantial selection boundary: this configuration
+  is useful for some migration classes but not yet reliable for the full long tail.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    The source supports C01 by documenting an engineering configuration that can take
+    repository-level action through iterative tool use and verification without
+    continuous human operation. It supports C02 because the reported actor's fitness
+    depends directly on Context, Execution, Verification, Coordination, Observability,
+    and Economics conditions supplied by Google's engineering system. The evidence
+    also shows differential effectiveness by migration problem type and a large
+    unresolved long tail, indicating that the environment selects where this agent
+    configuration remains viable rather than making it uniformly capable.
+
+what_this_does_not_establish:
+  - >
+    Google's report is a first-party account and does not independently validate the
+    stated production scale, migration economics, or future expectations for
+    CogniPort.
+  - >
+    The 30% benchmark uses a selected subset of 245 historical migration commits that
+    could be cleanly rolled back; it does not represent all 38,156 migration commits
+    or all 100,000+ applications.
+  - >
+    The benchmark does not compare CogniPort against a compute-matched alternative
+    agent architecture, human developers, or the surrounding non-AI automation, so
+    it does not isolate the causal contribution of the nested-agent design.
+  - >
+    The source reports that CogniPort had only recently been scaled to high usage and
+    does not provide longitudinal reliability, cost-per-fix, review burden, or
+    production-defect rates for agent-generated changes.
+  - >
+    The nested orchestrator, build-fixer, and test-fixer roles are task-local
+    differentiated loops. This source does not establish that their cooperation is
+    fitter than isolated operation under C03, nor that they form a persistent
+    higher-order engineering object under C04.
+  - >
+    Application owners remain necessary for difficult cases, so the source does not
+    establish full autonomous migration of the remaining long tail.
+
+open_question: >
+  As repository-scale migration agents move from selected repair classes into the
+  remaining long tail, which combinations of context, verification, orchestration,
+  rollout observability, and human handoff most improve successful fixes per unit of
+  inference, review, and application-owner attention?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: failure-triggered-agent-remediation
+    use_case: "Repair build and test failures encountered while migrating applications across instruction-set architectures."
+    problem: "A migration can reach repository-specific build or test failures that do not lend themselves to a simple mechanical edit."
+    reported_practice: "Invoke an AI migration agent when a build or test fails and let it iteratively edit files, execute the failing check, and continue until verification succeeds or the agent gives up."
+    selection_conditions: [execution, verification, context]
+  - id: nested-build-test-agent-loops
+    use_case: "Separate repair strategies for build failures and test failures while preserving one migration workflow."
+    problem: "Build and test failures require different repair loops, and a test repair may itself encounter a build failure."
+    reported_practice: "Use an outer orchestrator that repeatedly calls specialized build-fixer and test-fixer agents, with the test-fixer able to invoke the build-fixer as needed."
+    selection_conditions: [coordination, execution, verification]
+  - id: tool-result-context-feedback
+    use_case: "Allow an agent to adapt its next repair action to the result of the previous engineering command."
+    problem: "A repair loop needs current build and test evidence rather than relying only on the initial task description."
+    reported_practice: "Execute each selected tool and attach its output back into the agent context before the next reasoning and tool-use step."
+    selection_conditions: [context, verification, execution]
+  - id: historical-rollback-agent-benchmark
+    use_case: "Evaluate a migration agent against known real repository fixes before relying on wider production use."
+    problem: "Synthetic coding tasks may not represent the failure modes encountered in a warehouse-scale migration."
+    reported_practice: "Select historical non-AI migration commits that can be cleanly rolled back, recreate the pre-fix state, and measure whether the agent can repair the same failures."
+    selection_conditions: [verification, observability]
+  - id: automated-health-eviction
+    use_case: "Scale multi-architecture rollout without destabilizing production services."
+    problem: "A migrated job may crash-loop or exhibit unacceptable throughput after rollout even if repository checks passed."
+    reported_practice: "Use automated continuous health monitoring to detect unhealthy Arm jobs and evict them for later offline tuning and debugging."
+    selection_conditions: [observability, verification, execution]
+  - id: automation-for-application-long-tail
+    use_case: "Migrate tens of thousands of applications when direct coordination with every application owner is impractical."
+    problem: "The coordination cost of scheduling and executing owner-by-owner migrations becomes prohibitive at warehouse scale."
+    reported_practice: "Use programmatic change generation, automated verification and rollout systems, and AI repair agents to minimize required application-team involvement, escalating difficult cases to owners."
+    selection_conditions: [economics, coordination, execution]
+
+assessment:
+  assisted_by_ai: true
