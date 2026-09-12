@@ -1,47 +1,46 @@
-# CI-owned derived artifacts
+# Deterministic publication artifacts
 
-Evidence contributions author canonical research state in `evidence/*.yaml`. Evidence integrity CI validates that state and derives the static/model artifacts that are deterministic projections of it.
+Evidence contributions author canonical research state in `evidence/*.yaml`. The publication pipeline validates that state and derives static/model artifacts that are deterministic projections of it.
 
-## Pull requests
-
-Pull-request validation is read-only with respect to the contribution branch. CI runs the validators and `pipeline/build-derived-artifacts.py`, then exposes generated outputs as workflow artifacts where useful for inspection. It does not commit generated files back to the PR branch.
-
-This makes one evidence YAML the ordinary contribution unit: contributors do not need to regenerate repository-owned artifacts before opening a pull request.
-
-## Main
-
-After canonical changes reach `main`, Evidence integrity CI regenerates and may commit the known derived static/model artifacts:
+The generated publication artifacts are:
 
 - `research-frontier.json`
 - `evaluate.html`
 - `synthesis.html`
 - `sitemap.xml`
 
-The second run must regenerate no diff.
+## Pull requests
 
-## Runtime publication
+Pull-request validation is read-only with respect to the contribution branch. CI runs the validators and `pipeline/build-publication.py`, then exposes generated outputs as workflow artifacts where useful for inspection.
 
-Evidence publication that depends on the corpus is served from the D1 projection through the shared runtime read model. Runtime surfaces include the evidence API, Scale Signal routes, and the homepage Evidence Landscape.
+The intended contributor contract remains one canonical evidence YAML for an ordinary evidence contribution. Contributors do not author generated publication state.
 
-The root `evidence.html` and `index.html` are authored/static pages. They are not CI-generated evidence projections.
+## Protected main
 
-## Ownership model
+The S3 quality gate requires changes to `main` to arrive through a pull request. CI therefore does not create or push a follow-up commit after merge.
+
+During the current migration, the four generated artifacts are still tracked in Git and CI requires regeneration to match their checked-in contents before merge. This is a temporary compatibility state while Cloudflare Pages is switched to execute the same publication build at deploy time.
+
+## Target publication model
+
+After the Pages build is verified, the generated artifacts will stop being tracked in Git. Pages will materialize them from canonical research state during deployment, while CI will verify that the publication build succeeds and is deterministic.
 
 ```text
-evidence/*.yaml
-      ↓
-CI validation
-      ├── derived static/model artifacts
-      │     research-frontier.json
-      │     evaluate.html
-      │     synthesis.html
-      │     sitemap.xml
-      │
-      └── D1 synchronization
-              ↓
-         runtime read model
-              ↓
-         API / Scale Signals / homepage Evidence Landscape
+canonical Git state
+  evidence/*.yaml
+  model/*
+       │
+       ├── CI validation
+       │      └── publication build verification
+       │
+       ├── D1 projection
+       │      └── API / Scale Signals / Evidence Landscape
+       │
+       └── Pages publication build
+              ├── research-frontier.json
+              ├── evaluate.html
+              ├── synthesis.html
+              └── sitemap.xml
 ```
 
-Git remains canonical. D1 and generated artifacts are rebuildable projections.
+Git remains canonical. D1 and generated publication artifacts are rebuildable projections.
