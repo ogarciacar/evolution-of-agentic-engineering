@@ -51,9 +51,12 @@ jobs:
         if: steps.scope.outputs.relevant == 'true'
         run: npm install --no-save --package-lock=false @playwright/test@1.62.1
 
+      # ubuntu-latest already carries the Chromium runtime libraries used by this
+      # acceptance test. Avoid Playwright's apt dependency/font sweep; the required
+      # browser E2E check remains the executable proof that the runner is sufficient.
       - name: Install Chromium
         if: steps.scope.outputs.relevant == 'true'
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Resolve deployed preview context
         if: steps.scope.outputs.relevant == 'true'
