@@ -9,6 +9,7 @@ on:
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
+      - "functions/api/search.js"
       - "pipeline/build/build-evidence.py"
       - "pipeline/templates/sitemap.xml"
       - "docs/ai-search.md"
@@ -24,6 +25,7 @@ on:
       - "evidence-search.js"
       - "evidence-search.css"
       - "evidence.html"
+      - "functions/api/search.js"
       - "pipeline/build/build-evidence.py"
       - "pipeline/templates/sitemap.xml"
       - "docs/ai-search.md"
@@ -52,6 +54,8 @@ jobs:
         run: python pipeline/build/build-evidence.py
       - name: Check AI Search endpoint contract
         run: node workers/ai-search/check-search-endpoint.mjs
+      - name: Check Pages preview bridge contract
+        run: node workers/ai-search/check-preview-bridge.mjs
       - name: Check Ask the evidence UI contract
         run: node workers/ai-search/check-search-ui.mjs
       - name: Check AI Search corpus sitemap coverage
