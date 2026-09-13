@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { injectPracticeNavigation, injectProjectionNavigation, withProjectionHref } from "../../functions/_middleware.js";
+import { injectPracticeNavigation, injectProjectionNavigation, normalizeSiteNavigation, withProjectionHref } from "../../functions/_middleware.js";
 
 const shell = `<section><!-- HOMEPAGE_EVIDENCE_START --><div>landscape</div><!-- HOMEPAGE_EVIDENCE_END --></section>`;
 const main = injectPracticeNavigation(shell, "main");
@@ -27,6 +27,10 @@ assert.equal((consolidated.match(/class="links/g) || []).length, 1);
 
 const unrelated = `<section>No evidence landscape</section>`;
 assert.equal(injectPracticeNavigation(unrelated, "main"), unrelated);
+
+const aboutNavigation = normalizeSiteNavigation(`<nav><a href="#about">About</a><a href="/#about">About elsewhere</a></nav>`);
+assert.equal((aboutNavigation.match(/href="\/about"/g) || []).length, 2);
+assert.doesNotMatch(aboutNavigation, /#about/);
 
 assert.equal(withProjectionHref("/evidence", "deadbeefcafe"), "/evidence?projection_id=deadbeefcafe");
 assert.equal(withProjectionHref("evaluate.html#claims", "deadbeefcafe"), "evaluate.html?projection_id=deadbeefcafe#claims");
