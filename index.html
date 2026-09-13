@@ -47,11 +47,17 @@
     .question-starter strong{font-size:17px;line-height:1.35}
     .question-starter.custom{border-style:dashed}
 
+    .social-proof{padding-top:44px;padding-bottom:44px}
+    .proof-sources{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:18px;margin-top:24px}
+    .proof-source{min-width:0;color:#5a5a63;font-size:clamp(17px,2vw,23px);font-weight:800;letter-spacing:-.025em;white-space:nowrap}
+    .proof-source.more{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:0}
+
     footer{padding-top:36px;color:var(--muted);font-size:13px}
 
     @media(max-width:900px){
       .navlinks{gap:14px}
       .value-grid,.question-grid{grid-template-columns:1fr}
+      .proof-sources{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 24px}
     }
 
     @media(max-width:680px){
@@ -78,6 +84,10 @@
       #value-proposition h2{font-size:32px;line-height:1.04;margin-bottom:12px}
       #value-proposition .value-grid{margin-top:22px}
       .value-card{padding:18px}
+      .social-proof{padding-top:36px;padding-bottom:36px}
+      .proof-sources{grid-template-columns:1fr 1fr;margin-top:18px;gap:12px 18px}
+      .proof-source{font-size:18px}
+      .proof-source.more{grid-column:1/-1;font-size:12px}
     }
   </style>
 </head>
@@ -130,6 +140,17 @@
       <button class="question-starter" type="button" data-question="What context infrastructure becomes necessary at scale?"><span>QUESTION 03</span><strong>What context infrastructure becomes necessary at scale?</strong></button>
       <button class="question-starter" type="button" data-question="Which practices are appearing independently across organizations?"><span>QUESTION 04</span><strong>Which practices are appearing independently across organizations?</strong></button>
       <button class="question-starter custom" type="button" data-focus-search><span>YOUR QUESTION</span><strong>I have my own strategic question.</strong></button>
+    </div>
+  </section>
+
+  <section class="social-proof" aria-labelledby="social-proof-label">
+    <div class="eyebrow" id="social-proof-label">Insights from real organisations</div>
+    <div class="proof-sources" aria-label="Evidence sources include">
+      <span class="proof-source">Spotify</span>
+      <span class="proof-source">Anthropic</span>
+      <span class="proof-source">Cursor</span>
+      <span class="proof-source">Cloudflare</span>
+      <span class="proof-source more">and more…</span>
     </div>
   </section>
 
