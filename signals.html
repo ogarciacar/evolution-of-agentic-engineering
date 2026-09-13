@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Signals — Evolution of Agentic Engineering</title>
+  <style>
+    :root{--bg:#f7f7f5;--ink:#171719;--muted:#66666f;--line:#d9d9dc;--card:#fff;--accent:#6c4cff;--soft:#eeeaff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.45}
+    a{color:inherit}
+    button{font:inherit}
+    main{max-width:1180px;margin:auto;padding:24px 28px 96px}
+    .eyebrow{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(32px,4vw,54px);line-height:1.02;letter-spacing:-.04em;margin:0 0 18px}
+    .lead{font-size:clamp(20px,2.2vw,29px);line-height:1.32;max-width:900px;color:#35353b}
+
+    .topnav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 0 24px;position:relative}
+    .brand{font-weight:850;text-decoration:none;letter-spacing:-.02em}
+    .navlinks{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end}
+    .navlinks a{font-size:13px;font-weight:750;text-decoration:none;border-bottom:1px solid transparent}
+    .navlinks a:hover{border-bottom-color:#aaa}
+    .navlinks a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+    .nav-toggle{display:none;appearance:none;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:42px;height:38px;align-items:center;justify-content:center;font-size:22px;line-height:1;cursor:pointer}
+    .nav-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .page-divider{border-top:1px solid var(--line);height:48px}
+
+    .signals{padding-bottom:82px;border-bottom:1px solid var(--line)}
+    .landscape-card{margin-top:34px;border:1px solid var(--line);border-radius:20px;background:#fff;overflow:hidden}
+    .landscape-card-head{padding:20px 24px 16px;border-bottom:1px solid var(--line)}
+    .landscape-card-head>div{display:grid;gap:3px}
+    .landscape-card-head span{font-size:12px;color:var(--muted)}
+    .landscape-scroll{overflow-x:auto}
+    .landscape-matrix{min-width:1040px;padding:16px 20px 4px}
+    .landscape-groups,.landscape-columns,.landscape-row{display:grid;grid-template-columns:190px repeat(4,64px) 24px repeat(7,64px) 112px;align-items:center}
+    .landscape-groups{min-height:28px}
+    .landscape-groups b{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+    .landscape-model-group{grid-column:2/6}
+    .landscape-conditions-group{grid-column:7/14}
+    .landscape-implication-group{grid-column:14/15;text-align:right}
+    .landscape-columns{min-height:72px;border-bottom:1px solid var(--line)}
+    .landscape-column-label{height:68px;position:relative}
+    .landscape-column-label b{position:absolute;left:50%;bottom:22px;transform:translateX(-50%) rotate(-36deg);white-space:nowrap;font-size:10px;text-transform:uppercase;color:var(--muted)}
+    .landscape-column-label small{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);font-size:9px;color:#999}
+    .landscape-row{min-height:54px;text-decoration:none;border-bottom:1px solid #ededf0}
+    .landscape-source{display:grid;padding-left:4px}
+    .landscape-date{font-size:10px;font-weight:800;color:#777}
+    .landscape-source strong{font-size:13px}
+    .landscape-cell{height:54px;display:grid;place-items:center;position:relative}
+    .landscape-dot,.landscape-ring{display:inline-block;width:11px;height:11px;border-radius:50%}
+    .landscape-dot{background:var(--accent)}
+    .landscape-ring{border:2px solid var(--accent)}
+    .landscape-square{width:9px;height:9px;border-radius:2px;background:#5f5f68}
+    .landscape-arrow{position:absolute;left:2px;color:var(--accent)}
+    .landscape-divider{height:100%;border-left:1px solid #e0e0e5}
+    .landscape-verdict{text-align:right;font-size:10px;font-weight:800}
+    .supports{color:#14835c}.refines{color:var(--accent)}.contradicts{color:#9a3b3b}.inconclusive{color:var(--muted)}
+    .landscape-legend{display:flex;gap:18px;flex-wrap:wrap;padding:16px 24px 20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .links{display:flex;gap:18px;flex-wrap:wrap;margin-top:28px}
+    .links a{font-weight:750;text-decoration:none;border-bottom:1px solid #aaa}
+    footer{padding-top:36px;color:var(--muted);font-size:13px}
+
+    @media(max-width:680px){
+      main{padding:18px 22px 64px}
+      .topnav{padding-bottom:24px}
+      .brand{font-size:17px}
+      .nav-toggle{display:inline-flex;flex:0 0 auto}
+      .navlinks{display:none;position:absolute;z-index:20;top:46px;right:0;min-width:190px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 14px 36px rgba(23,23,25,.12);flex-direction:column;align-items:stretch;gap:0}
+      .navlinks.open{display:flex}
+      .navlinks a{font-size:14px;padding:10px 12px;border-bottom:0;border-radius:9px}
+      .navlinks a:hover,.navlinks a:focus-visible{background:var(--soft);outline:none}
+      .navlinks a[aria-current="page"]{background:var(--soft);color:var(--accent)}
+      .page-divider{height:38px}
+      .signals{padding-bottom:54px}
+      .eyebrow{font-size:11px;line-height:1.35}
+      h1{font-size:32px;line-height:1.04;margin-bottom:12px}
+      .lead{font-size:18px;line-height:1.35}
+    }
+  </style>
+</head>
+<body>
+<main>
+  <nav class="topnav" aria-label="Primary">
+    <a class="brand" href="/">AgenticEngineering.science</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-links" aria-label="Open navigation menu">☰</button>
+    <div class="navlinks" id="primary-links">
+      <a href="/evidence">Evidence</a>
+      <a href="/model">Model</a>
+      <a href="/signals" aria-current="page">Signals</a>
+      <a href="/practices">Practices</a>
+      <a href="/#about">About</a>
+    </div>
+  </nav>
+
+  <div class="page-divider" aria-hidden="true"></div>
+
+  <section class="signals">
+    <div class="eyebrow">Signals</div>
+    <h1>Where is the evidence accumulating?</h1>
+    <p class="lead">Each row is one accepted public Scale Signal. The landscape maps evidence to the four active stages and candidate Selection conditions. Interpretation remains separate from what each source actually establishes.</p>
+    <!-- SIGNALS_EVIDENCE_START --><div class="landscape-card"><div class="landscape-card-head"><div><strong>Scale Signal Landscape</strong><span>Current accepted evidence is rendered from the active D1 projection.</span></div></div></div><!-- SIGNALS_EVIDENCE_END -->
+    <div class="links"><a href="/evidence">Explore evidence →</a><a href="/evaluate.html">Evaluate the model →</a></div>
+  </section>
+
+  <footer>Evolution of Agentic Engineering · Signals · Living research record · September 2026</footer>
+</main>
+<script>
+(() => {
+  const navToggle = document.querySelector(".nav-toggle");
+  const navLinks = document.getElementById("primary-links");
+  if (!navToggle || !navLinks) return;
+
+  const closeNav = () => {
+    navLinks.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+    navToggle.setAttribute("aria-label", "Open navigation menu");
+  };
+
+  navToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const open = navLinks.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", String(open));
+    navToggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+  });
+
+  navLinks.addEventListener("click", (event) => {
+    if (event.target.closest("a")) closeNav();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!navLinks.contains(event.target) && !navToggle.contains(event.target)) closeNav();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeNav();
+      navToggle.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>
