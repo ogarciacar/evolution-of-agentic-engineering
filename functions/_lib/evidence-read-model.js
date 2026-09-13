@@ -90,8 +90,10 @@ export async function listEvidence(env, filters = {}, limit = 100, projectionId 
     params.push(filters.to);
   }
 
-  const query = `${SELECT_BASE} WHERE ${where.join(" AND ")} ORDER BY e.source_date DESC, e.evidence_id ASC LIMIT ?`;
-  const result = await env.EVIDENCE_DB.prepare(query).bind(...params, limit).all();
+  const ordered = `${SELECT_BASE} WHERE ${where.join(" AND ")} ORDER BY e.source_date DESC, e.evidence_id ASC`;
+  const query = limit == null ? ordered : `${ordered} LIMIT ?`;
+  const bindings = limit == null ? params : [...params, limit];
+  const result = await env.EVIDENCE_DB.prepare(query).bind(...bindings).all();
   return (result.results || []).map(shapeEvidence);
 }
 
@@ -101,4 +103,9 @@ export async function getHomepageEvidence(env, limit = 24, projectionId = "main"
     env.EVIDENCE_DB.prepare("SELECT COUNT(*) AS count FROM evidence WHERE projection_id = ?").bind(projectionId).first(),
   ]);
   return { records, total: Number(countRow?.count || 0) };
+}
+
+export async function getAllEvidence(env, projectionId = "main") {
+  const records = await listEvidence(env, {}, null, projectionId);
+  return { records, total: records.length };
 }
