@@ -1,0 +1,163 @@
+source:
+  title: "Can AI agents build real Stripe integrations? We built a benchmark to find out"
+  producer: "Stripe"
+  producer_type: organization
+  date: "2026-03-02"
+  url: "https://stripe.com/blog/can-ai-agents-build-real-stripe-integrations"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Stripe benchmarked coding agents on production-realistic full-stack integration work and exposed both long-horizon capability and recovery failures"
+  summary: >
+    Stripe built 11 production-realistic evaluation environments for backend,
+    full-stack, and product-specific integration work. Agents received complete coding
+    environments, test Stripe credentials, terminal and browser tools, and Stripe
+    search access, while deterministic API and UI graders evaluated completed work.
+    Stripe reports high scores on some difficult tasks, including a 92% average score
+    for Claude Opus 4.5 across four full-stack tasks, but also documents failures in
+    ambiguous situations and cases where agents could not recover from browser-tool
+    mistakes that were locally fixable.
+
+observed:
+  - >
+    Stripe created 11 diverse evaluation environments representing realistic Stripe
+    integration work, including backend migrations, API-version changes, full-stack
+    payment integrations, and focused product exercises.
+  - >
+    Each environment included a complete coding workspace with code, databases, and
+    scripts, plus test Stripe API keys that agents could use for execution and
+    submission validation.
+  - >
+    Stripe used deterministic graders for most challenges. Graders exercised finished
+    software through API calls, automated UI tests, or both, and some also inspected
+    Stripe API objects created during an agent run.
+  - >
+    All evaluated models used a common goose-based agent harness with Model Context
+    Protocol access to a terminal, browser, and Stripe-specific search tools.
+  - >
+    Stripe reports that Claude Opus 4.5 averaged 92% across four full-stack API
+    integration tasks, while GPT-5.2 averaged 73% across two product-specific gym
+    problem sets. Stripe also reports that the best-performing runs averaged 63 turns.
+  - >
+    In the Checkout gym evaluation, agents supplied more than 80% of the correct
+    parameters across the evaluated tasks and, in stronger runs, used the browser to
+    inspect details that were not visible from the initial UI state.
+  - >
+    Stripe observed agents successfully navigating interfaces, debugging live issues,
+    handling some underdocumented behavior, and in one run completing a self-check by
+    making a test purchase through the upgraded integration.
+  - >
+    Stripe also observed verification failures in ambiguous situations. Some agents
+    tested endpoints with nonexistent Stripe data, received 400 responses, and treated
+    the error response as evidence that the upgraded endpoint was working correctly.
+  - >
+    Browser use remained another failure mode. Stripe documents a run in which an
+    agent put the checkout form into a bad focus state, failed to recover with a simple
+    refresh or click, and terminated the task without satisfying the tests.
+  - >
+    Stripe describes the benchmark as a replayable environment for testing changes to
+    prompts, skills, browser tools, and other interventions, and reports that early
+    evaluation runs surfaced documentation bugs that Stripe subsequently fixed.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The benchmark contains 11 production-realistic environments spanning backend,
+    full-stack, and product-specific integration tasks, with some runs extending to
+    dozens of interaction turns. It is strong execution evidence but not a sustained
+    production deployment, organization-wide rollout, or concurrent agent-fleet study.
+
+mapping:
+  stages: [Apparition, Selection]
+  conditions: [Context, Execution, Verification, Observability, Learning]
+
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  The benchmark supports Apparition because coding agents are shown performing
+  meaningful long-horizon software-engineering work across complete repositories,
+  databases, APIs, browsers, and test systems rather than only generating isolated
+  code snippets. The evidence also sharpens Selection. High scores on some difficult
+  tasks coexist with failures caused by weak verification judgment, ambiguous task
+  state, and inability to recover from tool-interaction mistakes. The result is not
+  that agent capability alone determines engineering fitness: task framing, available
+  context, execution tools, realistic test data, deterministic graders, and recovery
+  feedback materially define whether a run reaches a valid end state. The source does
+  not yet compare matched environmental interventions causally, so it refines rather
+  than independently supports C02.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Stripe provides direct support for C01 through end-to-end coding-agent execution in
+    production-realistic environments. It refines C02 by exposing concrete boundaries
+    between nominal coding capability and reliable completion: agents can perform
+    sophisticated multi-step integration work yet still fail when verification data
+    are unrealistic, browser state becomes confusing, or recovery requires interpreting
+    an ambiguous intermediate result. Stripe's replayable benchmark also demonstrates
+    an engineering mechanism for changing those conditions and measuring whether an
+    intervention improves agent fitness.
+
+what_this_does_not_establish:
+  - >
+    Stripe is the producer of both the benchmark and the report, so the published
+    results are first-party evidence rather than independent replication.
+  - >
+    The reported 92% and 73% figures are averages over small, task-specific subsets
+    and should not be interpreted as general software-engineering success rates.
+  - >
+    Best-performing runs averaging 63 turns does not establish the typical duration,
+    cost, or reliability distribution across all models and tasks.
+  - >
+    The benchmark does not establish sustained production operation, organizational
+    adoption, fleet concurrency, or unattended deployment of agent-generated changes.
+  - >
+    Model, harness, browser tooling, prompts, and task design all contribute to the
+    observed results, so the source does not isolate any single selection condition as
+    the causal driver of success or failure.
+  - >
+    The source does not quantify inference cost, human review effort, or maintenance
+    cost alongside task quality, so it does not establish economic fitness.
+  - >
+    The benchmark does not establish C03 because it does not compare cooperative
+    multi-agent systems with useful isolated operation.
+  - >
+    The benchmark does not establish C04 because it does not describe persistent
+    differentiated cooperation forming a higher-order engineering object.
+
+open_question: >
+  Which changes to context, verification, browser tooling, recovery feedback, and task
+  framing most reliably convert high coding capability into complete end-to-end
+  engineering outcomes when the environment contains ambiguity or recoverable failure?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: production-realistic-agent-integration-evals
+    use_case: "Measure whether coding agents can complete end-to-end API integration work rather than isolated code-generation tasks."
+    problem: "Function-level benchmarks can miss the planning, state management, browser use, database work, and glue code required by real integrations."
+    reported_practice: "Evaluate agents in complete coding environments with repositories, databases, scripts, test credentials, browsers, and real API interactions."
+    selection_conditions: [context, execution, verification]
+  - id: deterministic-end-to-end-agent-graders
+    use_case: "Determine whether an agent-generated integration actually works after the agent declares completion."
+    problem: "An agent can mistake a plausible intermediate result or expected-looking error for task success."
+    reported_practice: "Use deterministic API and automated UI graders, including inspection of created service-side objects, to validate the final system independently of the agent's own completion judgment."
+    selection_conditions: [verification, observability]
+  - id: realistic-test-state-for-agent-verification
+    use_case: "Help coding agents verify API migrations and integrations against meaningful runtime behavior."
+    problem: "Testing with nonexistent or unrealistic data can produce technically valid errors that an agent misreads as proof that the implementation works."
+    reported_practice: "Provide realistic test credentials and state, and grade behavior against valid end-to-end outcomes rather than accepting error responses as verification."
+    selection_conditions: [context, verification]
+  - id: replayable-agent-intervention-benchmark
+    use_case: "Improve an agent workflow after observing recurring execution or recovery failures."
+    problem: "Without replayable tasks, changes to prompts, skills, tools, or documentation cannot be compared against the same engineering problem."
+    reported_practice: "Use replayable benchmark environments as a test bed for prompt, skill, browser-tool, and documentation interventions, then measure whether task performance changes."
+    selection_conditions: [learning, verification, observability]
+
+assessment:
+  assisted_by_ai: true
