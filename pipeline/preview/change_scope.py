@@ -21,6 +21,8 @@ PREVIEW_RELEVANT_PATTERNS = (
     "*.css",
     "*.js",
     "_headers",
+    "package.json",
+    "package-lock.json",
     "pipeline/build-publication.py",
     "pipeline/build-derived-artifacts.py",
     "pipeline/build/**",
