@@ -30,6 +30,10 @@ export function injectProjectionNavigation(html, projectionId = "main") {
   }));
 }
 
+export function normalizeSiteNavigation(html) {
+  return html.replace(/href=(["'])\/?#about\1/gi, (match, quote) => `href=${quote}/about${quote}`);
+}
+
 export function injectPracticeNavigation(html, projectionId = "main") {
   const marker = html.indexOf(LANDSCAPE_END);
   if (marker === -1) return html;
@@ -56,7 +60,7 @@ export async function onRequest(context) {
   if (projection.error) return response;
 
   const html = await response.text();
-  let body = html;
+  let body = normalizeSiteNavigation(html);
   if (url.pathname === "/" || url.pathname === "/index.html") {
     body = injectPracticeNavigation(body, projection.id);
   }
