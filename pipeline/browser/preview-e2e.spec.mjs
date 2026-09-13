@@ -114,15 +114,15 @@ test("projected reader journey preserves context and renders from D1", async ({ 
   try {
     console.log("\nACCEPTANCE");
 
-    const homeResponse = await page.goto(`${previewUrl}/?projection_id=${projectionId}`, { waitUntil: "domcontentloaded" });
-    expect(homeResponse).not.toBeNull();
-    expect(homeResponse.status()).toBe(200);
-    expect(homeResponse.headers()["x-evidence-projection"]).toBe(projectionId);
-    expect(homeResponse.headers()["x-evidence-landscape-source"]).toBe("d1");
+    const signalsResponse = await page.goto(`${previewUrl}/signals?projection_id=${projectionId}`, { waitUntil: "domcontentloaded" });
+    expect(signalsResponse).not.toBeNull();
+    expect(signalsResponse.status()).toBe(200);
+    expect(signalsResponse.headers()["x-evidence-projection"]).toBe(projectionId);
+    expect(signalsResponse.headers()["x-evidence-landscape-source"]).toBe("d1");
     assertProjectedUrl(page);
-    await expect(page.getByRole("heading", { name: "Evolution of Agentic Engineering" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Where is the evidence accumulating?" })).toBeVisible();
     await expect(page.locator(".landscape-row, .landscape-mobile-row").first()).toBeVisible();
-    pass(checks, "Projected home", "D1 landscape selected by URL query");
+    pass(checks, "Projected Signals", "D1 landscape selected by URL query");
 
     const evidenceApiPromise = page.waitForResponse((response) => {
       const url = new URL(response.url());
@@ -180,14 +180,15 @@ test("projected reader journey preserves context and renders from D1", async ({ 
     expect(new URL(mappedSignalHref, previewUrl).searchParams.get("projection_id")).toBe(projectionId);
     pass(checks, "Evaluate model", "reader reaches evaluation without losing projection");
 
-    const defaultHomeResponse = await page.goto(`${previewUrl}/`, { waitUntil: "domcontentloaded" });
-    expect(defaultHomeResponse).not.toBeNull();
-    expect(defaultHomeResponse.status()).toBe(200);
-    expect(defaultHomeResponse.headers()["x-evidence-projection"]).toBe("main");
+    const defaultSignalsResponse = await page.goto(`${previewUrl}/signals`, { waitUntil: "domcontentloaded" });
+    expect(defaultSignalsResponse).not.toBeNull();
+    expect(defaultSignalsResponse.status()).toBe(200);
+    expect(defaultSignalsResponse.headers()["x-evidence-projection"]).toBe("main");
+    expect(defaultSignalsResponse.headers()["x-evidence-landscape-source"]).toBe("d1");
     expect(new URL(page.url()).searchParams.has("projection_id")).toBe(false);
     if (evidenceIsNew) {
       await expect(page.locator(`a[href*="/signals/${evidenceId}/"]`)).toHaveCount(0);
-      pass(checks, "Default isolation", `${evidenceId} absent from main homepage`);
+      pass(checks, "Default isolation", `${evidenceId} absent from main Signals landscape`);
     } else {
       pass(checks, "Default isolation", "unselected browser traffic resolves to main");
     }
