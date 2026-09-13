@@ -1,8 +1,167 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Practice Observations — Evolution of Agentic Engineering</title><style>
-:root{--bg:#f7f7f5;--ink:#171719;--muted:#66666f;--line:#d9d9dc;--card:#fff;--accent:#6c4cff;--soft:#eeeaff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.45}a{color:inherit}main{max-width:1440px;margin:auto;padding:56px 28px 96px}.eyebrow{font-size:13px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}h1{font-size:clamp(46px,7vw,82px);line-height:.96;letter-spacing:-.055em;margin:18px 0 28px}p.lead{font-size:clamp(19px,2vw,27px);max-width:900px;color:#35353b}.topnav{display:flex;justify-content:space-between;gap:24px;padding-bottom:38px}.back{font-size:13px;font-weight:750;text-decoration:none;border-bottom:1px solid #aaa}.hero{padding-bottom:70px;border-bottom:1px solid var(--line)}.observations{padding-top:54px}.corpus-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:12px;overflow:hidden}.summary-metric{padding:18px 20px;border-right:1px solid var(--line)}.summary-metric:last-child{border-right:0}.summary-value{display:block;font-size:25px;font-weight:780;letter-spacing:-.035em}.summary-label{display:block;margin-top:2px;color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}.assessment-note{margin:0 0 28px;color:var(--muted);font-size:11px}.practice-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}.filter{display:inline-flex;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--muted);font-size:11px;font-weight:750;text-decoration:none;text-transform:capitalize}.filter:hover{border-color:#b9b9c0;color:var(--ink)}.filter.active{background:var(--ink);border-color:var(--ink);color:#fff}.table-shell{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:20px}.practice-table{width:100%;min-width:1120px;border-collapse:collapse;table-layout:fixed}.practice-table th{text-align:left;padding:16px 18px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);vertical-align:bottom}.practice-table td{padding:20px 18px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5;vertical-align:top}.practice-table tbody tr:last-child td{border-bottom:0}.practice-table th:nth-child(1),.practice-table td:nth-child(1){width:12%}.practice-table th:nth-child(2),.practice-table td:nth-child(2){width:22%}.practice-table th:nth-child(3),.practice-table td:nth-child(3){width:25%}.practice-table th:nth-child(4),.practice-table td:nth-child(4){width:27%}.practice-table th:nth-child(5),.practice-table td:nth-child(5){width:14%}.company{font-weight:750}.evidence-link{display:inline-block;margin-top:7px;color:var(--accent);font-size:10px;font-weight:750;text-decoration:none;border-bottom:1px solid #c8bfff}.conditions{display:flex;flex-wrap:wrap;gap:6px}.condition{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);color:var(--accent);font-size:10px;font-weight:750;text-transform:capitalize}.empty{padding:34px;color:var(--muted);font-size:14px}.count{margin:0 0 14px;color:var(--muted);font-size:12px}footer{padding-top:36px;color:var(--muted);font-size:13px}@media(max-width:720px){main{padding:28px 16px 64px}.topnav{display:block;padding-bottom:30px}.topnav>span:last-child{display:flex;gap:18px;margin-top:16px}.topnav .back{white-space:nowrap}.hero{padding-bottom:40px}h1{font-size:clamp(42px,13vw,58px);line-height:.94;margin:14px 0 22px;overflow-wrap:anywhere}p.lead{font-size:18px;line-height:1.45;margin-bottom:0}.observations{padding-top:34px}.corpus-summary{grid-template-columns:repeat(2,minmax(0,1fr));border-radius:16px}.summary-metric{padding:14px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.summary-metric:nth-child(2n){border-right:0}.summary-metric:nth-child(5){grid-column:1/-1;border-right:0;border-bottom:0}.summary-metric:nth-child(3),.summary-metric:nth-child(4){border-bottom:1px solid var(--line)}.summary-value{font-size:22px}.assessment-note{font-size:10px;margin-bottom:22px}.practice-filters{gap:7px;margin-bottom:18px}.filter{padding:7px 10px;font-size:10px}.count{margin-bottom:12px}.table-shell{overflow:visible;background:transparent;border:0;border-radius:0}.practice-table{display:block;width:100%;min-width:0}.practice-table thead{display:none}.practice-table tbody{display:grid;gap:14px}.practice-table tr{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}.practice-table td{display:block;width:100%!important;padding:0;border:0;font-size:14px;line-height:1.5;overflow-wrap:anywhere}.practice-table td+td{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}.practice-table td::before{display:block;margin-bottom:5px;font-size:9px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}.practice-table td:nth-child(1)::before{content:"Company"}.practice-table td:nth-child(2)::before{content:"Specific use case being solved"}.practice-table td:nth-child(3)::before{content:"Problem encountered"}.practice-table td:nth-child(4)::before{content:"Reported practice"}.practice-table td:nth-child(5)::before{content:"Selection condition"}.company{font-size:16px!important}.evidence-link{font-size:11px;margin-top:8px}.condition{font-size:10px}.empty{padding:24px 0}footer{padding-top:30px}}
-</style></head><body><main>
-<nav class="topnav"><span class="eyebrow">Practice observations</span><span><a class="back" href="evidence.html">Evidence →</a><a class="back" href="index.html">← Model</a></span></nav>
-<header class="hero"><h1>Practice Observations</h1><p class="lead">Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.</p></header>
-<section class="observations"><!-- PRACTICE_OBSERVATIONS_START --><div class="empty">Practice observations are loaded from the evidence projection.</div><!-- PRACTICE_OBSERVATIONS_END --></section>
-<footer>Evolution of Agentic Engineering · Practice Observations · Living research record · September 2026</footer></main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Practice Observations — Evolution of Agentic Engineering</title>
+  <style>
+    :root{--bg:#f7f7f5;--ink:#171719;--muted:#66666f;--line:#d9d9dc;--card:#fff;--accent:#6c4cff;--soft:#eeeaff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.45}
+    a{color:inherit}
+    button{font:inherit}
+    main{max-width:1180px;margin:auto;padding:24px 28px 96px}
+    .eyebrow{font-size:13px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(46px,7vw,82px);line-height:.96;letter-spacing:-.055em;margin:18px 0 28px}
+    p.lead{font-size:clamp(19px,2vw,27px);max-width:900px;color:#35353b}
+
+    .topnav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 0 24px;position:relative}
+    .brand{font-weight:850;text-decoration:none;letter-spacing:-.02em}
+    .navlinks{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end}
+    .navlinks a{font-size:13px;font-weight:750;text-decoration:none;border-bottom:1px solid transparent}
+    .navlinks a:hover{border-bottom-color:#aaa}
+    .navlinks a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+    .nav-toggle{display:none;appearance:none;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:42px;height:38px;align-items:center;justify-content:center;font-size:22px;line-height:1;cursor:pointer}
+    .nav-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+    .practice-context{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0 32px;border-top:1px solid var(--line)}
+    .hero{padding-bottom:32px}
+    .observations{padding-top:24px}
+    .corpus-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:12px;overflow:hidden}
+    .summary-metric{padding:18px 20px;border-right:1px solid var(--line)}
+    .summary-metric:last-child{border-right:0}
+    .summary-value{display:block;font-size:25px;font-weight:780;letter-spacing:-.035em}
+    .summary-label{display:block;margin-top:2px;color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+    .assessment-note{margin:0 0 28px;color:var(--muted);font-size:11px}
+    .practice-filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 22px}
+    .filter{display:inline-flex;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--muted);font-size:11px;font-weight:750;text-decoration:none;text-transform:capitalize}
+    .filter:hover{border-color:#b9b9c0;color:var(--ink)}
+    .filter.active{background:var(--ink);border-color:var(--ink);color:#fff}
+    .table-shell{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:20px}
+    .practice-table{width:100%;min-width:1120px;border-collapse:collapse;table-layout:fixed}
+    .practice-table th{text-align:left;padding:16px 18px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);vertical-align:bottom}
+    .practice-table td{padding:20px 18px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5;vertical-align:top}
+    .practice-table tbody tr:last-child td{border-bottom:0}
+    .practice-table th:nth-child(1),.practice-table td:nth-child(1){width:12%}
+    .practice-table th:nth-child(2),.practice-table td:nth-child(2){width:22%}
+    .practice-table th:nth-child(3),.practice-table td:nth-child(3){width:25%}
+    .practice-table th:nth-child(4),.practice-table td:nth-child(4){width:27%}
+    .practice-table th:nth-child(5),.practice-table td:nth-child(5){width:14%}
+    .company{font-weight:750}
+    .evidence-link{display:inline-block;margin-top:7px;color:var(--accent);font-size:10px;font-weight:750;text-decoration:none;border-bottom:1px solid #c8bfff}
+    .conditions{display:flex;flex-wrap:wrap;gap:6px}
+    .condition{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);color:var(--accent);font-size:10px;font-weight:750;text-transform:capitalize}
+    .empty{padding:34px;color:var(--muted);font-size:14px}
+    .count{margin:0 0 14px;color:var(--muted);font-size:12px}
+    footer{padding-top:36px;color:var(--muted);font-size:13px}
+
+    @media(max-width:680px){
+      main{padding:18px 22px 64px}
+      .topnav{padding-bottom:24px}
+      .brand{font-size:17px}
+      .nav-toggle{display:inline-flex;flex:0 0 auto}
+      .navlinks{display:none;position:absolute;z-index:20;top:46px;right:0;min-width:190px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 14px 36px rgba(23,23,25,.12);flex-direction:column;align-items:stretch;gap:0}
+      .navlinks.open{display:flex}
+      .navlinks a{font-size:14px;padding:10px 12px;border-bottom:0;border-radius:9px}
+      .navlinks a:hover,.navlinks a:focus-visible{background:var(--soft);outline:none}
+      .navlinks a[aria-current="page"]{background:var(--soft);color:var(--accent)}
+      .practice-context{padding:12px 0 28px}
+      .hero{padding-bottom:22px}
+      h1{font-size:clamp(42px,13vw,58px);line-height:.94;margin:14px 0 22px;overflow-wrap:anywhere}
+      p.lead{font-size:18px;line-height:1.45;margin-bottom:0}
+      .observations{padding-top:16px}
+      .corpus-summary{grid-template-columns:repeat(2,minmax(0,1fr));border-radius:16px}
+      .summary-metric{padding:14px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+      .summary-metric:nth-child(2n){border-right:0}
+      .summary-metric:nth-child(5){grid-column:1/-1;border-right:0;border-bottom:0}
+      .summary-metric:nth-child(3),.summary-metric:nth-child(4){border-bottom:1px solid var(--line)}
+      .summary-value{font-size:22px}
+      .assessment-note{font-size:10px;margin-bottom:22px}
+      .practice-filters{gap:7px;margin-bottom:18px}
+      .filter{padding:7px 10px;font-size:10px}
+      .count{margin-bottom:12px}
+      .table-shell{overflow:visible;background:transparent;border:0;border-radius:0}
+      .practice-table{display:block;width:100%;min-width:0}
+      .practice-table thead{display:none}
+      .practice-table tbody{display:grid;gap:14px}
+      .practice-table tr{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+      .practice-table td{display:block;width:100%!important;padding:0;border:0;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+      .practice-table td+td{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+      .practice-table td::before{display:block;margin-bottom:5px;font-size:9px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+      .practice-table td:nth-child(1)::before{content:"Company"}
+      .practice-table td:nth-child(2)::before{content:"Specific use case being solved"}
+      .practice-table td:nth-child(3)::before{content:"Problem encountered"}
+      .practice-table td:nth-child(4)::before{content:"Reported practice"}
+      .practice-table td:nth-child(5)::before{content:"Selection condition"}
+      .company{font-size:16px!important}
+      .evidence-link{font-size:11px;margin-top:8px}
+      .condition{font-size:10px}
+      .empty{padding:24px 0}
+      footer{padding-top:30px}
+    }
+  </style>
+</head>
+<body>
+<main>
+  <nav class="topnav" aria-label="Primary">
+    <a class="brand" href="/">AgenticEngineering.science</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-links" aria-label="Open navigation menu">☰</button>
+    <div class="navlinks" id="primary-links">
+      <a href="/evidence">Evidence</a>
+      <a href="/#model">Model</a>
+      <a href="/#signals">Signals</a>
+      <a href="/practices" aria-current="page">Practices</a>
+      <a href="/#about">About</a>
+    </div>
+  </nav>
+
+  <div class="practice-context">
+    <span class="eyebrow">Practice observations</span>
+  </div>
+
+  <header class="hero">
+    <h1>Practice Observations</h1>
+    <p class="lead">Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.</p>
+  </header>
+
+  <section class="observations"><!-- PRACTICE_OBSERVATIONS_START --><div class="empty">Practice observations are loaded from the evidence projection.</div><!-- PRACTICE_OBSERVATIONS_END --></section>
+
+  <footer>Evolution of Agentic Engineering · Practice Observations · Living research record · September 2026</footer>
+</main>
+<script>
+(() => {
+  const navToggle = document.querySelector(".nav-toggle");
+  const navLinks = document.getElementById("primary-links");
+  if (!navToggle || !navLinks) return;
+
+  const closeNav = () => {
+    navLinks.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+    navToggle.setAttribute("aria-label", "Open navigation menu");
+  };
+
+  navToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const open = navLinks.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", String(open));
+    navToggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+  });
+
+  navLinks.addEventListener("click", (event) => {
+    if (event.target.closest("a")) closeNav();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!navLinks.contains(event.target) && !navToggle.contains(event.target)) closeNav();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeNav();
+      navToggle.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>
