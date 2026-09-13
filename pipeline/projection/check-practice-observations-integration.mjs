@@ -10,12 +10,14 @@ const observations = [
   { id:"single", projection_id:"main", evidence_id:"signal-b", company:"B", use_case:"Use case B", problem:"Problem B", reported_practice:"Practice B", selection_conditions:["verification"] },
 ];
 
-// The canonical shell exposes the Practice Observations dynamic insertion point.
+// The canonical shell exposes the Practice Observations dynamic insertion point and global site navigation.
 const practicesShell = fs.readFileSync("practices.html", "utf8");
 assert.match(practicesShell, /<!-- PRACTICE_OBSERVATIONS_START -->/);
 assert.match(practicesShell, /<!-- PRACTICE_OBSERVATIONS_END -->/);
-assert.match(practicesShell, /href="evidence\.html">Evidence →<\/a>/);
-assert.match(practicesShell, /href="index\.html">← Model<\/a>/);
+assert.match(practicesShell, /href="\/evidence">Evidence<\/a>/);
+assert.match(practicesShell, /href="\/model">Model<\/a>/);
+assert.match(practicesShell, /href="\/signals">Signals<\/a>/);
+assert.match(practicesShell, /href="\/practices" aria-current="page">Practices<\/a>/);
 
 // Main projection: exhaustive view, corpus summary, filters, and evidence traceability compose.
 const main = renderPracticeObservations(observations, null, "main", summary);

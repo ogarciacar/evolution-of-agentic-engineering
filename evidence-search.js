@@ -1,6 +1,7 @@
 (() => {
   const SITE_ORIGIN = "https://agenticengineering.science";
   const MAX_EXCERPT_CHARS = 620;
+  const MAX_EPISTEMIC_CHARS = 300;
 
   function esc(value, quote = false) {
     let out = String(value ?? "")
@@ -11,12 +12,13 @@
     return out;
   }
 
-  function shortExcerpt(value) {
+  function shortExcerpt(value, maxChars = MAX_EXCERPT_CHARS) {
     const text = String(value ?? "").replace(/\s+/g, " ").trim();
-    if (text.length <= MAX_EXCERPT_CHARS) return text;
-    const slice = text.slice(0, MAX_EXCERPT_CHARS);
+    if (text.length <= maxChars) return text;
+    const slice = text.slice(0, maxChars);
     const boundary = slice.lastIndexOf(" ");
-    const end = boundary >= 460 ? boundary : MAX_EXCERPT_CHARS;
+    const minBoundary = Math.floor(maxChars * 0.74);
+    const end = boundary >= minBoundary ? boundary : maxChars;
     return `${slice.slice(0, end).trim()}…`;
   }
 
@@ -75,7 +77,7 @@
 
   function matchedPassage(value) {
     let text = String(value ?? "").trim();
-    let label = "MATCHED EVIDENCE";
+    let label = "WHY THIS MATCHES";
 
     if (/^#{1,6}\s*What this does not establish\b/i.test(text)) {
       label = "WHAT THIS DOES NOT ESTABLISH";
@@ -86,13 +88,17 @@
 
     text = text
       .replace(/\*\*(SOURCE|OBSERVED|INTERPRETATION|MODEL IMPLICATION)\*\*/gi, "$1 ·")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1")
+      .replace(/`([^`]+)`/g, "$1")
       .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
       .replace(/(^|\s)[*+-]\s+/g, "$1")
       .replace(/#{1,6}\s*/g, "")
       .replace(/\s+/g, " ")
       .trim();
 
-    return { label, text: shortExcerpt(text) };
+    const maxChars = label === "WHAT THIS DOES NOT ESTABLISH" ? MAX_EPISTEMIC_CHARS : MAX_EXCERPT_CHARS;
+    return { label, text: shortExcerpt(text, maxChars) };
   }
 
   function normalizeResult(result) {
@@ -162,8 +168,9 @@
     const passage = matchedPassage(result.excerpt);
     const headline = evidence.presentation.headline || result.title;
     const provenance = [date, producer].filter(Boolean).join(" · ");
+    const passageClass = passage.label === "WHAT THIS DOES NOT ESTABLISH" ? " epistemic-boundary" : "";
 
-    return `<article class="ask-result ask-result-signal">${provenance ? `<div class="date">${esc(provenance)}</div>` : ""}<h3>${esc(headline)}</h3>${chips.length ? `<div class="meta">${chips.map((chip, index) => `<span class="chip${index === 0 ? " transition" : ""}">${esc(chip)}</span>`).join("")}</div>` : ""}${passage.text ? `<div class="ask-match"><b>${esc(passage.label)}</b><p>${esc(passage.text)}</p></div>` : ""}<div class="ask-result-foot">${evidence.verdict ? `<strong>${esc(evidence.verdict)}</strong>` : "<span></span>"}<a class="source" href="${esc(result.url, true)}">Read Scale Signal →</a></div></article>`;
+    return `<article class="ask-result ask-result-signal">${provenance ? `<div class="date">${esc(provenance)}</div>` : ""}<h3>${esc(headline)}</h3>${chips.length ? `<div class="meta">${chips.map((chip, index) => `<span class="chip${index === 0 ? " transition" : ""}">${esc(chip)}</span>`).join("")}</div>` : ""}${passage.text ? `<div class="ask-match${passageClass}"><b>${esc(passage.label)}</b><p>${esc(passage.text)}</p></div>` : ""}<div class="ask-result-foot">${evidence.verdict ? `<strong>${esc(evidence.verdict)}</strong>` : "<span></span>"}<a class="source" href="${esc(result.url, true)}">Read Scale Signal →</a></div></article>`;
   }
 
   function renderResult(result) {

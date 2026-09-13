@@ -1,5 +1,6 @@
-import { getEvidenceById } from "../_lib/evidence-read-model.js";
+import { getAllEvidence, getEvidenceById } from "../_lib/evidence-read-model.js";
 import { PROJECTION_HEADER, applyProjectionHeaders, projectionFromRequest } from "../_lib/evidence-projection.js";
+import { SIGNALS_END, SIGNALS_START, renderSignalLandscape } from "../_lib/signal-landscape.js";
 
 const SITE_ORIGIN = "https://agenticengineering.science";
 
@@ -40,6 +41,38 @@ function formatDate(isoDate) {
   }).format(new Date(`${isoDate}T00:00:00Z`));
 }
 
+async function renderSignalsIndex(context, projectionId) {
+  const { request, env } = context;
+  const staticResponse = await context.next();
+  if (!env.EVIDENCE_DB || request.method === "HEAD" || !staticResponse.ok) return staticResponse;
+
+  try {
+    const { records, total } = await getAllEvidence(env, projectionId);
+    const chart = renderSignalLandscape(records, total);
+    if (!chart) {
+      const headers = new Headers(staticResponse.headers);
+      applyProjectionHeaders(headers, projectionId);
+      return new Response(staticResponse.body, { status: staticResponse.status, statusText: staticResponse.statusText, headers });
+    }
+
+    const html = await staticResponse.text();
+    const start = html.indexOf(SIGNALS_START);
+    const end = html.indexOf(SIGNALS_END);
+    if (start === -1 || end === -1 || end < start) return new Response(html, staticResponse);
+
+    const body = html.slice(0, start + SIGNALS_START.length) + chart + html.slice(end);
+    const headers = new Headers(staticResponse.headers);
+    headers.set("Content-Type", "text/html; charset=utf-8");
+    headers.set("Cache-Control", "public, max-age=60");
+    headers.set("X-Evidence-Landscape-Source", "d1");
+    applyProjectionHeaders(headers, projectionId);
+    headers.delete("Content-Length");
+    return new Response(body, { status: staticResponse.status, statusText: staticResponse.statusText, headers });
+  } catch {
+    return staticResponse;
+  }
+}
+
 function renderSignal(evidence) {
   const canonicalUrl = `${SITE_ORIGIN}/signals/${encodeURIComponent(evidence.id)}/`;
   const observed = evidence.observed.map((item) => `<p>${esc(String(item).trim())}</p>`).join("");
@@ -68,7 +101,7 @@ function renderSignal(evidence) {
 </style>
 </head>
 <body><main>
-<nav class="topnav"><span class="eyebrow">Evolution of Agentic Engineering</span><a class="back" href="/">View the model →</a></nav>
+<nav class="topnav"><span class="eyebrow">Evolution of Agentic Engineering</span><a class="back" href="/signals">View Signals →</a></nav>
 <header class="hero"><div class="eyebrow">Scale Signal</div><h1>${esc(evidence.presentation.headline)}</h1><div class="date">${esc(published)} · ${esc(evidence.source.producer)}</div><div class="meta">${renderChips(evidence)}</div><div class="scale"><strong>${esc(evidence.scale.label)}:</strong> ${esc(evidence.scale.summary)}</div></header>
 <section><div class="eyebrow">Evidence record</div><h2>Source → Observed → Interpretation → Model implication</h2><div class="source-detail"><b>SOURCE</b><p>${esc(evidence.source.title)}</p><a class="source" href="${esc(evidence.source.url)}">View source →</a></div><div class="evidence"><div class="layer observed"><b>OBSERVED</b>${observed}</div><div class="layer"><b>INTERPRETATION</b><p>${esc(evidence.interpretation)}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>${esc(evidence.model_implication.verdict)}.</strong> ${esc(evidence.model_implication.explanation)}</p></div></div></section>
 <section class="boundaries"><div class="eyebrow">Epistemic boundaries</div><h2>What this does not establish</h2><ul>${boundaries}</ul><div class="layer"><b>OPEN QUESTION</b><p>${esc(evidence.open_question)}</p></div></section>
@@ -92,7 +125,8 @@ export async function onRequest(context) {
   }
 
   const rawId = Array.isArray(params.id) ? params.id.join("/") : params.id;
-  if (!rawId || rawId.includes("/")) return context.next();
+  if (!rawId) return renderSignalsIndex(context, projection.id);
+  if (rawId.includes("/")) return context.next();
 
   let id;
   try { id = decodeURIComponent(rawId); } catch { return context.next(); }

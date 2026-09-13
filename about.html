@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>About — Evolution of Agentic Engineering</title>
+  <style>
+    :root{--bg:#f7f7f5;--ink:#171719;--muted:#66666f;--line:#d9d9dc;--card:#fff;--accent:#6c4cff;--soft:#eeeaff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,sans-serif;line-height:1.45}
+    a{color:inherit}
+    button{font:inherit}
+    main{max-width:1180px;margin:auto;padding:24px 28px 96px}
+    .eyebrow{font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+    h1{font-size:clamp(46px,7vw,82px);line-height:.96;letter-spacing:-.055em;margin:18px 0 28px}
+    .lead{font-size:clamp(19px,2vw,27px);line-height:1.32;max-width:900px;color:#35353b}
+    .note{color:var(--muted)}
+    .provenance{color:var(--muted)}
+    .provenance strong{color:var(--ink)}
+
+    .topnav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 0 24px;position:relative}
+    .brand{font-weight:850;text-decoration:none;letter-spacing:-.02em}
+    .navlinks{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end}
+    .navlinks a{font-size:13px;font-weight:750;text-decoration:none;border-bottom:1px solid transparent}
+    .navlinks a:hover{border-bottom-color:#aaa}
+    .navlinks a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+    .nav-toggle{display:none;appearance:none;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:42px;height:38px;align-items:center;justify-content:center;font-size:22px;line-height:1;cursor:pointer}
+    .nav-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .page-divider{border-top:1px solid var(--line);height:24px}
+
+    .about{padding-bottom:82px;border-bottom:1px solid var(--line)}
+    .about-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:48px;align-items:start}
+    .about-note{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}
+    .about-note b{display:block;margin-bottom:8px;color:var(--accent)}
+    footer{padding-top:36px;color:var(--muted);font-size:13px}
+
+    @media(max-width:900px){
+      .navlinks{gap:14px}
+      .about-grid{grid-template-columns:1fr}
+    }
+
+    @media(max-width:680px){
+      main{padding:18px 22px 64px}
+      .topnav{padding-bottom:24px}
+      .brand{font-size:17px}
+      .nav-toggle{display:inline-flex;flex:0 0 auto}
+      .navlinks{display:none;position:absolute;z-index:20;top:46px;right:0;min-width:190px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 14px 36px rgba(23,23,25,.12);flex-direction:column;align-items:stretch;gap:0}
+      .navlinks.open{display:flex}
+      .navlinks a{font-size:14px;padding:10px 12px;border-bottom:0;border-radius:9px}
+      .navlinks a:hover,.navlinks a:focus-visible{background:var(--soft);outline:none}
+      .navlinks a[aria-current="page"]{background:var(--soft);color:var(--accent)}
+      .page-divider{height:24px}
+      .about{padding-bottom:54px}
+      .eyebrow{font-size:11px;line-height:1.35}
+      h1{font-size:clamp(42px,13vw,58px);line-height:.94;margin:14px 0 22px;overflow-wrap:anywhere}
+      .lead{font-size:18px;line-height:1.45}
+    }
+  </style>
+</head>
+<body>
+<main>
+  <nav class="topnav" aria-label="Primary">
+    <a class="brand" href="/">AgenticEngineering.science</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-links" aria-label="Open navigation menu">☰</button>
+    <div class="navlinks" id="primary-links">
+      <a href="/evidence">Evidence</a>
+      <a href="/model">Model</a>
+      <a href="/signals">Signals</a>
+      <a href="/practices">Practices</a>
+      <a href="/about" aria-current="page">About</a>
+    </div>
+  </nav>
+
+  <div class="page-divider" aria-hidden="true"></div>
+
+  <section class="about">
+    <div class="eyebrow">About</div>
+    <h1>How to interpret this working model</h1>
+    <div class="about-grid">
+      <div>
+        <p class="lead">AgenticEngineering.science is a working, evidence-backed model for reasoning about how software engineering may evolve as coding agents become more capable, numerous, cooperative and specialized.</p>
+        <p class="provenance"><strong>A working model by <a href="https://www.linkedin.com/in/ogarciacar" target="_blank" rel="noopener noreferrer">Orlando Garcia</a></strong><br>Working model v0.2 · September 2026</p>
+        <p class="note">It is not a maturity model, prediction engine, or catalogue of universal best practices. Evidence is kept distinct from interpretation, and practices are considered in the conditions that may select for them.</p>
+      </div>
+      <aside class="about-note"><b>THINKING LENS</b><p>This model was developed using <a href="https://www.linkedin.com/in/danielsanmartinsepuveda/" target="_blank" rel="noopener noreferrer">Daniel San Martín's</a> <a href="https://www.goodreads.com/book/show/58961062-clarity">Clarity</a> model as a thinking lens, particularly Apparition, Selection, Cooperation and Specialization.</p><p class="note">The application to agentic software engineering is my own.</p></aside>
+    </div>
+  </section>
+
+  <footer>Evolution of Agentic Engineering · About · Working model v0.2 · September 2026</footer>
+</main>
+<script>
+(() => {
+  const navToggle = document.querySelector(".nav-toggle");
+  const navLinks = document.getElementById("primary-links");
+  if (!navToggle || !navLinks) return;
+
+  const closeNav = () => {
+    navLinks.classList.remove("open");
+    navToggle.setAttribute("aria-expanded", "false");
+    navToggle.setAttribute("aria-label", "Open navigation menu");
+  };
+
+  navToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const open = navLinks.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", String(open));
+    navToggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
+  });
+
+  navLinks.addEventListener("click", (event) => {
+    if (event.target.closest("a")) closeNav();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!navLinks.contains(event.target) && !navToggle.contains(event.target)) closeNav();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeNav();
+      navToggle.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>
