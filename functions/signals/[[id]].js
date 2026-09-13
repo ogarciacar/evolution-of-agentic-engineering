@@ -1,6 +1,6 @@
-import { getEvidenceById, getHomepageEvidence } from "../_lib/evidence-read-model.js";
+import { getAllEvidence, getEvidenceById } from "../_lib/evidence-read-model.js";
 import { PROJECTION_HEADER, applyProjectionHeaders, projectionFromRequest } from "../_lib/evidence-projection.js";
-import { SIGNALS_END, SIGNALS_MAX_ROWS, SIGNALS_START, renderSignalLandscape } from "../_lib/signal-landscape.js";
+import { SIGNALS_END, SIGNALS_START, renderSignalLandscape } from "../_lib/signal-landscape.js";
 
 const SITE_ORIGIN = "https://agenticengineering.science";
 
@@ -47,7 +47,7 @@ async function renderSignalsIndex(context, projectionId) {
   if (!env.EVIDENCE_DB || request.method === "HEAD" || !staticResponse.ok) return staticResponse;
 
   try {
-    const { records, total } = await getHomepageEvidence(env, SIGNALS_MAX_ROWS, projectionId);
+    const { records, total } = await getAllEvidence(env, projectionId);
     const chart = renderSignalLandscape(records, total);
     if (!chart) {
       const headers = new Headers(staticResponse.headers);
