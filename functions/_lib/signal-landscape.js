@@ -2,7 +2,6 @@ import { CONDITIONS, STAGES } from "./evidence-read-model.js";
 
 export const SIGNALS_START = "<!-- SIGNALS_EVIDENCE_START -->";
 export const SIGNALS_END = "<!-- SIGNALS_EVIDENCE_END -->";
-export const SIGNALS_MAX_ROWS = 24;
 
 function esc(value, quote = false) {
   let out = String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
@@ -76,9 +75,7 @@ function countMapping(records, field, value) {
 
 export function renderSignalLandscape(records, total) {
   if (!records.length) return null;
-  const subtitle = total <= SIGNALS_MAX_ROWS
-    ? `${records.length} accepted evidence records · ${dateRange(records)}`
-    : `${records.length} of ${total} accepted evidence records · ${dateRange(records)}`;
+  const subtitle = `${total} accepted evidence records · ${dateRange(records)}`;
   const stageHeaders = STAGES.map((stage) => `<span class="landscape-column-label"><b>${esc(stage)}</b><small>${countMapping(records, "stages", stage)}</small></span>`).join("");
   const conditionHeaders = CONDITIONS.map((condition) => `<span class="landscape-column-label"><b>${esc(condition)}</b><small>${countMapping(records, "conditions", condition)}</small></span>`).join("");
   const rows = records.map(renderRow).join("");
