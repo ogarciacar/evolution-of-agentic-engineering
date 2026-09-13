@@ -45,10 +45,8 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Resolve deployed preview context
-        if: steps.scope.outputs.relevant == 'true'
-        run: python pipeline/browser/resolve_preview_context.py
-
+      # Browser provisioning is independent of Pages/D1 readiness. Do it first so
+      # those external systems can converge while Playwright and Chromium install.
       - name: Install Playwright
         if: steps.scope.outputs.relevant == 'true'
         run: npm install --no-save --package-lock=false @playwright/test@1.62.1
@@ -56,6 +54,10 @@ jobs:
       - name: Install Chromium
         if: steps.scope.outputs.relevant == 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Resolve deployed preview context
+        if: steps.scope.outputs.relevant == 'true'
+        run: python pipeline/browser/resolve_preview_context.py
 
       - name: Run projected reader journey
         if: steps.scope.outputs.relevant == 'true'
