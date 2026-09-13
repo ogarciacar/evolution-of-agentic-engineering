@@ -43,6 +43,37 @@ The canonical research source and D1 projection remain governed by the [evidence
 
 The Worker configuration lives in `workers/ai-search/wrangler.jsonc`. The repository root Wrangler configuration and the Cloudflare Pages application are unchanged by AI Search.
 
+## Pages previews
+
+The production custom domain reaches `agentic-engineering-search-api` through the Worker route above. Cloudflare Pages preview hostnames do not match that route, so previews expose the same `/api/search` browser contract through `functions/api/search.js`.
+
+The Pages Function is deliberately only a bridge:
+
+```text
+<preview>.pages.dev/api/search
+        ↓
+functions/api/search.js
+        ↓
+SEARCH_API service binding
+        ↓
+agentic-engineering-search-api
+        ↓
+AI_SEARCH namespace binding
+        ↓
+agentic-engineering-search
+```
+
+Configure the Cloudflare Pages project preview environment with this Service Binding:
+
+```text
+Binding: SEARCH_API
+Service: agentic-engineering-search-api
+```
+
+The bridge forwards the original request unchanged. Query validation, retrieval configuration, deduplication, provenance filtering, and response shaping remain owned by the search Worker. If `SEARCH_API` is not configured, the preview endpoint returns `503` instead of silently falling back to another implementation.
+
+Preview search intentionally uses the current published AI Search index. It does not create a PR-specific AI Search instance or crawl a PR-specific corpus.
+
 ## Indexed corpus
 
 AI Search crawls the production website using Sitemap parsing with:
@@ -166,6 +197,7 @@ Deterministic repository contracts:
 
 ```bash
 node workers/ai-search/check-search-endpoint.mjs
+node workers/ai-search/check-preview-bridge.mjs
 node workers/ai-search/check-search-ui.mjs
 node experiments/ai-search/check-corpus-coverage.mjs
 ```
