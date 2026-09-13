@@ -1,0 +1,164 @@
+source:
+  title: "Stripe Projects adds new agent integrations, more providers, and custom developer controls"
+  producer: "Stripe"
+  producer_type: organization
+  date: "2026-06-11"
+  url: "https://stripe.com/blog/stripe-projects-adds-new-agents-providers-developer-controls"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Stripe extends coding-agent operation into infrastructure provisioning with provider integration, persistent context, and explicit safety boundaries"
+  summary: >
+    Stripe reports rapidly growing agent usage around its developer platform and expands
+    Stripe Projects so coding agents can provision and manage infrastructure across 49
+    providers. The design adds agent integrations, persistent project context, unified
+    cost visibility, provider-specific spend caps, scoped credentials, and named
+    environment boundaries that default agents to development rather than production.
+
+observed:
+  - >
+    Stripe reports that agent traffic to its documentation grew more than 10x during
+    2025 and now represents nearly 40% of Stripe documentation traffic.
+  - >
+    Stripe reports that 70% of Stripe CLI requests for API resources come from agents.
+  - >
+    Stripe states that agents can independently write code and integrate with APIs, but
+    that adjacent steps such as provisioning infrastructure, managing credentials,
+    setting up accounts, and connecting services remain difficult for agents to perform
+    on their own.
+  - >
+    Stripe Projects is integrated as a skill in Hermes and is also embedded in Factory
+    Droids and Warp workflows so agents can provision and manage infrastructure from
+    their coding-agent environment.
+  - >
+    Stripe describes Hermes carrying project context across sessions so an agent can
+    return to a multi-day or multi-week project with persistent context.
+  - >
+    Stripe Projects connects to 16 additional providers for a total of 49 providers,
+    including services for billing, storefronts, databases, hosting, and LLM
+    observability.
+  - >
+    Stripe states that agents can use Projects to spin up live AI-powered software,
+    configure billing, and monitor model cost, latency, and quality without a human
+    clicking through provider dashboards.
+  - >
+    Stripe added a unified cost view across providers and provider-specific spending
+    caps so project operators can constrain resource consumption service by service.
+  - >
+    Stripe added named environments with isolated credentials for development,
+    staging, production, or custom environments, and agents default to development so
+    off-script behavior cannot directly affect production.
+  - >
+    Stripe added delegated authority and white-labeling support so platforms can mint
+    scoped credentials and provision services on developers' behalf.
+  - >
+    Stripe says it plans to extend Projects across the lifecycle of agent-built
+    software, including deeper security primitives for autonomous agents and a data
+    layer for metering and billing agent-built services.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Stripe reports agent traffic at large developer-platform scale: documentation
+    traffic from agents grew more than 10x during 2025, nearly 40% of documentation
+    traffic is now from agents, and 70% of Stripe CLI API-resource requests come from
+    agents. These figures establish broad agent activity around Stripe but do not
+    establish how many autonomous infrastructure-provisioning sessions use Projects or
+    how reliably those sessions complete.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: REFINES
+
+interpretation: >
+  This source sharpens Selection by showing that useful coding capability does not by
+  itself make an agent operationally fit for end-to-end software delivery. Stripe
+  explicitly identifies infrastructure provisioning, credential management, account
+  setup, and service connection as adjacent constraints and responds by changing the
+  environment around the agent: persistent project context, integrated provisioning,
+  cost visibility, spend caps, scoped credentials, and environment isolation. The
+  source also sharpens Cooperation because the working object is no longer an isolated
+  coding agent. It is an agent cooperating with Stripe Projects and multiple provider
+  systems through structured interfaces and delegated authority. However, Stripe does
+  not publish a matched comparison showing that these integrations improve task success
+  relative to isolated agent operation, so the evidence refines rather than independently
+  supports C02 or C03.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Stripe Projects provides concrete evidence that the environment surrounding a
+    coding agent must expand as the agent moves from code generation toward operating
+    software. Context continuity, execution authority, provider coordination,
+    observability, and economic guardrails become part of the viability boundary. The
+    source also identifies an emerging cooperative engineering object composed of the
+    coding agent, Projects, and provider APIs, but it does not measure the cooperation
+    advantage or establish a persistent specialized higher-order system under C04.
+
+what_this_does_not_establish:
+  - >
+    Stripe's traffic metrics describe broad agent activity around Stripe documentation
+    and CLI resources, not the number of Stripe Projects users or autonomous
+    infrastructure-provisioning sessions.
+  - >
+    The source is a first-party product announcement and does not independently validate
+    the reliability, security, or economic effectiveness of Stripe Projects.
+  - >
+    The source does not provide completion-rate, latency, cost, incident, or rollback
+    metrics for agent-provisioned infrastructure.
+  - >
+    The source does not compare matched agent tasks with and without Projects, so it
+    does not isolate the causal effect of persistent context, spend caps, environment
+    boundaries, or provider integration on task success.
+  - >
+    The statement that agents can independently write code and integrate with APIs is a
+    Stripe claim in this source rather than an independently replicated benchmark.
+  - >
+    Defaulting an agent to development limits blast radius but does not establish that
+    off-script behavior is fully contained or that promotion to production is safe.
+  - >
+    The source does not establish persistent differentiated cooperation forming a
+    higher-order engineering object under C04.
+
+open_question: >
+  As coding agents move from editing repositories to provisioning and operating live
+  software, which combinations of persistent context, scoped authority, cost controls,
+  environment boundaries, and provider coordination most improve end-to-end success
+  without making human oversight the dominant bottleneck?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: default-agents-to-nonproduction-environments
+    use_case: "Allow coding agents to provision and configure infrastructure without exposing production by default."
+    problem: "An agent that goes off-script can create direct production impact if credentials and environment access are too broad."
+    reported_practice: "Use named environments with isolated credentials and default agents to the development environment rather than production."
+    selection_conditions: [execution, coordination]
+  - id: provider-specific-agent-spend-caps
+    use_case: "Let agents consume infrastructure while constraining runaway resource cost."
+    problem: "An autonomous workflow can overspend on a single model, database, hosting, or other provider."
+    reported_practice: "Set service-specific spending limits and expose unified current and historical cost across providers."
+    selection_conditions: [economics, observability]
+  - id: persist-project-context-across-agent-sessions
+    use_case: "Continue multi-day or multi-week agent-built software projects without rediscovering project state on every session."
+    problem: "Session-local agents lose project context and repeatedly reacquire state before they can act."
+    reported_practice: "Carry project context across sessions so the agent can return to the same project with persistent state."
+    selection_conditions: [context]
+  - id: integrate-infrastructure-provisioning-into-agent-workflows
+    use_case: "Move from code generation to runnable software without requiring a human to configure each provider dashboard."
+    problem: "Provisioning infrastructure, connecting services, and managing credentials remain adjacent bottlenecks even when an agent can write the application code."
+    reported_practice: "Expose infrastructure provisioning through a structured agent skill or embedded CLI and connect it to multiple providers through delegated, scoped authority."
+    selection_conditions: [execution, coordination, context]
+
+assessment:
+  assisted_by_ai: true
