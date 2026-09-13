@@ -1,0 +1,158 @@
+source:
+  title: "Artifact validity under varying agent configurations in LLM-assisted software development: A comparative analysis"
+  producer: "Dae-Kyoo Kim"
+  producer_type: authors
+  date: "2026-01-06"
+  url: "https://doi.org/10.1016/j.infsof.2026.108022"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Task-, phase-, and process-level agent specialization showed different strengths but no universally fitter configuration"
+  summary: >
+    Kim compares Task-Specialized, Phase-Specialized, and Process-Generalist agent
+    configurations using the same underlying LLM across nine software-engineering tasks
+    and three application domains. No configuration consistently outperforms the
+    others. Task-specialized agents perform well on some modeling work, phase-level
+    specialization benefits some tasks through contextual continuity, and generalist
+    configurations remain comparatively stable. The study concludes that useful
+    specialization depends on task and domain fit rather than increasing specialization
+    monotonically improving artifact validity.
+
+observed:
+  - >
+    The study compares three orchestration granularities: Task-Specialized (TS),
+    Phase-Specialized (PS), and Process-Generalist (PG) agent configurations.
+  - >
+    All configurations use the same base LLM inside a structured orchestration
+    framework so that the comparison focuses on configuration strategy rather than
+    changing the underlying model between treatments.
+  - >
+    The evaluation covers nine software-engineering tasks spanning requirements
+    analysis, design modeling, implementation, and testing.
+  - >
+    The configurations are evaluated in three application domains: a Tour Reservation
+    System, a Smart Wallet System, and a Food Order and Delivery System.
+  - >
+    Artifact validity is evaluated with task-specific structural and semantic criteria.
+  - >
+    No configuration consistently outperforms the others across all tasks. The paper
+    reports the same overall average validity score of 0.56 across the three
+    configurations.
+  - >
+    Validity is strongest in early requirements tasks, reported in the 0.63 to 0.85
+    range, moderate in implementation and testing at about 0.61, and weakest in
+    modeling tasks, reported in the 0.25 to 0.42 range.
+  - >
+    Task-Specialized agents perform comparatively well on some modeling tasks, while
+    Phase-Specialized agents benefit from contextual continuity in tasks such as
+    operation identification and test design; Process-Generalist agents provide more
+    stable but less tailored behavior across the pipeline.
+  - >
+    All three configurations perform best in the Tour Reservation System domain, which
+    the paper characterizes as having simpler and more modular requirements.
+  - >
+    The authors conclude that artifact quality appears more influenced by the base
+    LLM's capabilities than orchestration strategy alone, while task- and domain-level
+    variation still motivates adaptive or hybrid specialization strategies.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The study systematically compares three agent-configuration strategies across nine
+    software-engineering tasks and three application domains. This is controlled
+    comparative evidence about specialization granularity, but not evidence of
+    sustained production operation, organizational deployment, or persistent agent
+    roles operating at engineering-fleet scale.
+
+mapping:
+  stages: [Selection, Specialization]
+  conditions: [Context, Execution, Verification, Coordination, Learning]
+
+claims:
+  - id: C02
+    relationship: REFINES
+  - id: C04
+    relationship: REFINES
+
+interpretation: >
+  The study sharpens Selection because the fitness of an agent configuration depends on
+  the task and domain in which it operates: the same underlying model produces
+  different artifact-validity patterns when orchestration granularity and domain
+  characteristics change. Its strongest contribution is to Specialization. The
+  evidence rejects a simple monotonic reading in which narrower agent roles are always
+  fitter. Task-level specialization helps some work, phase-level specialization gains
+  from contextual continuity in some tasks, and a process-level generalist remains
+  competitive elsewhere. Specialization therefore appears useful when role boundaries
+  align with the structure of the work, not merely when more differentiated roles are
+  introduced. The study does not establish the persistence and higher-order integrated
+  object required for strong support of C04, so it refines rather than supports that
+  claim.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    C02 is refined because configuration fitness varies with task structure, domain
+    complexity, context continuity, and verification criteria even when the base model
+    is held constant. C04 is refined because differentiated roles can improve selected
+    tasks but do not dominate generalist or phase-level alternatives across the
+    lifecycle. The result makes specialization conditional: engineering value depends
+    on choosing a granularity suited to the work and may be bounded by the underlying
+    model's capabilities.
+
+what_this_does_not_establish:
+  - >
+    The evaluated application domains are controlled study cases rather than evidence
+    of sustained production deployment in live engineering organizations.
+  - >
+    The experiment does not establish persistent autonomous agent identities or a
+    long-lived higher-order engineering object formed through repeated differentiated
+    cooperation.
+  - >
+    Artifact-validity scores are study metrics and do not directly measure business
+    outcomes, developer productivity, maintainability, operational reliability, or
+    economic return.
+  - >
+    The comparison does not establish that specialization itself is the sole causal
+    driver of task-level differences; prompt design, orchestration implementation, and
+    the chosen base LLM remain part of the experimental system.
+  - >
+    The study does not provide evidence that differentiated agents outperform a useful
+    isolated-agent baseline after accounting for coordination, latency, and inference
+    cost, so it does not independently establish C03.
+  - >
+    The results do not establish that one specialization granularity transfers
+    unchanged across repositories, organizations, domains, or model families.
+
+open_question: >
+  Under matched models, tools, verification budgets, and production tasks, which
+  characteristics of the work predict whether task-specialized, phase-specialized, or
+  generalist agent roles will produce the highest engineering fitness after
+  coordination cost is included?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: specialize-agents-by-task-fit
+    use_case: "Choose how narrowly to specialize agents across a software-development workflow."
+    problem: "Increasing role specialization does not consistently improve artifact validity across all engineering tasks."
+    reported_practice: "Compare task-specialized, phase-specialized, and process-generalist configurations and choose specialization granularity according to the task rather than assuming narrower roles are universally better."
+    selection_conditions: [coordination, verification, learning]
+  - id: preserve-context-when-phase-continuity-matters
+    use_case: "Design agent boundaries for tasks that depend on information accumulated across a development phase."
+    problem: "Overly narrow task boundaries can discard useful continuity between related activities."
+    reported_practice: "Use phase-level specialization where contextual continuity across related tasks improves artifact validity, such as operation identification or test design in the study."
+    selection_conditions: [context, coordination]
+  - id: hold-model-constant-when-testing-orchestration
+    use_case: "Evaluate whether a new specialization strategy improves an agentic engineering workflow."
+    problem: "Changing the model and orchestration at the same time makes it difficult to attribute outcome differences to agent configuration."
+    reported_practice: "Hold the underlying LLM constant while comparing orchestration granularities so configuration effects can be evaluated more directly."
+    selection_conditions: [verification, observability]
+  - id: evaluate-specialization-across-task-and-domain
+    use_case: "Assess whether an agent configuration generalizes beyond one favorable engineering task."
+    problem: "A configuration can appear effective on one task or domain while performing poorly elsewhere."
+    reported_practice: "Evaluate specialization strategies across multiple lifecycle tasks and application domains using structural and semantic artifact-validity criteria."
+    selection_conditions: [verification, learning]
+
+assessment:
+  assisted_by_ai: true
