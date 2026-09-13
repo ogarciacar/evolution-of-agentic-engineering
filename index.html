@@ -18,11 +18,8 @@
     h2{font-size:clamp(32px,4vw,54px);line-height:1.02;letter-spacing:-.04em;margin:0 0 18px}
     h3{margin:20px 0 8px}
     .lead{font-size:clamp(20px,2.2vw,29px);line-height:1.32;max-width:900px;color:#35353b}
-    .note{color:var(--muted)}
     header,section{padding-bottom:82px;border-bottom:1px solid var(--line)}
     section{padding-top:82px}
-    .provenance{color:var(--muted)}
-    .provenance strong{color:var(--ink)}
 
     .topnav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 0 24px;position:relative}
     .brand{font-weight:850;text-decoration:none;letter-spacing:-.02em}
@@ -50,14 +47,11 @@
     .question-starter strong{font-size:17px;line-height:1.35}
     .question-starter.custom{border-style:dashed}
 
-    .about-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:48px;align-items:start}
-    .about-note{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}
-    .about-note b{display:block;margin-bottom:8px;color:var(--accent)}
     footer{padding-top:36px;color:var(--muted);font-size:13px}
 
     @media(max-width:900px){
       .navlinks{gap:14px}
-      .value-grid,.question-grid,.about-grid{grid-template-columns:1fr}
+      .value-grid,.question-grid{grid-template-columns:1fr}
     }
 
     @media(max-width:680px){
@@ -97,7 +91,7 @@
       <a href="/model">Model</a>
       <a href="/signals">Signals</a>
       <a href="/practices">Practices</a>
-      <a href="#about">About</a>
+      <a href="/about">About</a>
     </div>
   </nav>
 
@@ -136,19 +130,6 @@
       <button class="question-starter" type="button" data-question="What context infrastructure becomes necessary at scale?"><span>QUESTION 03</span><strong>What context infrastructure becomes necessary at scale?</strong></button>
       <button class="question-starter" type="button" data-question="Which practices are appearing independently across organizations?"><span>QUESTION 04</span><strong>Which practices are appearing independently across organizations?</strong></button>
       <button class="question-starter custom" type="button" data-focus-search><span>YOUR QUESTION</span><strong>I have my own strategic question.</strong></button>
-    </div>
-  </section>
-
-  <section id="about">
-    <div class="eyebrow">About</div>
-    <h2>How to interpret this working model</h2>
-    <div class="about-grid">
-      <div>
-        <p class="lead">AgenticEngineering.science is a working, evidence-backed model for reasoning about how software engineering may evolve as coding agents become more capable, numerous, cooperative and specialized.</p>
-        <p class="provenance"><strong>A working model by <a href="https://www.linkedin.com/in/ogarciacar" target="_blank" rel="noopener noreferrer">Orlando Garcia</a></strong><br>Working model v0.2 · September 2026</p>
-        <p class="note">It is not a maturity model, prediction engine, or catalogue of universal best practices. Evidence is kept distinct from interpretation, and practices are considered in the conditions that may select for them.</p>
-      </div>
-      <aside class="about-note"><b>THINKING LENS</b><p>This model was developed using <a href="https://www.linkedin.com/in/danielsanmartinsepuveda/" target="_blank" rel="noopener noreferrer">Daniel San Martín's</a> <a href="https://www.goodreads.com/book/show/58961062-clarity">Clarity</a> model as a thinking lens, particularly Apparition, Selection, Cooperation and Specialization.</p><p class="note">The application to agentic software engineering is my own.</p></aside>
     </div>
   </section>
 
