@@ -13,10 +13,12 @@ The model uses 1K-agent scale as a forcing function for examining the engineerin
 The site combines authored model pages with runtime evidence views backed by the validated D1 projection:
 
 - `index.html` — the authored model shell; the bounded Evidence Landscape is rendered at runtime from D1 and shows up to the newest 24 accepted Scale Signals.
-- `evidence.html` — the living evidence record used to test, refine, and potentially contradict the model.
+- `evidence.html` — the living, queryable evidence record used to test, refine, and potentially contradict the model.
+- `/practices` — exhaustive Practice Observations rendered at runtime from the D1 evidence projection.
 - `evaluate.html` — deterministic evaluation of the active model claims against the mapped corpus, generated at deploy time.
 - `/signals/<signal-id>/` — permanent Scale Signal routes rendered at runtime from D1.
-- `apply.html` — the protocol for evaluating a new source against the model.
+- `apply.html` — the protocol for evaluating a new source against the model and research frontier.
+- `contribute.html` — the public contribution and provenance-safety protocol.
 
 The evidence record separates **Observed**, **Interpretation**, and **Model implication** so that published facts remain distinct from conclusions drawn through the model.
 
