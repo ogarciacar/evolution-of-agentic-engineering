@@ -1,0 +1,155 @@
+source:
+  title: "How Meta Used AI to Map Tribal Knowledge in Large-Scale Data Pipelines"
+  producer: "Meta"
+  producer_type: organization
+  date: "2026-04-06"
+  url: "https://engineering.fb.com/2026/04/06/developer-tools/how-meta-used-ai-to-map-tribal-knowledge-in-large-scale-data-pipelines/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Meta reduced coding-agent exploration by pre-computing concise, quality-gated repository context with specialized agents"
+  summary: >
+    Meta describes a proprietary data pipeline spanning four repositories, three languages,
+    and more than 4,100 files where coding agents initially lacked enough domain context to
+    make useful changes efficiently. A 50+ task specialized-agent workflow produced 59 compact
+    context files and more than 50 non-obvious patterns, while preliminary six-task tests
+    reported roughly 40% fewer agent tool calls and tokens with the pre-computed context.
+
+observed:
+  - >
+    Meta applied coding agents to a data-processing pipeline spanning four repositories,
+    three programming languages, and more than 4,100 files, and reports that agents initially
+    explored repeatedly and could produce code that compiled while still being subtly wrong
+    because important conventions and cross-module relationships were undocumented.
+  - >
+    Meta built a pre-compute workflow containing more than 50 specialized AI-agent tasks,
+    including explorers, module analysts, writers, critics, fixers, upgraders, prompt testers,
+    gap-fillers, and final critics orchestrated within one session.
+  - >
+    The workflow generated 59 concise context files covering 100% of the code modules, up from
+    about 5% context coverage, and documented more than 50 non-obvious engineering patterns
+    such as compatibility constraints, naming conventions, and cross-module dependencies.
+  - >
+    Meta states that each context file is intentionally compact, typically 25–35 lines and
+    about 1,000 tokens, and that all 59 files together consume less than 0.1% of a modern
+    model context window.
+  - >
+    In preliminary tests on six tasks, Meta reports that agents using the pre-computed context
+    required roughly 40% fewer tool calls and tokens per task. It also reports complex workflow
+    guidance that previously required about two days of engineer research and consultation
+    completing in about 30 minutes with the context system.
+  - >
+    Meta reports three rounds of independent critic review improving context quality scores
+    from 3.65 to 4.20 out of 5, 55+ tested prompts reaching a 100% core pass rate, and all
+    referenced file paths being verified without hallucinated paths.
+  - >
+    The context system is maintained periodically: automated jobs run every few weeks to
+    validate file paths, detect coverage gaps, re-run quality critics, and repair stale
+    references.
+  - >
+    Meta also generated a cross-repository dependency index and data-flow maps so dependency
+    questions can be answered through direct lookup rather than repeated multi-file exploration.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The repository-context system covers four repositories, three languages, 4,100+ files,
+    59 generated context files, 50+ documented non-obvious patterns, and a workflow of more
+    than 50 specialized agent tasks. The reported 40% reduction in tool calls and tokens is
+    preliminary and comes from only six evaluated tasks.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Cooperation
+    to: Specialization
+  conditions: [Context, Verification, Coordination, Observability, Economics, Learning]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: REFINES
+  - id: C04
+    relationship: REFINES
+
+interpretation: >
+  This is direct evidence for Selection because Meta changes the coding-agent environment by
+  supplying concise, repository-specific context and reports a measurable reduction in agent
+  exploration cost. The source also refines Cooperation: specialized explorer, writer, critic,
+  fixer, and testing roles cooperate to produce and improve a shared context layer, with critic
+  rounds associated with higher quality scores. It further refines Specialization by showing
+  differentiated agent roles embedded in a reusable, periodically maintained orchestration
+  system. The specialization is workflow-level rather than evidence of persistent individual
+  agent identities, so it should not be interpreted as proof that stable autonomous agent
+  organizations have emerged.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Meta supports C02 with a concrete environmental intervention and measured reduction in
+    tool-call and token cost. It refines C03 by showing coordinated specialist roles and
+    feedback loops producing a shared artifact, but without a controlled isolated-agent
+    baseline. It refines C04 by demonstrating persistent orchestration with differentiated
+    roles and recurring maintenance, while leaving open whether this workflow-level
+    specialization should count as the same phenomenon as persistent specialized agent actors.
+
+what_this_does_not_establish:
+  - >
+    The roughly 40% reduction in tool calls and tokens is based on preliminary testing across
+    only six tasks and is not a large controlled benchmark.
+  - >
+    The source does not isolate which context artifact, orchestration role, or critic stage
+    caused the reported efficiency or quality improvements.
+  - >
+    The before-and-after context comparison does not provide a randomized evaluation of coding
+    correctness, acceptance rate, defect rate, or review burden across a broad task distribution.
+  - >
+    The 50+ specialized agents are role assignments inside an orchestrated workflow; the source
+    does not establish persistent autonomous agent identities or an independently evolving
+    multi-agent organization.
+  - >
+    The article is a first-party Meta engineering report and the reported metrics are not
+    independently validated.
+  - >
+    The result comes from a proprietary config-as-code environment with significant tribal
+    knowledge, so the benefit may not transfer unchanged to well-known open-source repositories
+    already represented in model pretraining.
+
+open_question: >
+  At larger repository and task scales, which compact context artifacts provide the greatest
+  reduction in exploration and incorrect changes after accounting for the ongoing cost of
+  generating, validating, routing, and refreshing that context?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: compact-repository-context-compass
+    use_case: "Help coding agents locate the right files, commands, conventions, and dependencies before editing a proprietary codebase."
+    problem: "Without repository-specific tribal knowledge, agents repeatedly explore the codebase and can make plausible but subtly wrong changes."
+    reported_practice: "Generate compact context files containing quick commands, key files, non-obvious patterns, and cross-references instead of exhaustive repository summaries."
+    selection_conditions: [context, economics]
+  - id: specialized-agent-context-precompute
+    use_case: "Create structured AI-readable repository knowledge across a large multi-repository system."
+    problem: "Manually documenting thousands of files and hidden engineering conventions does not scale."
+    reported_practice: "Orchestrate specialized explorer, analyst, writer, critic, fixer, tester, and gap-filling agent roles to pre-compute repository context."
+    selection_conditions: [context, coordination]
+  - id: independent-context-critics
+    use_case: "Prevent generated repository guidance from becoming a new source of agent error."
+    problem: "AI-generated context can be incorrect, stale, overly broad, or contain invalid references."
+    reported_practice: "Run multiple rounds of independent critics, prompt tests, integration checks, and file-path validation before relying on generated context."
+    selection_conditions: [verification, observability]
+  - id: automated-context-freshness-loop
+    use_case: "Keep repository context useful as code and dependencies change."
+    problem: "Stale context can misdirect coding agents and may be more harmful than missing context."
+    reported_practice: "Periodically validate paths, detect coverage gaps, rerun quality critics, and automatically repair stale references."
+    selection_conditions: [context, learning, observability]
+  - id: cross-repository-dependency-index
+    use_case: "Answer cross-repository impact questions without repeated exploratory searches."
+    problem: "A change in one subsystem can propagate across repositories, making dependency discovery expensive and error-prone."
+    reported_practice: "Pre-compute dependency indexes and data-flow maps so agents can retrieve affected relationships directly."
+    selection_conditions: [context, economics]
+
+assessment:
+  assisted_by_ai: true
