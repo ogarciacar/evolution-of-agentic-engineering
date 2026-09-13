@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Evidence — Evolution of Agentic Engineering</title>
   <link rel="stylesheet" href="evidence-query.css"/>
-  <link rel="stylesheet" href="evidence-search.css"/>
   <style>
     :root{--bg:#f7f7f5;--ink:#171719;--muted:#66666f;--line:#d9d9dc;--card:#fff;--accent:#6c4cff;--soft:#eeeaff}
     *{box-sizing:border-box}
@@ -104,21 +103,6 @@
     <p class="rule"><strong>Important:</strong> classification is interpretation, not a claim by the cited organization.</p>
   </section>
 
-  <section id="ask-evidence">
-    <div class="eyebrow">Search experiment</div>
-    <h2>Ask the evidence</h2>
-    <p class="lead">Search the published corpus with a natural-language question. Results are excerpts from published evidence pages, not generated answers.</p>
-    <div class="ask-panel">
-      <form class="ask-form" id="ask-evidence-form">
-        <label class="ask-label" for="ask-evidence-input">Question</label>
-        <div class="ask-controls"><input class="ask-input" id="ask-evidence-input" name="q" type="search" maxlength="500" required autocomplete="off" placeholder="What evidence do we have about coding agents acquiring context?"/><button class="ask-submit" id="ask-evidence-submit" type="submit">Search</button></div>
-        <p class="ask-note">Every result links back to the underlying AgenticEngineering.science evidence page.</p>
-      </form>
-      <div class="ask-summary"><span class="ask-count" id="ask-evidence-count"></span><span class="ask-status" id="ask-evidence-status" role="status" aria-live="polite"></span></div>
-      <div class="ask-results" id="ask-evidence-results"></div>
-    </div>
-  </section>
-
   <section id="query">
     <div class="eyebrow">Query the evidence</div>
     <h2>Interrogate the corpus</h2>
@@ -137,7 +121,6 @@
 
   <footer>Evolution of Agentic Engineering · Evidence · v0.2 · Living research record · September 2026</footer>
 </main>
-<script src="evidence-search.js" defer></script>
 <script src="evidence-query.js" defer></script>
 <script>
 (() => {
