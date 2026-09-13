@@ -37,7 +37,7 @@ assert.deepEqual(
 assert.deepEqual(
   matchedPassage("## Source → Observed → Interpretation → Model implication **SOURCE** Evaluating AGENTS.md [View source →](https://example.com)"),
   {
-    label: "MATCHED EVIDENCE",
+    label: "WHY THIS MATCHES",
     text: "SOURCE · Evaluating AGENTS.md View source →",
   },
 );
@@ -97,7 +97,7 @@ assert.match(markup, /Spotify context engineering/);
 assert.match(markup, /Selection → Cooperation \/ Specialization/);
 assert.match(markup, /Context/);
 assert.match(markup, /Verification/);
-assert.match(markup, /MATCHED EVIDENCE/);
+assert.match(markup, /WHY THIS MATCHES/);
 assert.match(markup, /Relevant evidence/);
 assert.match(markup, /REFINES/);
 assert.match(markup, /Read Scale Signal →/);
@@ -116,15 +116,19 @@ assert.match(practiceMarkup, /Practice Observations/);
 assert.match(practiceMarkup, /Explore practices →/);
 assert.doesNotMatch(practiceMarkup, /Read Scale Signal →|Read evidence →/);
 
-const page = fs.readFileSync("evidence.html", "utf8");
-assert.match(page, /id="ask-evidence"/);
-assert.match(page, /<h2>Ask the evidence<\/h2>/);
+const page = fs.readFileSync("index.html", "utf8");
+assert.match(page, /id="ai-search"/);
+assert.match(page, /What are you trying to understand\?/);
 assert.match(page, /id="ask-evidence-input"/);
 assert.match(page, /maxlength="500"/);
 assert.match(page, /id="ask-evidence-results"/);
+assert.match(page, />Investigate<\/button>/);
 assert.match(page, /evidence-search\.css/);
 assert.match(page, /evidence-search\.js/);
-assert.match(page, /Results are excerpts from published evidence pages, not generated answers\./);
+assert.match(page, /Every result is traceable to its underlying evidence\./);
+
+const evidencePage = fs.readFileSync("evidence.html", "utf8");
+assert.doesNotMatch(evidencePage, /id="ask-evidence"|<h2>Ask the evidence<\/h2>/);
 
 const css = fs.readFileSync("evidence-search.css", "utf8");
 assert.match(css, /ask-match/);
@@ -132,4 +136,4 @@ assert.match(css, /ask-result-signal/);
 assert.match(css, /focus-visible/);
 assert.match(css, /@media\(max-width:800px\)/);
 
-console.log("Ask the evidence UI contract is stable");
+console.log("Homepage investigation UI contract is stable");
