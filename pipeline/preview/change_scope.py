@@ -11,6 +11,7 @@ from typing import Iterable
 
 # Keep this intentionally focused on files that can change the published reader
 # experience, D1 evidence projection, or the deployed acceptance machinery itself.
+# Root npm metadata is included because setup-node uses it to control CI tool caching.
 PREVIEW_RELEVANT_PATTERNS = (
     "evidence/**",
     "model/**",
