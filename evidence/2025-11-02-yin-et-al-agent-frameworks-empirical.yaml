@@ -1,0 +1,171 @@
+source:
+  title: "A Comprehensive Empirical Evaluation of Agent Frameworks on Code-centric Software Engineering Tasks"
+  producer: "Yin et al."
+  producer_type: authors
+  date: "2025-11-02"
+  url: "https://arxiv.org/abs/2511.00872"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Seven agent frameworks showed distinct effectiveness, coordination, and cost trade-offs across three software-engineering task families"
+  summary: >
+    Yin et al. empirically evaluate seven publicly available general-purpose agent
+    frameworks across software development, vulnerability detection, and program
+    repair. The study measures not only task effectiveness but execution efficiency
+    and token/cost overhead. It reports moderate overall effectiveness, substantial
+    variation across frameworks and tasks, and a recurring coordination boundary:
+    more elaborate or multi-agent orchestration can create longer trajectories,
+    additional correction cycles, and higher resource cost without automatically
+    producing better engineering outcomes.
+
+observed:
+  - >
+    The study evaluates seven general-purpose agent frameworks selected because they
+    can be applied across all three studied tasks and are publicly available:
+    AgentOrchestra, OWL, SE-Agent, Trae, GPTswarm, OpenHands, and SWE-Agent.
+  - >
+    The three task families are evaluated with established public benchmarks. The
+    benchmark datasets described by the paper contain 1,200 software-development
+    prompts in SRDD, 115 labeled vulnerability instances in LLM-SmartAudit, and 300
+    program-repair instances in SWE-bench Lite.
+  - >
+    The authors evaluate agent behavior along three dimensions: effectiveness of the
+    final result, efficiency of the execution trajectory, and overhead measured by
+    token consumption and associated monetary cost.
+  - >
+    The paper characterizes overall agent effectiveness as moderate rather than
+    uniformly high. OpenHands shows the most balanced software-development quality,
+    GPTswarm reaches 77% accuracy on the vulnerability-detection evaluation, and only
+    a subset of evaluated agents repair about half of the program-repair issues.
+  - >
+    Execution efficiency varies substantially across frameworks and tasks. SE-Agent
+    with three iterations exhibits especially long step sequences, while
+    AgentOrchestra exhibits the longest correction sequences. The authors associate
+    AgentOrchestra's long trajectories with coordination overhead.
+  - >
+    The study reports that a lighter SE-Agent configuration with one iteration can
+    perform competitively in software development and concludes that efficiency
+    depends less on agent quantity than on reasoning depth, coordination strategy,
+    and feedback integration.
+  - >
+    Resource use also differs by task and framework. Software development is the most
+    expensive task family in monetary terms, AgentOrchestra is the most
+    resource-intensive configuration in the reported comparison, and GPTswarm is
+    reported as the most cost-efficient framework overall.
+  - >
+    Stage-level token analysis shows different cost shapes for different agent
+    architectures. Multi-agent workflows spend a larger share on planning and
+    reflection, while single-agent workflows concentrate more of their cost on
+    execution and editing stages.
+  - >
+    The authors make the experimental results publicly available and frame the study
+    as a comparison of practical framework trade-offs rather than a claim that one
+    architecture dominates across all software-engineering tasks.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The study spans seven agent frameworks and three benchmark task families with
+    benchmark datasets containing 1,200 software-development prompts, 115
+    vulnerability instances, and 300 program-repair instances. This is broad
+    comparative evaluation evidence, but it is not evidence of sustained production
+    operation, organizational deployment, or large concurrent agent fleets.
+
+mapping:
+  stages: [Apparition, Selection, Cooperation]
+  conditions: [Execution, Verification, Coordination, Economics, Learning]
+
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: REFINES
+
+interpretation: >
+  The study supports Apparition because multiple agent frameworks repeatedly perform
+  code-centric tasks through iterative reasoning, tool use, execution, and feedback
+  rather than acting as single-pass text generators. Its stronger contribution is to
+  Selection and Cooperation. Framework fitness varies across task type, execution
+  trajectory, correction behavior, and token cost, so useful operation cannot be
+  inferred from agent capability alone. The comparison also sharpens Cooperation:
+  additional agents and richer orchestration do not automatically improve fitness.
+  Coordination itself consumes execution steps, reasoning cycles, and tokens, and a
+  lighter configuration can sometimes rival a more elaborate one. Cooperation is
+  therefore better treated as an engineering trade-off whose benefit must exceed its
+  coordination and verification cost, not as a monotonic advantage of adding agents.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    The source supports C01 by documenting meaningful automated software-engineering
+    task execution across multiple agent frameworks. It refines C02 because the
+    frameworks exhibit different effectiveness, efficiency, and cost profiles across
+    tasks, making viability dependent on execution, verification, feedback, and
+    economic conditions. It refines C03 because the comparative results show that
+    multi-agent or heavier orchestration can incur material coordination overhead and
+    that agent quantity alone does not determine efficiency. The evidence is
+    consistent with cooperation being useful only when the gain from differentiated
+    reasoning or feedback exceeds the additional coordination cost.
+
+what_this_does_not_establish:
+  - >
+    The paper is an arXiv preprint and the evidence record does not establish that the
+    reported results have undergone independent peer review or replication.
+  - >
+    The benchmark evaluations are not sustained production deployments, so the source
+    does not establish long-term reliability, maintainability, user impact, or
+    organizational adoption of the evaluated frameworks.
+  - >
+    The seven frameworks differ in architecture, prompts, tooling, reasoning strategy,
+    and other implementation details. The comparison therefore does not isolate agent
+    count or cooperation as the sole causal explanation for performance differences.
+  - >
+    The three task families use different benchmarks and success metrics, so results
+    should not be interpreted as directly interchangeable measures of one universal
+    notion of software-engineering fitness.
+  - >
+    Token consumption and monetary cost depend on model choice, caching, pricing, and
+    experimental configuration; the reported cost ranking is not a timeless economic
+    ordering of the frameworks.
+  - >
+    The study does not establish that any multi-agent framework is consistently fitter
+    than a useful single-agent alternative after controlling for model, compute,
+    prompts, tools, and task distribution.
+  - >
+    The source does not establish persistent differentiated cooperation that forms a
+    higher-order engineering object under C04.
+
+open_question: >
+  Under matched models, tools, task distributions, and compute budgets, when does the
+  additional success from specialized or multi-agent cooperation exceed the extra
+  coordination, verification, latency, and token cost it introduces?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: evaluate-agent-outcome-process-and-cost
+    use_case: "Compare software-engineering agent frameworks before selecting one for repeated engineering work."
+    problem: "Task success alone can hide long trajectories, repeated corrections, or prohibitive token cost."
+    reported_practice: "Evaluate agent frameworks on effectiveness, execution efficiency, and token or monetary overhead rather than ranking them only by final-task success."
+    selection_conditions: [verification, observability, economics]
+  - id: measure-agent-coordination-overhead
+    use_case: "Decide whether richer multi-agent orchestration is worth its operational complexity."
+    problem: "Additional roles and coordination loops can increase reasoning steps, corrections, latency, and resource consumption without a proportional outcome gain."
+    reported_practice: "Measure trajectory length and correction behavior alongside effectiveness so coordination overhead is visible when comparing agent architectures."
+    selection_conditions: [coordination, economics, execution]
+  - id: prefer-evidence-over-agent-count
+    use_case: "Choose between lightweight and more elaborate agent orchestration for a software-engineering task."
+    problem: "Agent quantity is an unreliable proxy for execution quality or efficiency."
+    reported_practice: "Compare reasoning depth, coordination strategy, feedback integration, effectiveness, and cost instead of assuming that adding agents improves the workflow."
+    selection_conditions: [coordination, learning, economics]
+  - id: account-tokens-by-reasoning-stage
+    use_case: "Identify where an agent architecture spends its inference budget."
+    problem: "Aggregate token totals do not reveal whether cost is concentrated in planning, reflection, execution, or editing."
+    reported_practice: "Break token consumption down by workflow stage to expose architectural cost patterns and optimization opportunities."
+    selection_conditions: [economics, observability]
+
+assessment:
+  assisted_by_ai: true
