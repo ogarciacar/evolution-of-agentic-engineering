@@ -1,4 +1,4 @@
-name: Preview smoke
+name: Preview · Smoke
 
 on:
   pull_request:

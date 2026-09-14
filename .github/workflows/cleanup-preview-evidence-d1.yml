@@ -1,4 +1,4 @@
-name: Clean closed preview evidence projection
+name: Preview · D1 cleanup
 
 on:
   pull_request:

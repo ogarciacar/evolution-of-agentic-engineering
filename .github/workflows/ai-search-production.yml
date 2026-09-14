@@ -1,4 +1,4 @@
-name: AI Search production benchmark
+name: Experiment · AI Search production benchmark
 
 on:
   workflow_dispatch:

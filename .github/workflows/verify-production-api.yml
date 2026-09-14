@@ -1,4 +1,4 @@
-name: Verify production evidence API
+name: Production · Evidence API verify
 
 on:
   push:

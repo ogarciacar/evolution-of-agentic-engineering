@@ -1,4 +1,4 @@
-name: Deploy AI Search Worker
+name: Production · AI Search Worker deploy
 
 on:
   push:
