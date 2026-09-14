@@ -1,4 +1,4 @@
-name: Evidence integrity
+name: CI · Evidence integrity
 
 on:
   pull_request:
