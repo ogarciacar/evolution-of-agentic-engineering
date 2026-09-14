@@ -214,22 +214,44 @@ def wait_for_projection(
     raise SystemExit(f"Timed out waiting for preview projection {projection_id}: {last_state}")
 
 
-def assert_api_item(
+def wait_for_api_item(
     preview_url: str,
     projection_id: str,
     evidence_id: str,
+    timeout_seconds: int,
     reporter: SmokeReporter | None = None,
 ) -> None:
     reporter = reporter or SmokeReporter()
-    status, headers, body = request(
-        api_url(preview_url, f"/api/evidence/{quote(evidence_id, safe='')}"),
-        {PROJECTION_HEADER: projection_id},
-    )
-    assert status == 200, f"Projected evidence API returned HTTP {status} for {evidence_id}"
-    assert headers.get(PROJECTION_HEADER) == projection_id, "Projected evidence API returned the wrong projection header"
-    payload = parse_json(body, "projected evidence item API")
-    assert isinstance(payload, dict) and payload.get("id") == evidence_id, "Projected evidence API returned the wrong evidence item"
-    reporter.passed("Evidence API", evidence_id)
+    deadline = time.monotonic() + timeout_seconds
+    last_state = "not checked"
+
+    while time.monotonic() < deadline:
+        try:
+            status, headers, body = request(
+                api_url(preview_url, f"/api/evidence/{quote(evidence_id, safe='')}"),
+                {PROJECTION_HEADER: projection_id},
+            )
+        except URLError as error:
+            last_state = f"network error: {error}"
+            reporter.waiting("Evidence API", last_state)
+            time.sleep(10)
+            continue
+
+        response_projection = headers.get(PROJECTION_HEADER)
+        if status == 200:
+            payload = parse_json(body, "projected evidence item API")
+            response_id = payload.get("id") if isinstance(payload, dict) else None
+            if response_projection == projection_id and response_id == evidence_id:
+                reporter.passed("Evidence API", evidence_id)
+                return
+            last_state = f"header={response_projection!r} id={response_id!r}"
+        else:
+            last_state = f"HTTP {status}"
+
+        reporter.waiting("Evidence API", last_state)
+        time.sleep(10)
+
+    raise SystemExit(f"Timed out waiting for projected evidence API {evidence_id}: {last_state}")
 
 
 def assert_signal_page(
@@ -328,7 +350,7 @@ def run_smoke(
     wait_for_projection(preview_url, projection_id, expected_count, timeout_seconds, reporter)
 
     reporter.section("Acceptance")
-    assert_api_item(preview_url, projection_id, evidence_id, reporter)
+    wait_for_api_item(preview_url, projection_id, evidence_id, timeout_seconds, reporter)
     assert_signal_page(preview_url, projection_id, evidence_id, reporter)
     wait_for_static_routes(preview_url, projection_id, timeout_seconds, reporter)
     assert_default_main(preview_url, reporter)
