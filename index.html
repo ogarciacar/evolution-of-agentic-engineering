@@ -49,7 +49,8 @@
 
     .social-proof{padding-top:44px;padding-bottom:44px}
     .proof-sources{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:18px;margin-top:24px}
-    .proof-source{min-width:0;color:#5a5a63;font-size:clamp(17px,2vw,23px);font-weight:800;letter-spacing:-.025em;white-space:nowrap}
+    .proof-source{justify-self:start;min-width:0;color:#5a5a63;font-size:clamp(17px,2vw,23px);font-weight:800;letter-spacing:-.025em;white-space:nowrap;text-decoration:none;border-bottom:1px solid transparent}
+    .proof-source[href]:hover,.proof-source[href]:focus-visible{color:var(--accent);border-bottom-color:var(--accent);outline:none}
     .proof-source.more{font-size:14px;font-weight:700;color:var(--muted);letter-spacing:0}
 
     footer{padding-top:36px;color:var(--muted);font-size:13px}
@@ -146,10 +147,10 @@
   <section class="social-proof" aria-labelledby="social-proof-label">
     <div class="eyebrow" id="social-proof-label">Insights from real organisations</div>
     <div class="proof-sources" aria-label="Evidence sources include">
-      <span class="proof-source">Spotify</span>
-      <span class="proof-source">Anthropic</span>
-      <span class="proof-source">Cursor</span>
-      <span class="proof-source">Cloudflare</span>
+      <a class="proof-source" href="/?q=Spotify" data-organisation="Spotify">Spotify</a>
+      <a class="proof-source" href="/?q=Anthropic" data-organisation="Anthropic">Anthropic</a>
+      <a class="proof-source" href="/?q=Cursor" data-organisation="Cursor">Cursor</a>
+      <a class="proof-source" href="/?q=Cloudflare" data-organisation="Cloudflare">Cloudflare</a>
       <span class="proof-source more">and more…</span>
     </div>
   </section>
@@ -192,11 +193,25 @@
   const searchSection = document.getElementById("ai-search");
   if (!input || !form || !searchSection) return;
 
+  const runSearch = (query, updateUrl = false) => {
+    input.value = query;
+    searchSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("q", query);
+      window.history.replaceState({}, "", url);
+    }
+    window.setTimeout(() => form.requestSubmit(), 250);
+  };
+
   document.querySelectorAll("[data-question]").forEach((button) => {
-    button.addEventListener("click", () => {
-      input.value = button.dataset.question || "";
-      searchSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      window.setTimeout(() => form.requestSubmit(), 250);
+    button.addEventListener("click", () => runSearch(button.dataset.question || ""));
+  });
+
+  document.querySelectorAll("[data-organisation]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      runSearch(link.dataset.organisation || "", true);
     });
   });
 
@@ -206,6 +221,12 @@
       window.setTimeout(() => input.focus(), 250);
     });
   });
+
+  const initialQuery = new URLSearchParams(window.location.search).get("q");
+  if (initialQuery) {
+    input.value = initialQuery;
+    window.setTimeout(() => form.requestSubmit(), 50);
+  }
 })();
 </script>
 </body>
