@@ -1,4 +1,4 @@
-name: AI Search contracts
+name: CI · AI Search contracts
 
 on:
   pull_request:
