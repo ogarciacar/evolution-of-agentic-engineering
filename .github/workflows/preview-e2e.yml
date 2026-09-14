@@ -1,4 +1,4 @@
-name: Preview browser E2E
+name: Preview · Browser E2E
 
 on:
   pull_request:
