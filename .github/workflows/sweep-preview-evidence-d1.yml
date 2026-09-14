@@ -1,4 +1,4 @@
-name: Sweep orphan preview evidence projections
+name: Preview · D1 reconciliation
 
 on:
   schedule:
