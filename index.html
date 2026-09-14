@@ -4,6 +4,9 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Evolution of Agentic Engineering</title>
+  <link rel="icon" href="/favicon.ico" sizes="any"/>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg"/>
+  <link rel="apple-touch-icon" href="/assets/logo.png"/>
   <link rel="stylesheet" href="evidence-search.css"/>
   <style>
     :root{--bg:#f7f7f5;--ink:#171719;--muted:#66666f;--line:#d9d9dc;--card:#fff;--accent:#6c4cff;--soft:#eeeaff;--dark:#202126}
@@ -22,7 +25,8 @@
     section{padding-top:82px}
 
     .topnav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 0 24px;position:relative}
-    .brand{font-weight:850;text-decoration:none;letter-spacing:-.02em}
+    .brand{display:inline-flex;align-items:center;gap:10px;font-weight:850;text-decoration:none;letter-spacing:-.02em}
+    .brand-mark{display:block;width:30px;height:auto;flex:0 0 auto}
     .navlinks{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end}
     .navlinks a{font-size:13px;font-weight:750;text-decoration:none;border-bottom:1px solid transparent}
     .navlinks a:hover{border-bottom-color:#aaa}
@@ -67,6 +71,7 @@
       main{padding:18px 22px 64px}
       .topnav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:24px}
       .brand{font-size:17px}
+      .brand-mark{width:26px}
       .nav-toggle{display:inline-flex;flex:0 0 auto}
       .navlinks{display:none;position:absolute;z-index:20;top:46px;right:0;min-width:190px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--card);box-shadow:0 14px 36px rgba(23,23,25,.12);flex-direction:column;align-items:stretch;gap:0}
       .navlinks.open{display:flex}
@@ -97,7 +102,7 @@
 <body>
 <main>
   <nav class="topnav" aria-label="Primary">
-    <a class="brand" href="/">AgenticEngineering.science</a>
+    <a class="brand" href="/" aria-label="AgenticEngineering.science home"><img class="brand-mark" src="/assets/logo.svg" alt="" width="30" height="36"/><span>AgenticEngineering.science</span></a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-links" aria-label="Open navigation menu">☰</button>
     <div class="navlinks" id="primary-links">
       <a href="/evidence">Evidence</a>
