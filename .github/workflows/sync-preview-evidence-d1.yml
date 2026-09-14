@@ -1,4 +1,4 @@
-name: Sync preview evidence to D1
+name: Preview · D1 sync
 
 on:
   pull_request:
