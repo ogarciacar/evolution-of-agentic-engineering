@@ -57,6 +57,10 @@
     }
   }
 
+  function isAllowedSearchUrl(value) {
+    return isPracticesUrl(value) || signalIdFromUrl(value) !== null;
+  }
+
   function transitionLabel(mapping) {
     const transition = mapping?.transition;
     if (transition?.from && transition?.to) {
@@ -103,9 +107,9 @@
 
   function normalizeResult(result) {
     const url = safeSourceUrl(result?.url);
-    if (!url) return null;
+    if (!url || !isAllowedSearchUrl(url)) return null;
     return {
-      title: String(result?.title ?? "").trim() || "Evidence result",
+      title: String(result?.title ?? "").trim() || (isPracticesUrl(url) ? "Practice Observations" : "Scale Signal"),
       url,
       excerpt: shortExcerpt(result?.excerpt),
     };
@@ -173,10 +177,17 @@
     return `<article class="ask-result ask-result-signal">${provenance ? `<div class="date">${esc(provenance)}</div>` : ""}<h3>${esc(headline)}</h3>${chips.length ? `<div class="meta">${chips.map((chip, index) => `<span class="chip${index === 0 ? " transition" : ""}">${esc(chip)}</span>`).join("")}</div>` : ""}${passage.text ? `<div class="ask-match${passageClass}"><b>${esc(passage.label)}</b><p>${esc(passage.text)}</p></div>` : ""}<div class="ask-result-foot">${evidence.verdict ? `<strong>${esc(evidence.verdict)}</strong>` : "<span></span>"}<a class="source" href="${esc(result.url, true)}">Read Scale Signal →</a></div></article>`;
   }
 
+  function renderSignalFallbackResult(result) {
+    const passage = matchedPassage(result.excerpt);
+    const passageClass = passage.label === "WHAT THIS DOES NOT ESTABLISH" ? " epistemic-boundary" : "";
+    return `<article class="ask-result ask-result-signal"><h3>${esc(result.title || "Scale Signal")}</h3>${passage.text ? `<div class="ask-match${passageClass}"><b>${esc(passage.label)}</b><p>${esc(passage.text)}</p></div>` : ""}<div class="ask-result-foot"><span></span><a class="source" href="${esc(result.url, true)}">Read Scale Signal →</a></div></article>`;
+  }
+
   function renderResult(result) {
     if (isPracticesUrl(result.url)) return renderPracticesResult(result);
     if (result.evidence) return renderSignalResult(result);
-    return `<article class="ask-result"><h3>${esc(result.title)}</h3>${result.excerpt ? `<p>${esc(result.excerpt)}</p>` : ""}<div class="ask-result-foot"><a class="source" href="${esc(result.url, true)}">Read evidence →</a></div></article>`;
+    if (signalIdFromUrl(result.url)) return renderSignalFallbackResult(result);
+    return "";
   }
 
   function init(doc = globalThis.document, fetchImpl = globalThis.fetch) {
@@ -235,6 +246,7 @@
       safeSourceUrl,
       isPracticesUrl,
       signalIdFromUrl,
+      isAllowedSearchUrl,
       matchedPassage,
       normalizeResults,
       enrichResults,

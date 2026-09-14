@@ -1,0 +1,68 @@
+name: Deploy AI Search Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers/ai-search/**"
+      - ".github/workflows/deploy-ai-search-worker.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ai-search-worker-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Check AI Search Worker contract
+        run: node workers/ai-search/check-search-endpoint.mjs
+
+      - name: Deploy AI Search Worker
+        run: npx --yes wrangler@4 deploy --config workers/ai-search/wrangler.jsonc
+
+      - name: Verify production search endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl --fail-with-body \
+            --silent \
+            --show-error \
+            --retry 5 \
+            --retry-all-errors \
+            --retry-delay 3 \
+            --header 'Accept: application/json' \
+            'https://agenticengineering.science/api/search?q=Spotify' \
+            --output response.json
+
+          python - <<'PY'
+          import json
+          from urllib.parse import urlparse
+
+          with open("response.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+          assert data.get("query") == "Spotify"
+          results = data.get("results")
+          assert isinstance(results, list)
+
+          for result in results:
+              path = urlparse(result["url"]).path.rstrip("/")
+              assert path == "/practices" or path.startswith("/signals/"), path
+
+          print(f"Production AI Search healthy: {len(results)} allowed result(s)")
+          PY

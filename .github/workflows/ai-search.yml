@@ -16,6 +16,7 @@ on:
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
       - ".github/workflows/ai-search-production.yml"
+      - ".github/workflows/deploy-ai-search-worker.yml"
   push:
     branches: [main]
     paths:
@@ -32,6 +33,7 @@ on:
       - "docs/README.md"
       - ".github/workflows/ai-search.yml"
       - ".github/workflows/ai-search-production.yml"
+      - ".github/workflows/deploy-ai-search-worker.yml"
 
 permissions:
   contents: read

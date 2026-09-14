@@ -122,6 +122,7 @@ Contract:
 - maximum query length is 500 characters
 - GET only
 - maximum public output is five unique on-site source pages
+- public results are restricted to `/signals/<id>` and `/practices`
 - hybrid retrieval uses `keyword_match_mode: "or"`
 - source order is the AI Search order after source-URL deduplication
 - no application-side reranking
@@ -147,7 +148,7 @@ It does not use Workers AI inference, `env.AI.autorag()`, an application-managed
 
 ## Provenance and response shape
 
-Every public result must stay connected to a crawled AgenticEngineering.science source page. Source provenance comes from `chunk.item.key`; off-site keys are discarded.
+Every public result must stay connected to a crawled AgenticEngineering.science source page inside the supported search corpus. Source provenance comes from `chunk.item.key`; off-site and unsupported same-origin keys are discarded.
 
 The response exposes only the public retrieval fields:
 
@@ -206,7 +207,17 @@ Production retrieval evaluation is intentionally separate from PR contracts beca
 
 ## Deployment
 
-Deploy the Worker independently with:
+The Worker deploys independently from Cloudflare Pages. `.github/workflows/deploy-ai-search-worker.yml` runs after a merge to `main` whenever `workers/ai-search/**` changes, and can also be started manually with `workflow_dispatch`.
+
+The deployment job:
+
+1. runs the Worker endpoint contract,
+2. deploys `agentic-engineering-search-api` with Wrangler, and
+3. verifies the production `/api/search` response only exposes `/signals/<id>` or `/practices` results.
+
+It uses the existing `production` GitHub environment and expects `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. The API token must include permission to deploy Workers.
+
+Manual deployment remains available with:
 
 ```bash
 npx --yes wrangler@4 deploy --config workers/ai-search/wrangler.jsonc
