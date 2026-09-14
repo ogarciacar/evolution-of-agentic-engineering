@@ -22,7 +22,7 @@ For the PR/head projection it verifies:
 - `/api/evidence` without a selector resolves to `main`;
 - when the branch adds a new evidence file, that evidence is absent from default `main`.
 
-The runner polls both D1 projection readiness and the publication routes because Cloudflare can expose the deployment before every static route is consistently available at the edge.
+The runner polls D1 projection readiness, the selected evidence item, and the publication routes because Cloudflare can expose the deployment or a projection count before every D1 read replica and static route is consistently available at the edge.
 
 Projection selection in this smoke layer intentionally uses the `X-Evidence-Projection` header. Browser navigation with `?projection_id=<SHA-12>` belongs to the browser E2E layer.
 

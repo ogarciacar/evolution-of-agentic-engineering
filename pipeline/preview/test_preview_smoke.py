@@ -107,6 +107,27 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
         ):
             preview_smoke.wait_for_projection("https://preview.pages.dev", projection_id, 20, 1)
 
+    def test_wait_for_api_item_retries_transient_not_found(self) -> None:
+        projection_id = "abcdef123456"
+        evidence_id = "new-evidence"
+        body = json.dumps({"id": evidence_id}).encode("utf-8")
+        with (
+            patch.object(
+                preview_smoke,
+                "request",
+                side_effect=[
+                    (404, {preview_smoke.PROJECTION_HEADER: projection_id}, b'{"error":"Evidence not found"}'),
+                    (200, {preview_smoke.PROJECTION_HEADER: projection_id}, body),
+                ],
+            ) as request_mock,
+            patch.object(preview_smoke.time, "sleep") as sleep_mock,
+        ):
+            preview_smoke.wait_for_api_item(
+                "https://preview.pages.dev", projection_id, evidence_id, 10
+            )
+        self.assertEqual(request_mock.call_count, 2)
+        sleep_mock.assert_called_once_with(10)
+
     def test_wait_for_static_routes_accepts_healthy_html(self) -> None:
         with patch.object(
             preview_smoke,
@@ -211,7 +232,7 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
         reporter = preview_smoke.SmokeReporter()
         with (
             patch.object(preview_smoke, "wait_for_projection") as wait_projection,
-            patch.object(preview_smoke, "assert_api_item") as assert_item,
+            patch.object(preview_smoke, "wait_for_api_item") as wait_item,
             patch.object(preview_smoke, "assert_signal_page") as assert_signal,
             patch.object(preview_smoke, "wait_for_static_routes") as wait_routes,
             patch.object(preview_smoke, "assert_default_main") as assert_main,
@@ -229,8 +250,8 @@ class PreviewSmokePrimitiveTest(unittest.TestCase):
         wait_projection.assert_called_once_with(
             "https://preview.pages.dev", "abcdef123456", 21, 30, reporter
         )
-        assert_item.assert_called_once_with(
-            "https://preview.pages.dev", "abcdef123456", "new-evidence", reporter
+        wait_item.assert_called_once_with(
+            "https://preview.pages.dev", "abcdef123456", "new-evidence", 30, reporter
         )
         assert_signal.assert_called_once_with(
             "https://preview.pages.dev", "abcdef123456", "new-evidence", reporter
