@@ -8,6 +8,7 @@ const {
   safeSourceUrl,
   isPracticesUrl,
   signalIdFromUrl,
+  isAllowedSearchUrl,
   matchedPassage,
   normalizeResults,
   enrichResults,
@@ -22,6 +23,10 @@ assert.equal(isPracticesUrl("https://agenticengineering.science/practices/"), tr
 assert.equal(isPracticesUrl("https://agenticengineering.science/signals/example/"), false);
 assert.equal(signalIdFromUrl("https://agenticengineering.science/signals/2026-09-03-cursor/"), "2026-09-03-cursor");
 assert.equal(signalIdFromUrl("https://agenticengineering.science/practices"), null);
+assert.equal(isAllowedSearchUrl("https://agenticengineering.science/signals/example/"), true);
+assert.equal(isAllowedSearchUrl("https://agenticengineering.science/practices"), true);
+assert.equal(isAllowedSearchUrl("https://agenticengineering.science/evidence"), false);
+assert.equal(isAllowedSearchUrl("https://agenticengineering.science/sitemap.xml"), false);
 
 const long = `${"evidence ".repeat(100)}tail`;
 assert.ok(shortExcerpt(long).length <= 621);
@@ -55,6 +60,11 @@ const normalized = normalizeResults([
     excerpt: "Practice collection",
   },
   {
+    title: "Malformed evidence page result",
+    url: "https://agenticengineering.science/evidence",
+    excerpt: "**Spotify** [/signals/example/] raw markdown from multiple chunks",
+  },
+  {
     title: "Off-site",
     url: "https://example.com/result",
     excerpt: "Should not render",
@@ -66,6 +76,7 @@ assert.deepEqual(normalized[0], {
   url: "https://agenticengineering.science/signals/spotify/",
   excerpt: "Relevant evidence",
 });
+assert.doesNotMatch(JSON.stringify(normalized), /Malformed evidence page result|raw markdown/);
 
 const enrichmentCalls = [];
 const enriched = await enrichResults(normalized, async (url) => {
@@ -110,6 +121,17 @@ const boundaryMarkup = renderResult({
 });
 assert.match(boundaryMarkup, /WHAT THIS DOES NOT ESTABLISH/);
 assert.doesNotMatch(boundaryMarkup, /##|\* The source/);
+
+const fallbackMarkup = renderResult({
+  title: "Scale Signal",
+  url: "https://agenticengineering.science/signals/fallback/",
+  excerpt: "**SOURCE** Example [View source →](https://example.com) **OBSERVED** Relevant fallback passage.",
+});
+assert.match(fallbackMarkup, /Scale Signal/);
+assert.match(fallbackMarkup, /WHY THIS MATCHES/);
+assert.match(fallbackMarkup, /SOURCE · Example View source → OBSERVED · Relevant fallback passage\./);
+assert.match(fallbackMarkup, /Read Scale Signal →/);
+assert.doesNotMatch(fallbackMarkup, /\*\*|\]\(/);
 
 const practiceMarkup = renderResult(normalized[1]);
 assert.match(practiceMarkup, /Practice Observations/);
