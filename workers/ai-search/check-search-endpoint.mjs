@@ -72,6 +72,15 @@ async function body(response) {
   const { env, calls, instanceGets } = fakeEnv(async () => ({
     chunks: [
       {
+        id: "unsupported-on-site-chunk",
+        score: 0.99,
+        text: "**Spotify** mixed with multiple unrelated result fragments [/signals/example/] and raw markdown.",
+        item: {
+          key: "https://agenticengineering.science/evidence",
+          metadata: {},
+        },
+      },
+      {
         id: "internal-chunk-id",
         type: "text",
         score: 0.82,
@@ -135,7 +144,7 @@ async function body(response) {
     excerpt: "Repository context is assembled before execution.",
     score: 0.74,
   });
-  assert.doesNotMatch(JSON.stringify(data), /same-source-lower-ranked-chunk|second matching chunk|internal-chunk-id|scoring_details|vector_score|keyword_score|keyword_rank/);
+  assert.doesNotMatch(JSON.stringify(data), /unsupported-on-site-chunk|mixed with multiple unrelated|same-source-lower-ranked-chunk|second matching chunk|internal-chunk-id|scoring_details|vector_score|keyword_score|keyword_rank/);
 }
 
 {
