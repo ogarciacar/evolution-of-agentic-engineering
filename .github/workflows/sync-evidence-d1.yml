@@ -1,4 +1,4 @@
-name: Sync evidence to D1
+name: Production · D1 sync
 
 on:
   push:
