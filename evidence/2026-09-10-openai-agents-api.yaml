@@ -1,0 +1,138 @@
+source:
+  title: "Introducing the Agents API"
+  producer: "OpenAI"
+  producer_type: organization
+  date: "2026-09-10"
+  url: "https://openai.com/index/introducing-the-agents-api/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Orchestration becomes infrastructure for long-running parallel agents"
+  summary: >
+    OpenAI packages the harness and infrastructure behind Codex as a managed API
+    for long-running agents, with context management, tool use, durable execution,
+    and subagent coordination as distinct platform capabilities. One customer
+    reports that moving to the API's subagent support improved its evaluation
+    score from 0.71 to 0.85 and reduced latency by 4x compared with its prior
+    orchestration setup.
+
+observed:
+  - >
+    OpenAI says useful long-running agents need a harness that manages context,
+    uses tools efficiently, coordinates subagents, preserves intermediate work,
+    and keeps execution reliable for days.
+  - >
+    The Agents API separates the managed Codex harness from the agent's compute
+    environment, which may be an OpenAI-hosted sandbox, customer infrastructure,
+    or an integrated sandbox provider.
+  - >
+    OpenAI reports that the harness compacts earlier context for sessions spanning
+    multiple context windows, loads relevant tool definitions on demand, and lets
+    agents run tool calls in parallel or combine results before returning relevant
+    information to model context.
+  - >
+    OpenAI reports that multi-agent support delegates independent work to parallel
+    subagents with separate contexts while a main agent coordinates and combines
+    their results.
+  - >
+    Ciridae reports that after adopting the Agents API its evaluation score rose
+    from 0.71 to 0.85 and its previous difficulty observing and orchestrating
+    subagents was reduced, with a 4x latency improvement.
+  - >
+    Customer reports published by OpenAI include asynchronous fan-out across
+    hundreds of agents and thousands of long-running agents coordinating work
+    across production logistics workflows lasting hours or days.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    OpenAI presents the managed harness as derived from operating Codex and
+    ChatGPT for Work at millions-of-users scale. Customer reports include fan-out
+    across hundreds of agents and thousands of long-running production agents;
+    one customer reports a 4x latency reduction and evaluation improvement from
+    0.71 to 0.85 after adopting the API's subagent support.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Coordination, Observability]
+
+claims:
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: SUPPORTS
+  - id: C04
+    relationship: INCONCLUSIVE
+
+interpretation: >
+  The source shows context management, durable execution, tool mediation, and
+  subagent coordination moving from application-specific implementation into a
+  reusable platform layer. This refines Selection by identifying environmental
+  capabilities that support longer-running and more parallel configurations. The
+  Ciridae comparison also supplies direct, though first-party and bundled,
+  evidence that a cooperating subagent configuration with dedicated orchestration
+  can improve latency and evaluated quality over its prior setup. The separation
+  of harness, sandbox, tools, and coordinated subagents resembles differentiated
+  capabilities, but the source does not establish the persistent integrated
+  higher-order engineering object required by Specialization.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports Cooperation with a reported before-and-after outcome: dedicated
+    subagent orchestration improved both latency and an evaluation score compared
+    with a customer's previous setup. More broadly, the API suggests that as
+    agents become long-running and parallel, context management and coordination
+    become reusable infrastructure rather than remaining embedded in each agent
+    application. The evidence is not sufficient to establish persistent
+    Specialization.
+
+what_this_does_not_establish:
+  - >
+    The Ciridae result does not isolate subagent cooperation from the other harness
+    and API changes introduced during migration.
+  - >
+    The customer outcomes are first-party testimonials published by OpenAI and do
+    not provide task definitions, evaluation methodology, repeated-trial results,
+    or independent replication.
+  - >
+    Reports of hundreds or thousands of agents come from different customer
+    workloads and do not establish equivalent scale for coding-agent work.
+  - >
+    The source does not compare persistent cooperating and isolated configurations
+    across repeated software-engineering tasks.
+  - >
+    Distinct harness, sandbox, tool, and subagent roles do not by themselves
+    establish stable Specialization or a meaningful higher-order engineering
+    object.
+
+open_question: >
+  Across repeated software-engineering tasks, which dedicated orchestration
+  capabilities preserve the reported quality and latency advantage as subagent
+  concurrency and task duration increase, and at what coordination cost?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: managed-long-running-agent-harness
+    use_case: "Keep agents operating reliably across sessions that span hours, days, and multiple context windows."
+    problem: "Long-running work requires context continuity, recoverable execution, files, code execution, and preserved intermediate results."
+    reported_practice: "Use a managed, versioned agent harness with automatic context compaction and a durable execution environment."
+    selection_conditions: [context, execution]
+  - id: scoped-tool-discovery-and-execution
+    use_case: "Let an agent use a large tool environment without loading every tool definition or raw result into context."
+    problem: "Large tool catalogs and result sets consume tokens and dilute the context needed for the task."
+    reported_practice: "Load relevant tools on demand, run related calls programmatically, and return only relevant combined results to model context."
+    selection_conditions: [context, execution]
+  - id: managed-subagent-orchestration
+    use_case: "Parallelize complex work across independent subproblems without implementing a custom coordination layer."
+    problem: "Applications otherwise need to build and observe delegation, separate subagent contexts, parallel execution, and result aggregation themselves."
+    reported_practice: "Delegate independent work to parallel subagents with separate contexts while a main agent coordinates and combines their results."
+    selection_conditions: [coordination, observability, execution]
+
+assessment:
+  assisted_by_ai: true
