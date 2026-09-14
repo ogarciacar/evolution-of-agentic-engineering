@@ -1,0 +1,147 @@
+source:
+  title: "An Organizational Second Brain: Building an AI That Learns From Experts"
+  producer: "Meta"
+  producer_type: organization
+  date: "2026-09-02"
+  url: "https://engineering.fb.com/2026/09/02/ml-applications/organizational-second-brain-ai-learns-from-experts/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Expert corrections become regression-tested institutional memory"
+  summary: >
+    Meta describes an integrated agent system that separates structured knowledge
+    from reasoning procedures, then converts expert corrections into minimal,
+    reviewed, regression-tested file changes without retraining the model. After
+    six weeks, Meta reports assessment time falling from days to minutes and zero
+    regressions across improvement cycles.
+
+observed:
+  - >
+    Meta built a domain-specific agent with four interdependent layers: a
+    structured knowledge system, composable reasoning procedures, an evaluation
+    framework, and a self-improvement loop.
+  - >
+    The knowledge system contains more than 200 structured files with explicit
+    boundaries, routing rules, dependencies, and consumers; Meta separates
+    frequently used distilled knowledge from sparse sources retrieved when needed.
+  - >
+    Meta reports that replacing a flat instruction file and broad semantic
+    retrieval with recipe-driven progressive disclosure reduced tokens consumed
+    per turn by around 80%.
+  - >
+    Human checkpoints and escalations let experts confirm, correct, or redirect
+    intermediate reasoning, and each correction becomes input to the improvement
+    loop.
+  - >
+    The improvement pipeline diagnoses feedback, compiles minimal file edits,
+    performs independent adversarial review and deterministic structural checks,
+    runs targeted replay and regression tests, and presents a pull request to a
+    domain expert for final review.
+  - >
+    When a fix lands, the triggering failure and validated answer are added to the
+    regression suite so future changes must preserve the corrected behavior.
+  - >
+    After three development sprints spanning six weeks, Meta reports reducing
+    individual assessment time from days to minutes, producing validated knowledge
+    edits at a rate that previously required full engineering sprints, and
+    observing zero regressions across improvement cycles.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The implemented system structures more than 200 interdependent knowledge
+    files and was evaluated over three development sprints spanning six weeks.
+    Meta reports around 80% fewer tokens per turn after progressive-disclosure
+    restructuring, days-to-minutes assessment time, and zero regressions across
+    its improvement cycles.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Cooperation
+    to: Specialization
+  conditions: [Context, Verification, Coordination, Learning]
+
+claims:
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: INCONCLUSIVE
+  - id: C04
+    relationship: SUPPORTS
+
+interpretation: >
+  The source refines Learning as an engineering-environment capability rather than
+  an attribute confined to model weights or transient prompts. Expert corrections
+  persist through versioned knowledge and reasoning files, while replay,
+  regression testing, and human review regulate which changes survive. The
+  architecture also separates persistent roles for knowledge, procedures,
+  evaluation, and maintenance, and Meta treats their integration as the operating
+  system: each layer solves a distinct problem and the others degrade if one is
+  removed. This provides evidence of Specialization in an agentic system, although
+  it does not compare the integrated system with useful isolated operation.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Refines the model by showing that organizational agent learning can be
+    externalized into auditable, regression-tested environmental state. Selection
+    operates on proposed knowledge and procedure changes through deterministic
+    checks, evaluations, adversarial review, and expert approval. The persistent,
+    differentiated, interdependent layers also support Specialization: the
+    integrated system, rather than any single agent invocation, becomes the
+    meaningful unit that preserves and improves institutional capability.
+
+what_this_does_not_establish:
+  - >
+    The implemented domain is organizational compliance rather than a comparative
+    study of software-engineering agents, although Meta identifies engineering
+    standards compliance as an applicable domain.
+  - >
+    The source does not compare the integrated architecture with useful isolated
+    agent operation, so it does not establish the relative fitness advantage
+    required to support Cooperation directly.
+  - >
+    The reported outcomes are first-party, do not publish benchmark sizes or raw
+    results, and have not been independently replicated.
+  - >
+    Zero regressions across the reported improvement cycles does not establish
+    that the process prevents regressions across arbitrary domains, longer time
+    horizons, or substantially larger knowledge systems.
+  - >
+    Human experts remain responsible for consequential checkpoints, ambiguity
+    resolution, and approval of proposed knowledge changes.
+
+open_question: >
+  As structured organizational knowledge and its regression suite grow, does the
+  specialized maintenance system preserve accuracy and expert-review efficiency
+  across repeated software-engineering work better than less integrated agent
+  configurations?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: structured-auditable-agent-knowledge
+    use_case: "Give an agent durable organizational positions, terminology, and routing rules without encoding them in model weights."
+    problem: "Retrieving raw documents forces the agent to re-derive institutional reasoning on every run, producing slow and inconsistent analysis."
+    reported_practice: "Distill frequently used organizational knowledge into versioned files with explicit boundaries, dependencies, consumers, and deterministic routing."
+    selection_conditions: [context, learning]
+  - id: recipe-driven-progressive-disclosure
+    use_case: "Execute expert reasoning procedures without loading every instruction and source into each agent turn."
+    problem: "Flat instructions and broad retrieval introduce mixed-relevance context that consumes tokens and degrades attention."
+    reported_practice: "Separate knowledge from composable reasoning recipes and load only the instructions and files required for each analytical phase."
+    selection_conditions: [context]
+  - id: expert-feedback-compilation
+    use_case: "Convert expert corrections into durable improvements to agent knowledge and reasoning."
+    problem: "Manually tracing dependencies, editing interdependent files, and proving that a correction does not break existing behavior can take weeks."
+    reported_practice: "Diagnose feedback, compile minimal edits with parallel impact analysis, perform independent review and structural checks, then submit a validated pull request for expert approval."
+    selection_conditions: [learning, coordination, verification]
+  - id: replay-and-growing-regression-suite
+    use_case: "Verify that a proposed knowledge or reasoning change fixes the reported failure without losing existing behavior."
+    problem: "An automatically drafted correction can solve one case while introducing regressions elsewhere in the institutional knowledge system."
+    reported_practice: "Run blind targeted replay and domain regression tests, retry failed compilations, and add every landed failure case to the permanent regression suite."
+    selection_conditions: [verification, learning]
+
+assessment:
+  assisted_by_ai: true
