@@ -1,0 +1,161 @@
+source:
+  title: "Project Think: building the next generation of AI agents on Cloudflare"
+  producer: "Cloudflare"
+  producer_type: organization
+  date: "2026-04-15"
+  url: "https://blog.cloudflare.com/project-think/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Durable agent orchestration becomes a reusable serverless platform layer"
+  summary: >
+    Cloudflare packages durable execution, persistent context, capability-scoped
+    code execution, and isolated subagent coordination as reusable Agents SDK
+    primitives and an opinionated agent harness. The source makes the operating
+    environment a configurable part of agent viability, but does not compare
+    cooperating and isolated configurations or establish persistent specialization.
+
+observed:
+  - >
+    Cloudflare presents Project Think as a set of Agents SDK primitives for
+    long-running agents: durable execution, subagents, sandboxed code execution,
+    and persistent sessions, together with an opinionated base class that connects
+    them.
+  - >
+    Cloudflare says Agents SDK instances use Durable Objects for per-agent identity,
+    SQLite-backed state, wake-on-message operation, and hibernation without active
+    compute; fibers register work before execution, support checkpoints, and can
+    recover after the execution environment restarts.
+  - >
+    Project Think stores tree-structured session messages, supports conversation
+    forks and full-text history search, and uses non-destructive compaction while
+    retaining the complete history in SQLite. Context blocks provide persistent
+    memory that an agent can update across sessions.
+  - >
+    Cloudflare describes an execution ladder spanning a durable workspace,
+    network-disabled Dynamic Workers, runtime npm dependencies, browser automation,
+    and full sandbox environments with repositories and development toolchains.
+  - >
+    Dynamic Workers begin without ambient network authority. Developers grant
+    resource-specific capabilities through bindings, and self-authored extensions
+    declare network and workspace permissions that remain auditable and revocable.
+  - >
+    The Think base class handles the agent loop, message persistence, streaming,
+    tool execution, stream resumption, output truncation, and lifecycle hooks. The
+    article shows hooks being used to record tool calls and alter tools or models
+    between turns.
+  - >
+    Project Think can create isolated child agents with their own conversation
+    tree, memory, tools, model, and SQLite state. A parent delegates work and
+    receives streamed results through typed RPC.
+  - >
+    Cloudflare says code-mode execution lets a model write one sandboxed program
+    that invokes multiple tools and processes their results instead of returning
+    every intermediate result through the model context.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Cloudflare illustrates the economics of 10,000 agent instances active one
+    percent of the time as approximately 100 active Durable Objects rather than
+    10,000 always-on instances. This is an architectural scaling example, not an
+    observed Project Think deployment. Cloudflare says the broader Agents SDK
+    powers thousands of production agents while Project Think remains in preview.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: INCONCLUSIVE
+  - id: C04
+    relationship: INCONCLUSIVE
+
+interpretation: >
+  Project Think makes several engineering-environment variables explicit agent
+  variants: durable or ephemeral execution, different compute tiers, scoped
+  capabilities, persistent context, and single- or multi-agent configurations.
+  This refines Selection by identifying mechanisms that may let longer-running and
+  more numerous agents remain operable without proportional idle cost or ambient
+  authority. Isolated state and typed subagent RPC make Cooperation a first-class
+  infrastructure concern. Distinct parent, child, tool, and execution roles are
+  adjacent to Specialization, but the source describes configurable architecture
+  rather than evidence of stable differentiated cooperation emerging through
+  repeated engineering work.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    The source refines the environment-as-fitness-function hypothesis by showing
+    durability, context persistence, capability-scoped execution, coordination,
+    observability, and idle economics converging in a reusable platform layer.
+    It independently reinforces the shift from isolated agent capability toward
+    engineering the surrounding system. Because the article reports available
+    mechanisms rather than comparative engineering outcomes, it does not establish
+    that subagent cooperation improves fitness or that persistent specialization
+    has formed.
+
+what_this_does_not_establish:
+  - >
+    The source does not compare Project Think with an isolated agent or another
+    harness on task quality, latency, reliability, total cost, or human attention.
+  - >
+    The 10,000-agent example is scaling arithmetic based on assumed activity, not
+    evidence of a Project Think deployment operating at that scale.
+  - >
+    The statement that the broader Agents SDK powers thousands of production agents
+    does not establish equivalent production use or reliability for Project Think,
+    which the source labels experimental and available in preview.
+  - >
+    Typed RPC and isolated child state establish a coordination mechanism, not a
+    durable cooperation advantage across repeated software-engineering tasks.
+  - >
+    Configurable child models, tools, memory, and roles do not establish stable
+    Specialization or a cooperating system that has become a meaningful higher-order
+    engineering object.
+  - >
+    Persistent memory and self-authored extensions do not establish that failures
+    reliably improve later executions.
+  - >
+    The architectural, efficiency, and security properties are first-party claims
+    and are not independently evaluated in the source.
+
+open_question: >
+  Across repeated software-engineering tasks, which combinations of durability,
+  execution isolation, persistent context, and subagent coordination improve useful
+  outcomes relative to a simpler isolated agent after total compute, coordination,
+  failure-recovery, and human-attention costs are included?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: durable-per-agent-runtime
+    use_case: "Keep long-running agent work recoverable without maintaining an always-on process for every agent."
+    problem: "Deploys, restarts, and idle periods can destroy in-memory work or make one-runtime-per-agent economics impractical."
+    reported_practice: "Give each agent addressable persistent state and run checkpointable work that can recover after the runtime restarts and hibernate when idle."
+    selection_conditions: [execution, economics]
+  - id: least-authority-execution-ladder
+    use_case: "Run agent-authored code with only the capabilities required by the current task."
+    problem: "A general-purpose execution environment gives generated code unnecessary ambient authority, while one fixed sandbox is inefficient for every task."
+    reported_practice: "Escalate through workspace, isolated code, package, browser, and full-sandbox tiers while granting network and resource capabilities explicitly."
+    selection_conditions: [execution, economics]
+  - id: persistent-searchable-agent-context
+    use_case: "Continue agent work across long conversations, interruptions, and session branches."
+    problem: "Long-running work exceeds model context windows and loses continuity when conversation state exists only in the active process."
+    reported_practice: "Persist full tree-structured session history, compact context non-destructively, and expose searchable history plus updateable context blocks."
+    selection_conditions: [context, observability]
+  - id: isolated-subagent-rpc
+    use_case: "Delegate a bounded task without sharing the parent's entire context and mutable state."
+    problem: "Subagents need independent context and tools while the parent still needs a defined mechanism for delegation and result collection."
+    reported_practice: "Create isolated child agents with their own state, model, memory, and tools, connected to the parent through typed streaming RPC."
+    selection_conditions: [coordination, context, execution]
+
+assessment:
+  assisted_by_ai: true
