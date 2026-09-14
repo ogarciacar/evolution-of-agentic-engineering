@@ -41,6 +41,10 @@ function sourcePath(url) {
   }
 }
 
+function isAllowedCorpusPath(path) {
+  return path === PRACTICES_PATH || /^\/signals\/[^/]+$/.test(String(path ?? ""));
+}
+
 function parsedDescription(text) {
   const raw = String(text ?? "").trim();
   if (!raw.startsWith("---")) return null;
@@ -60,6 +64,8 @@ function normalizeChunk(chunk) {
   if (!url) return null;
 
   const path = sourcePath(url);
+  if (!isAllowedCorpusPath(path)) return null;
+
   const score = Number.isFinite(chunk?.score) ? chunk.score : null;
   if (path === PRACTICES_PATH) {
     return {
@@ -71,7 +77,7 @@ function normalizeChunk(chunk) {
   }
 
   const rawExcerpt = String(chunk?.text ?? "").trim();
-  const excerpt = path?.startsWith("/signals/") ? parsedDescription(rawExcerpt) || rawExcerpt : rawExcerpt;
+  const excerpt = parsedDescription(rawExcerpt) || rawExcerpt;
 
   return {
     title: sourceTitle(chunk?.item?.metadata),
@@ -129,7 +135,7 @@ export async function handleRequest(request, env) {
       event: "ai_search",
       result_count: results.length,
       candidate_count: candidates.length,
-      duplicate_chunks_dropped: Math.max(0, candidates.length - results.length),
+      candidate_chunks_dropped: Math.max(0, candidates.length - results.length),
       latency_ms: latencyMs,
       zero_results: results.length === 0,
     }));
