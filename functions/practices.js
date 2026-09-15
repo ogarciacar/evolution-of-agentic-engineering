@@ -33,17 +33,17 @@ export function renderPracticeSummary(summary) {
     ["Observations", summary.observations],
     ["Coverage", `${summary.coverage}%`],
   ];
-  return `<section class="corpus-summary" aria-label="Practice observation corpus assessment summary">${metrics.map(([label, value]) => `<div class="summary-metric"><span class="summary-value">${esc(value)}</span><span class="summary-label">${esc(label)}</span></div>`).join("")}</section><p class="assessment-note">Assessment coverage measures evidence records explicitly assessed for practice observations. Assessed evidence may legitimately contain zero observations.</p>`;
+  return `<section class="corpus-summary" aria-label="Emerging practices evidence assessment summary">${metrics.map(([label, value]) => `<div class="summary-metric"><span class="summary-value">${esc(value)}</span><span class="summary-label">${esc(label)}</span></div>`).join("")}</section><p class="assessment-note">Assessment coverage measures evidence records explicitly assessed for emerging practices. Assessed evidence may legitimately contain zero practice observations.</p>`;
 }
 
 export function renderPracticeObservations(observations, selectedCondition = null, projectionId = "main", summary = null) {
   const summaryHtml = summary ? renderPracticeSummary(summary) : "";
-  const filters = `<nav class="practice-filters" aria-label="Filter practice observations by selection condition"><a class="filter${selectedCondition ? "" : " active"}" href="${esc(filterHref(null, projectionId), true)}">All</a>${PRACTICE_SELECTION_CONDITIONS.map((condition) => `<a class="filter${selectedCondition === condition ? " active" : ""}" href="${esc(filterHref(condition, projectionId), true)}">${esc(condition)}</a>`).join("")}</nav>`;
+  const filters = `<nav class="practice-filters" aria-label="Filter emerging practices by selection condition"><a class="filter${selectedCondition ? "" : " active"}" href="${esc(filterHref(null, projectionId), true)}">All</a>${PRACTICE_SELECTION_CONDITIONS.map((condition) => `<a class="filter${selectedCondition === condition ? " active" : ""}" href="${esc(filterHref(condition, projectionId), true)}">${esc(condition)}</a>`).join("")}</nav>`;
 
   if (!observations.length) {
     const message = selectedCondition
-      ? `No practice observations match the ${esc(selectedCondition)} selection condition.`
-      : "No practice observations are available for this projection.";
+      ? `No emerging practices match the ${esc(selectedCondition)} selection condition.`
+      : "No emerging practices are available for this projection.";
     return `${summaryHtml}${filters}<div class="empty">${message}</div>`;
   }
 
@@ -53,7 +53,8 @@ export function renderPracticeObservations(observations, selectedCondition = nul
     return `<tr data-projection-id="${esc(observation.projection_id, true)}" data-evidence-id="${esc(observation.evidence_id, true)}" data-observation-id="${esc(observation.id, true)}"><td class="company">${esc(observation.company)}<div>${evidence}</div></td><td>${esc(observation.use_case)}</td><td>${esc(observation.problem)}</td><td>${esc(observation.reported_practice)}</td><td><span class="conditions">${conditions}</span></td></tr>`;
   }).join("");
 
-  const countLabel = selectedCondition ? `${observations.length} practice observations · ${esc(selectedCondition)}` : `${observations.length} practice observations`;
+  const observationLabel = observations.length === 1 ? "evidence-backed practice observation" : "evidence-backed practice observations";
+  const countLabel = selectedCondition ? `${observations.length} ${observationLabel} · ${esc(selectedCondition)}` : `${observations.length} ${observationLabel}`;
   return `${summaryHtml}${filters}<p class="count">${countLabel}</p><div class="table-shell"><table class="practice-table"><thead><tr><th>Company</th><th>Specific use case being solved</th><th>Problem encountered</th><th>Reported practice</th><th>Selection condition</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
