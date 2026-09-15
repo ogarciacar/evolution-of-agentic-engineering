@@ -1,0 +1,3 @@
+.brand{display:inline-flex;align-items:center;gap:10px}
+.brand-mark{display:block;width:30px;height:auto;flex:0 0 auto}
+@media(max-width:680px){.brand-mark{width:26px}}
