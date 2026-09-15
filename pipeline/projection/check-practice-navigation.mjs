@@ -4,24 +4,24 @@ import { injectPracticeNavigation, injectProjectionNavigation, normalizeSiteNavi
 const shell = `<section><!-- HOMEPAGE_EVIDENCE_START --><div>landscape</div><!-- HOMEPAGE_EVIDENCE_END --></section>`;
 const main = injectPracticeNavigation(shell, "main");
 assert.match(main, /href="\/evidence">Explore evidence →<\/a>/);
-assert.match(main, /href="\/practices">Practice observations →<\/a>/);
+assert.match(main, /href="\/practices">Emerging practices →<\/a>/);
 assert.match(main, /href="evaluate\.html">Evaluate the model →<\/a>/);
 assert.doesNotMatch(main, /projection_id=/);
 
 const projected = injectPracticeNavigation(shell, "deadbeefcafe");
-assert.match(projected, /href="\/practices\?projection_id=deadbeefcafe">Practice observations →<\/a>/);
+assert.match(projected, /href="\/practices\?projection_id=deadbeefcafe">Emerging practices →<\/a>/);
 
 const legacy = `<section><!-- HOMEPAGE_EVIDENCE_END --><div class="links"><a href="evidence.html">Explore evidence →</a></div></section>`;
 const migrated = injectPracticeNavigation(legacy, "main");
 assert.equal((migrated.match(/Explore evidence →/g) || []).length, 1);
-assert.equal((migrated.match(/Practice observations →/g) || []).length, 1);
+assert.equal((migrated.match(/Emerging practices →/g) || []).length, 1);
 assert.equal((migrated.match(/Evaluate the model →/g) || []).length, 1);
 
 const current = `<section><!-- HOMEPAGE_EVIDENCE_END --><div class="links"><a href="evidence.html">Explore the evidence →</a><a href="evaluate.html">Evaluate the model →</a></div></section>`;
 const consolidated = injectPracticeNavigation(current, "main");
 assert.equal((consolidated.match(/Explore evidence →/g) || []).length, 1);
 assert.equal((consolidated.match(/Explore the evidence →/g) || []).length, 0);
-assert.equal((consolidated.match(/Practice observations →/g) || []).length, 1);
+assert.equal((consolidated.match(/Emerging practices →/g) || []).length, 1);
 assert.equal((consolidated.match(/Evaluate the model →/g) || []).length, 1);
 assert.equal((consolidated.match(/class="links/g) || []).length, 1);
 
@@ -50,4 +50,4 @@ assert.match(projectedHtml, /href="\/evidence\?projection_id=deadbeefcafe"/);
 assert.match(projectedHtml, /href="evaluate\.html\?projection_id=deadbeefcafe"/);
 assert.match(projectedHtml, /href="https:\/\/example\.com\/source"/);
 
-console.log("Practice Observations and projection navigation contracts are stable");
+console.log("Emerging Practices and projection navigation contracts are stable");
