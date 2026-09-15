@@ -3,8 +3,8 @@ const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
 const AI_SEARCH_INSTANCE = "agentic-engineering-search";
 const PRACTICES_PATH = "/practices";
-const PRACTICES_TITLE = "Practice Observations";
-const PRACTICES_EXCERPT = "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.";
+const PRACTICES_TITLE = "Emerging Practices";
+const PRACTICES_EXCERPT = "Evidence-backed engineering practices emerging across public engineering organizations, shown with the use case, problem encountered, reported response, and Selection conditions behind each observation.";
 
 function json(data, status = 200, extraHeaders = {}) {
   return Response.json(data, {
