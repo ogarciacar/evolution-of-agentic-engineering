@@ -55,7 +55,7 @@ const normalized = normalizeResults([
     score: 0.98,
   },
   {
-    title: "Practice Observations",
+    title: "Emerging Practices",
     url: "https://agenticengineering.science/practices",
     excerpt: "Practice collection",
   },
@@ -134,7 +134,7 @@ assert.match(fallbackMarkup, /Read Scale Signal →/);
 assert.doesNotMatch(fallbackMarkup, /\*\*|\]\(/);
 
 const practiceMarkup = renderResult(normalized[1]);
-assert.match(practiceMarkup, /Practice Observations/);
+assert.match(practiceMarkup, /Emerging Practices/);
 assert.match(practiceMarkup, /Explore practices →/);
 assert.doesNotMatch(practiceMarkup, /Read Scale Signal →|Read evidence →/);
 
