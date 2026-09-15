@@ -10,10 +10,12 @@ const observations = [
   { id:"single", projection_id:"main", evidence_id:"signal-b", company:"B", use_case:"Use case B", problem:"Problem B", reported_practice:"Practice B", selection_conditions:["verification"] },
 ];
 
-// The canonical shell exposes the Practice Observations dynamic insertion point and global site navigation.
+// The canonical shell exposes the Emerging Practices dynamic insertion point and global site navigation.
 const practicesShell = fs.readFileSync("practices.html", "utf8");
 assert.match(practicesShell, /<!-- PRACTICE_OBSERVATIONS_START -->/);
 assert.match(practicesShell, /<!-- PRACTICE_OBSERVATIONS_END -->/);
+assert.match(practicesShell, /<title>Emerging Practices — Evolution of Agentic Engineering<\/title>/);
+assert.match(practicesShell, /<h1>Emerging Practices<\/h1>/);
 assert.match(practicesShell, /href="\/evidence">Evidence<\/a>/);
 assert.match(practicesShell, /href="\/model">Model<\/a>/);
 assert.match(practicesShell, /href="\/signals">Signals<\/a>/);
@@ -37,7 +39,7 @@ assert.match(main, />coordination</);
 
 // Filtering changes the result set/count, not corpus completeness semantics.
 const contextOnly = renderPracticeObservations([observations[0]], "context", "main", summary);
-assert.match(contextOnly, /1 practice observations · context/);
+assert.match(contextOnly, /1 evidence-backed practice observation · context/);
 assert.match(contextOnly, />38<\/span><span class="summary-label">Observations/);
 assert.match(contextOnly, />100%<\/span><span class="summary-label">Coverage/);
 
@@ -51,7 +53,7 @@ assert.match(projected, /href="\/practices\?projection_id=deadbeefcafe">All<\/a>
 
 const modelShell = `<!-- HOMEPAGE_EVIDENCE_START --><div>landscape</div><!-- HOMEPAGE_EVIDENCE_END -->`;
 const projectedModel = injectPracticeNavigation(modelShell, projection);
-assert.match(projectedModel, /href="\/practices\?projection_id=deadbeefcafe">Practice observations →<\/a>/);
+assert.match(projectedModel, /href="\/practices\?projection_id=deadbeefcafe">Emerging practices →<\/a>/);
 assert.match(projectedModel, /href="\/evidence">Explore evidence →<\/a>/);
 
-console.log("Practice Observations end-to-end integration contract is stable");
+console.log("Emerging Practices end-to-end integration contract is stable");
