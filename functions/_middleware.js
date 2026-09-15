@@ -1,8 +1,6 @@
 import { projectionFromRequest } from "./_lib/evidence-projection.js";
 
 const LANDSCAPE_END = "<!-- HOMEPAGE_EVIDENCE_END -->";
-const BRAND_LOGO_CSS = `<style data-brand-logo>.brand{display:inline-flex;align-items:center;gap:10px}.brand-mark{display:block;width:30px;height:auto;flex:0 0 auto}@media(max-width:680px){.brand-mark{width:26px}}</style>`;
-const BRAND_LOGO_HTML = `<img class="brand-mark" src="/assets/logo.svg" alt="" width="30" height="36"/><span>AgenticEngineering.science</span>`;
 
 function practicesHref(projectionId) {
   if (projectionId === "main") return "/practices";
@@ -36,17 +34,6 @@ export function normalizeSiteNavigation(html) {
   return html.replace(/href=(["'])\/?#about\1/gi, (match, quote) => `href=${quote}/about${quote}`);
 }
 
-export function injectBrandLogo(html) {
-  const brandPattern = /<a\b([^>]*\bclass=(["'])[^"']*\bbrand\b[^"']*\2[^>]*)>AgenticEngineering\.science<\/a>/i;
-  if (!brandPattern.test(html)) return html;
-
-  let body = html.replace(brandPattern, `<a$1>${BRAND_LOGO_HTML}</a>`);
-  if (!body.includes("data-brand-logo")) {
-    body = body.replace(/<\/head>/i, `${BRAND_LOGO_CSS}</head>`);
-  }
-  return body;
-}
-
 export function injectPracticeNavigation(html, projectionId = "main") {
   const marker = html.indexOf(LANDSCAPE_END);
   if (marker === -1) return html;
@@ -74,7 +61,6 @@ export async function onRequest(context) {
 
   const html = await response.text();
   let body = normalizeSiteNavigation(html);
-  body = injectBrandLogo(body);
   if (url.pathname === "/" || url.pathname === "/index.html") {
     body = injectPracticeNavigation(body, projection.id);
   }

@@ -33,6 +33,8 @@ jobs:
         run: python -m unittest pipeline.preview.test_change_scope
       - name: Test browser E2E runner
         run: python -m unittest pipeline.browser.test_run_preview_e2e
+      - name: Check brand integration
+        run: python pipeline/validation/check-brand-integration.py
       - name: Validate model claims
         run: python pipeline/validation/validate-model-claims.py
       - name: Validate research gaps
