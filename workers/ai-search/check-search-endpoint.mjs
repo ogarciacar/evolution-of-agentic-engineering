@@ -166,9 +166,9 @@ async function body(response) {
   const data = await body(response);
   assert.equal(data.results.length, 1);
   assert.deepEqual(data.results[0], {
-    title: "Practice Observations",
+    title: "Emerging Practices",
     url: "https://agenticengineering.science/practices",
-    excerpt: "Observations of specific engineering use cases, encountered problems, and reported practices extracted from the evidence corpus.",
+    excerpt: "Evidence-backed engineering practices emerging across public engineering organizations, shown with the use case, problem encountered, reported response, and Selection conditions behind each observation.",
     score: 0.93,
   });
   assert.doesNotMatch(JSON.stringify(data), /Specific use case being solved|Reported practice/);
