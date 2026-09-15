@@ -38,7 +38,7 @@ export function injectPracticeNavigation(html, projectionId = "main") {
   const marker = html.indexOf(LANDSCAPE_END);
   if (marker === -1) return html;
   const insertionPoint = marker + LANDSCAPE_END.length;
-  const navigation = `<div class="links practice-navigation"><a href="/evidence">Explore evidence →</a><a href="${practicesHref(projectionId)}">Practice observations →</a><a href="evaluate.html">Evaluate the model →</a></div>`;
+  const navigation = `<div class="links practice-navigation"><a href="/evidence">Explore evidence →</a><a href="${practicesHref(projectionId)}">Emerging practices →</a><a href="evaluate.html">Evaluate the model →</a></div>`;
 
   // The Evidence Landscape owns the homepage navigation immediately after it.
   // Replace the older evidence/evaluation links so evidence is exposed once.
