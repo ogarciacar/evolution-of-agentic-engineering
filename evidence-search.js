@@ -109,7 +109,7 @@
     const url = safeSourceUrl(result?.url);
     if (!url || !isAllowedSearchUrl(url)) return null;
     return {
-      title: String(result?.title ?? "").trim() || (isPracticesUrl(url) ? "Practice Observations" : "Scale Signal"),
+      title: String(result?.title ?? "").trim() || (isPracticesUrl(url) ? "Emerging Practices" : "Scale Signal"),
       url,
       excerpt: shortExcerpt(result?.excerpt),
     };
