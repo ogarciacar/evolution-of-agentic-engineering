@@ -88,6 +88,10 @@ function renderSignal(evidence) {
 <title>${esc(`${evidence.presentation.headline} · Scale Signal`)}</title>
 <meta name="description" content="${esc(description)}" />
 <link rel="canonical" href="${esc(canonicalUrl)}" />
+<link rel="icon" href="/favicon.ico" sizes="any"/>
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg"/>
+<link rel="apple-touch-icon" href="/assets/logo.png"/>
+<link rel="stylesheet" href="/assets/brand.css"/>
 <meta property="og:type" content="article" />
 <meta property="og:title" content="${esc(evidence.presentation.headline)}" />
 <meta property="og:description" content="${esc(description)}" />
@@ -101,7 +105,7 @@ function renderSignal(evidence) {
 </style>
 </head>
 <body><main>
-<nav class="topnav" aria-label="Primary"><a class="brand" href="/">AgenticEngineering.science</a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-links" aria-label="Open navigation menu">☰</button><div class="navlinks" id="primary-links"><a href="/evidence">Evidence</a><a href="/model">Model</a><a href="/signals" aria-current="page">Signals</a><a href="/practices">Practices</a><a href="/about">About</a></div></nav>
+<nav class="topnav" aria-label="Primary"><a class="brand" href="/" aria-label="AgenticEngineering.science home"><img class="brand-mark" src="/assets/logo.svg" alt="" width="30" height="36"/><span>AgenticEngineering.science</span></a><button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-links" aria-label="Open navigation menu">☰</button><div class="navlinks" id="primary-links"><a href="/evidence">Evidence</a><a href="/model">Model</a><a href="/signals" aria-current="page">Signals</a><a href="/practices">Practices</a><a href="/about">About</a></div></nav>
 <div class="page-divider" aria-hidden="true"></div>
 <header class="hero"><div class="eyebrow">Scale Signal</div><h1>${esc(evidence.presentation.headline)}</h1><div class="date">${esc(published)} · ${esc(evidence.source.producer)}</div><div class="meta">${renderChips(evidence)}</div><div class="scale"><strong>${esc(evidence.scale.label)}:</strong> ${esc(evidence.scale.summary)}</div></header>
 <section><div class="eyebrow">Evidence record</div><h2>Source → Observed → Interpretation → Model implication</h2><div class="source-detail"><b>SOURCE</b><p>${esc(evidence.source.title)}</p><a class="source" href="${esc(evidence.source.url)}">View source →</a></div><div class="evidence"><div class="layer observed"><b>OBSERVED</b>${observed}</div><div class="layer"><b>INTERPRETATION</b><p>${esc(evidence.interpretation)}</p></div><div class="layer"><b>MODEL IMPLICATION</b><p><strong>${esc(evidence.model_implication.verdict)}.</strong> ${esc(evidence.model_implication.explanation)}</p></div></div></section>
