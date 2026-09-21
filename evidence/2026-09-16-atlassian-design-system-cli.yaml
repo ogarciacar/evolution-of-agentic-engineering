@@ -1,0 +1,145 @@
+source:
+  title: "Giving AI agents design system context from the terminal: what we learned building a CLI"
+  producer: "Atlassian"
+  producer_type: organization
+  date: "2026-09-16"
+  url: "https://www.atlassian.com/blog/ai-at-work/giving-ai-agents-design-system-context-from-the-terminal-what-we-learned-building-a-cli"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "The context interface itself is selected by agent economics"
+  summary: >
+    Atlassian compared four ways of delivering the same design-system context
+    while holding the agent, model, tasks, and questions constant. After
+    iterating on its CLI, Atlassian reports that CLI-backed sessions maintained
+    quality while completing 8% faster and using 8% fewer tokens than its MCP
+    baseline, leading its agent skill to prefer the CLI and retain MCP as a
+    fallback.
+
+observed:
+  - >
+    Atlassian maintains one structured design-system dataset and shared search
+    handlers, then exposes them through an agent skill, an MCP server, and a CLI.
+  - >
+    Atlassian evaluated real front-end tasks using the same agent and model on
+    the same questions. The changed variable was whether the skill delivered
+    context through MCP, the CLI, CLI wrapper scripts, or bundled reference
+    files.
+  - >
+    Each run recorded pass rate, task time, agent-reported tokens, and tool calls;
+    Atlassian also retained transcripts to inspect whether agents followed the
+    intended context path.
+  - >
+    The initial npx-based CLI added more than 15 seconds of startup overhead per
+    query in Atlassian's monorepo. Moving it into a pre-installed internal CLI
+    reduced that overhead to milliseconds, which Atlassian characterizes as a
+    95% reduction.
+  - >
+    Trace inspection showed agents making repeated round trips. Atlassian added
+    a batch command and improved fuzzy search, reporting a further 50% reduction
+    in the remaining lookup overhead.
+  - >
+    Against the MCP baseline, Atlassian reports that the iterated CLI
+    configuration maintained quality while mean task time fell from 352 seconds
+    to 325 seconds and mean tokens per task fell from 218,000 to 201,000, both
+    reported as 8% improvements.
+  - >
+    Atlassian reports CLI usage surpassed MCP usage by 60%. Its agent skill now
+    surfaces the CLI by default and falls back to MCP when a sandbox cannot
+    access the terminal.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The evidence comes from Atlassian's internal benchmark bank of real
+    front-end tasks and compares multiple context-delivery configurations under
+    a controlled agent-and-model setup. The source reports mean task-time and
+    token results but does not disclose the number of tasks, runs, variance, or
+    statistical significance.
+
+mapping:
+  stages: [Selection]
+  transition:
+    from: Apparition
+    to: Selection
+  conditions: [Context, Execution, Verification, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
+interpretation: >
+  The experiment makes the context-delivery interface a selectable part of the
+  agent environment. Although each configuration exposes the same underlying
+  design-system knowledge, invocation latency, batching, output shape, and
+  agent instructions alter the end-to-end time and token cost of completing a
+  task. Atlassian's decision to make the measured CLI configuration the default
+  is direct evidence of Selection acting on infrastructure around the model,
+  while retaining MCP as a fallback shows that accessibility constraints vary
+  across execution environments.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports Selection by showing that controlled variation in an agent's
+    context interface produced measurable differences in execution time and
+    token use while maintaining reported quality. The resulting operational
+    choice selected one configuration as the default and preserved another for
+    environments without terminal access. The source therefore supports the
+    claim that environments select agent configurations partly through their
+    reliability and economics, not only through model capability.
+
+what_this_does_not_establish:
+  - >
+    The source does not disclose the benchmark size, number of repeated runs,
+    score distributions, uncertainty, or statistical significance.
+  - >
+    The 8% results compare Atlassian's iterated CLI configuration with its MCP
+    baseline; they do not establish that CLIs are generally faster or cheaper
+    than MCP servers in other systems.
+  - >
+    Several changes were introduced during iteration, including pre-installed
+    invocation, batching, compact output, search improvements, and revised skill
+    instructions, so the source does not isolate each change's contribution.
+  - >
+    The reported 60% usage difference measures agent interface use rather than
+    independently establishing higher task quality or business value.
+  - >
+    Atlassian reports maintained quality rather than a quality improvement, and
+    does not publish the underlying pass rates in the article.
+  - >
+    The results are first-party and specific to Atlassian's design-system
+    context, monorepo, internal CLI, benchmark tasks, and agent configuration.
+
+open_question: >
+  Across organizations and task types, which properties of a context interface
+  most strongly determine end-to-end agent quality, latency, and token cost once
+  the underlying knowledge is held constant?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: benchmark-context-delivery-interfaces
+    use_case: "Choose how a coding agent should retrieve structured engineering context."
+    problem: "Equivalent knowledge can produce different end-to-end outcomes when invocation, instructions, and output formats differ."
+    reported_practice: "Hold the agent, model, tasks, and questions constant; vary only the context-delivery path; then record pass rate, task time, tokens, tool calls, and transcripts."
+    selection_conditions: [context, verification, observability, economics]
+  - id: remove-agent-tool-startup-overhead
+    use_case: "Serve context repeatedly during an agent task without paying process or package startup costs on every lookup."
+    problem: "An npx-based command added more than 15 seconds per query and compounded when agents performed multiple lookups."
+    reported_practice: "Provide a pre-installed CLI path for the default environment while retaining the portable npx invocation as a fallback."
+    selection_conditions: [execution, economics]
+  - id: batch-agent-context-lookups
+    use_case: "Retrieve several related components, tokens, or guidance records during one agent task."
+    problem: "Agents made repeated context round trips, accumulating avoidable lookup latency."
+    reported_practice: "Add a batch command and improve fuzzy search so agents can consolidate related context queries."
+    selection_conditions: [context, execution, economics]
+  - id: route-context-by-execution-environment
+    use_case: "Expose one governed knowledge source to agents with different tool access."
+    problem: "Some agent environments provide a shell but no MCP client, while some sandboxes cannot access a terminal."
+    reported_practice: "Generate multiple interfaces from shared handlers and data, prefer the benchmarked CLI path, and fall back to MCP or bundled references when required by the environment."
+    selection_conditions: [context, execution]
+
+assessment:
+  assisted_by_ai: true
