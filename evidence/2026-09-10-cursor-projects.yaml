@@ -1,0 +1,165 @@
+source:
+  title: "Introducing Projects"
+  producer: "Cursor"
+  producer_type: organization
+  date: "2026-09-10"
+  url: "https://cursor.com/blog/projects"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "The Project becomes the persistent unit of agentic engineering"
+  summary: >
+    Cursor reports using Projects internally for several months to coordinate
+    long-running features, migrations spanning hundreds of pull requests, and
+    recurring maintenance. A dedicated coordinator delegates implementation to
+    subagents, maintains shared context across machines and time, and reacts to
+    external events. Cursor reports that new Projects users merge 30% more pull
+    requests and users who primarily use Projects merge six times as many.
+
+observed:
+  - >
+    Cursor describes Projects as maintaining context over months, delegating
+    tasks to thousands of subagents, and performing recurring work without a new
+    prompt.
+  - >
+    Cursor reports using Projects internally for several months for features,
+    migrations spanning a few hundred pull requests, design-system maintenance,
+    and development of Projects itself.
+  - >
+    Cursor reports that new Projects users merge 30% more pull requests and users
+    who primarily use Projects merge six times as many.
+  - >
+    Each Project has a coordinator agent that plans and delegates but does not
+    write code; implementation and testing are assigned to other agents that can
+    operate in parallel.
+  - >
+    A Project runs on its own cloud computer and can continue when the developer's
+    laptop is closed, while the coordinator can start a local agent when work
+    requires testing on the developer's machine.
+  - >
+    Project files synchronize across the cloud and local machines used by its
+    agents. Agents add research, artifacts, codebase knowledge, and user
+    preferences so discoveries made by one agent are available to future agents.
+  - >
+    A coordinator can watch Slack, run on a schedule, or follow pull-request
+    events and act on detected signals without waiting for a new user prompt.
+  - >
+    Cursor reports that its migrations establish a safe approach with the
+    operator, apply it incrementally across hundreds of pull requests, and
+    continue with less review as fixes hold up.
+  - >
+    Cursor reports one design-system Project that scans new pull requests,
+    extracts reusable components, and adds a lint rule after seeing the same
+    mistake twice. Cursor says the Project is on track to touch 20 to 100 pull
+    requests per day.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Cursor reports several months of internal operation, delegation across
+    thousands of subagents, and migrations spanning a few hundred pull requests.
+    It reports 30% more merged pull requests among new Projects users and six
+    times as many among users who primarily use Projects. One design-system
+    Project is projected, rather than demonstrated, to touch 20 to 100 pull
+    requests per day.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Cooperation
+    to: Specialization
+  conditions: [Context, Execution, Verification, Coordination, Observability, Learning]
+
+claims:
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: SUPPORTS
+  - id: C04
+    relationship: SUPPORTS
+
+interpretation: >
+  Projects extends Cursor's differentiated planner-worker architecture from a
+  bounded swarm experiment into persistent production work. Context, cloud and
+  local execution, event observation, accumulated learning, and human review are
+  integrated around a durable Project rather than reconstructed for each agent
+  session. The coordinator and worker agents have stable different
+  responsibilities, while shared context and subscriptions let their cooperation
+  persist across machines, tasks, and time. Cursor's reported pull-request
+  differences provide observational support for a cooperation advantage, although
+  they do not isolate causality. More strongly, the Project itself is the object
+  engineers create, direct, revisit, and hold responsible for a body of work,
+  supporting the model's higher-order Specialization claim.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports Specialization by documenting persistent differentiated cooperation
+    in ordinary engineering work: coordinators plan and delegate, workers
+    implement and test, cloud and local environments provide distinct execution
+    capabilities, and shared project context preserves learning across executions.
+    These parts operate together over months and across hundreds of pull requests,
+    with the Project becoming the meaningful unit engineers direct. Reported
+    pull-request differences also support Cooperation, but remain observational
+    and do not establish the causal contribution of individual mechanisms.
+
+what_this_does_not_establish:
+  - >
+    Delegation to thousands of subagents describes work across a Project and does
+    not establish thousands of agents operating concurrently.
+  - >
+    Cursor does not publish the definitions, denominators, time windows, quality
+    controls, or statistical methods behind the 30% and six-times pull-request
+    comparisons.
+  - >
+    Users who primarily use Projects may differ from other users, so the reported
+    pull-request differences do not isolate Projects as the cause.
+  - >
+    Pull-request volume does not by itself establish equivalent improvements in
+    software quality, customer value, cost, reliability, or review burden.
+  - >
+    The design-system Project is reported as being on track to touch 20 to 100
+    pull requests per day; the source does not establish sustained operation at
+    that rate.
+  - >
+    Cursor's internal results and product claims are first-party and have not been
+    independently replicated across other organizations or engineering
+    environments.
+
+open_question: >
+  Across repeated production engineering work, do persistent Projects preserve
+  quality and reduce human coordination and review cost as their shared context,
+  subagent population, event sources, and pull-request volume grow?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: persistent-coordinator-worker-project
+    use_case: "Direct a feature, migration, or recurring maintenance program that outlives one agent session."
+    problem: "A developer otherwise has to repeatedly plan work, start agents, relay context, and integrate results across a long-running body of work."
+    reported_practice: "Create a persistent Project whose coordinator plans and delegates while separate worker agents implement and test bounded tasks."
+    selection_conditions: [coordination, execution]
+  - id: cross-execution-shared-project-context
+    use_case: "Make discoveries from one agent execution available to later agents working on the same body of work."
+    problem: "Session-local agents repeatedly rediscover codebase procedures, architectural context, and user preferences."
+    reported_practice: "Synchronize project files containing research, artifacts, codebase knowledge, and preferences across every cloud and local machine used by the Project."
+    selection_conditions: [context, learning]
+  - id: hybrid-cloud-local-agent-execution
+    use_case: "Keep long-running work active while still executing tests or operations that require a developer's machine."
+    problem: "Laptop-bound execution limits duration and parallelism, while some tasks still require local state or hardware."
+    reported_practice: "Run the Project persistently on a cloud computer and let its coordinator start a local agent when machine-specific testing is needed."
+    selection_conditions: [execution, coordination]
+  - id: event-driven-recurring-engineering
+    use_case: "Act on new pull requests, CI failures, bug reports, schedules, or Slack signals without waiting for a new prompt."
+    problem: "Prompt-driven agents stop observing the environment after an individual task completes."
+    reported_practice: "Subscribe the coordinator to schedules and external events so it can initiate recurring maintenance and follow-up work."
+    selection_conditions: [observability, execution]
+  - id: confidence-calibrated-migration-review
+    use_case: "Continue a migration across hundreds of pull requests without requiring equally intensive review of every change."
+    problem: "Human review becomes the throughput constraint when every repetitive agent-produced change receives the same level of scrutiny."
+    reported_practice: "Establish a safe approach, review early pull requests closely, and reduce review intensity as repeated fixes hold up."
+    selection_conditions: [verification, learning]
+
+assessment:
+  assisted_by_ai: true
