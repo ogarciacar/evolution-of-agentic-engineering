@@ -1,0 +1,167 @@
+source:
+  title: "Trying the Software factory pattern"
+  producer: "Will Larson"
+  producer_type: individual
+  date: "2026-09-20"
+  url: "https://lethain.com/software-factory-experiment/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "The project becomes a goal-regulated agentic engineering loop"
+  summary: >
+    Will Larson describes an early Imprint experiment that points an agent at a
+    project rather than a single task. The loop audits whether goals and measures
+    exist, reads current metrics and work state, creates or updates tasks,
+    executes non-blocked work, and periodically reassesses direction. Larson says
+    the local prototype is working well enough to consider moving it to Imprint's
+    orchestrated Agent Fleet, but publishes no outcome comparison.
+
+observed:
+  - >
+    Larson defines the software-factory pattern as repeatedly pursuing a broad
+    goal while relying on an agent harness to drive progress toward it.
+  - >
+    Imprint's first implementation is a linear-project-loop skill that begins by
+    auditing whether a Linear project has an RFC in Notion describing its goals,
+    measures, and approach, together with a Datadog dashboard or Snowflake
+    queries that measure progress.
+  - >
+    When the project, goal definition, or measurement tools are missing, the
+    skill iterates with the operator to create them.
+  - >
+    The loop reviews project metrics and issues, adds newly identified work,
+    updates issue state, and works on non-blocked tasks through actions such as
+    writing or updating pull requests, requesting review, and asking clarifying
+    questions.
+  - >
+    After a task completes, the loop selects another task when the project
+    description is fresh; when it is stale, the agent restarts from the goal and
+    measurement audit.
+  - >
+    Larson reports running the prototype locally and says it works well enough
+    that he anticipates moving it to the same orchestrated harness used for
+    one-off tasks.
+  - >
+    Larson describes a possible lower-frequency post-release mode that would
+    revisit shipped projects and detect changes in adoption or error rates, but
+    presents this as an intended use rather than a demonstrated result.
+  - >
+    Imprint's preceding adoption sequence included about ten local multi-repository
+    workspaces, a company-wide migration from Jira to Linear, and deployment of
+    an orchestrated harness called Agent Fleet.
+  - >
+    Larson says the factory loop depends on Datadog MCP and Snowflake access for
+    goal tracking, Linear as the shared work-state system, and a harness capable
+    of operating independently from a developer laptop.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    This is a first-pass local experiment at Imprint. The source mentions about
+    ten multi-repository workspaces and an existing orchestrated Agent Fleet, but
+    does not report how many projects or tasks ran through the factory loop, how
+    long it operated, or any comparative quality, productivity, cost, or human-
+    attention outcomes.
+
+mapping:
+  stages: [Selection]
+  transition:
+    from: Apparition
+    to: Selection
+  conditions: [Context, Execution, Coordination, Observability, Learning]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: INCONCLUSIVE
+  - id: C04
+    relationship: INCONCLUSIVE
+
+interpretation: >
+  Imprint's experiment moves selection from choosing the next isolated coding
+  task toward regulating a project against an explicit goal and observable
+  measures. Current metrics, task state, blockers, and the freshness of the
+  project description influence whether the agent creates work, executes work,
+  or returns to reassess direction. The prerequisites are environmental: goals
+  and measures must be machine-readable, work state must be shared, tools must
+  expose operational evidence, and execution must persist beyond a laptop. This
+  supports Selection as a property of the surrounding engineering system. It is
+  adjacent to Cooperation and Specialization, but the source does not establish
+  multiple differentiated agents or a durable higher-order production unit.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports Selection by documenting a goal-regulated environment in which
+    observable project state determines the agent's next action and periodically
+    triggers renewed assessment rather than continued task execution. The source
+    also identifies the Context, Execution, Coordination, Observability, and
+    Learning capabilities required for that loop to operate. Because the report
+    is an early qualitative prototype without comparative outcomes, it does not
+    establish a cooperation advantage or stable specialization.
+
+what_this_does_not_establish:
+  - >
+    The source publishes no task count, project count, operating duration,
+    success rate, quality result, productivity change, cost result, or reduction
+    in human attention for the factory loop.
+  - >
+    Larson's statement that the local prototype is working well enough to move
+    toward Agent Fleet is a qualitative judgment, not a controlled comparison.
+  - >
+    The loop still iterates with a human to create missing goals and measurement
+    tools, asks clarifying questions, requests review, and depends on existing
+    project state; it does not establish unattended end-to-end autonomy.
+  - >
+    The proposed post-release monitoring mode is not reported as implemented or
+    evaluated.
+  - >
+    The source does not compare a project-level loop with task-level agents, nor
+    isolate which prerequisite or loop step contributes to useful outcomes.
+  - >
+    Agent Fleet, shared tools, and project-level iteration do not by themselves
+    establish beneficial multi-agent Cooperation or stable differentiated roles
+    sufficient for Specialization.
+  - >
+    The report is a first-party account from one leader at Imprint and has not
+    been independently replicated across other organizations or engineering
+    environments.
+
+open_question: >
+  Does a goal-regulated project loop improve engineering outcomes and reduce
+  human steering compared with task-level agents once goal ambiguity, metric
+  quality, stale state, review work, and post-release operation are included?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: machine-readable-project-control-plane
+    use_case: "Give an agent enough project state to reason beyond one assigned task."
+    problem: "Goals, measures, work state, and implementation context held in private human knowledge cannot regulate an automated project loop."
+    reported_practice: "Represent goals and approach in a Notion RFC, measures in Datadog or Snowflake, and shared work state in a Linear project that the agent can audit."
+    selection_conditions: [context, coordination, observability]
+  - id: goal-and-measurement-readiness-audit
+    use_case: "Prevent an agent from executing project work without a defined direction or observable outcome."
+    problem: "A task backlog can appear actionable even when the project lacks an explicit goal or a way to measure progress."
+    reported_practice: "Start each project loop by auditing the goal definition and measurement tools, and iterate with the operator to create missing prerequisites."
+    selection_conditions: [context, observability]
+  - id: project-state-driven-agent-loop
+    use_case: "Advance a broad engineering goal across a changing set of tasks."
+    problem: "A task-scoped agent cannot identify missing work, reconcile changed issue state, or choose the next non-blocked action."
+    reported_practice: "Review metrics and issues, create newly identified tasks, update state, execute non-blocked work, and select the next action from current project state."
+    selection_conditions: [execution, coordination, observability]
+  - id: stale-project-reassessment
+    use_case: "Keep agent execution aligned when project understanding or operating results change over time."
+    problem: "Continuing to drain an old task list can optimize against a stale description after the project or its environment has changed."
+    reported_practice: "Continue to the next task only when the project description is fresh; otherwise restart the loop from goal and measurement assessment."
+    selection_conditions: [context, observability, learning]
+  - id: workspace-level-cross-repository-execution
+    use_case: "Implement one project across frontend, backend, infrastructure, and data repositories."
+    problem: "Repository-scoped checkouts make coordinated cross-repository agent changes difficult to manage."
+    reported_practice: "Maintain about ten independent local workspaces, each with a checkout of every repository, and operate agents at workspace rather than repository scope."
+    selection_conditions: [execution, coordination, context]
+
+assessment:
+  assisted_by_ai: true
