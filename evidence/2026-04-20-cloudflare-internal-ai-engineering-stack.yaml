@@ -1,0 +1,186 @@
+source:
+  title: "The AI engineering stack we built internally — on the platform we ship"
+  producer: "Cloudflare"
+  producer_type: organization
+  date: "2026-04-20"
+  url: "https://blog.cloudflare.com/internal-ai-engineering-stack/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "The engineering environment becomes an integrated agentic system"
+  summary: >
+    Cloudflare reports 3,683 active internal AI-tool users, 93% R&D adoption,
+    295 teams using agentic AI tools, and 47.95 million AI requests in 30 days.
+    Its internal stack integrates platform routing and permissions, Backstage and
+    repository context, Engineering Codex standards, and multi-agent code review.
+    Cloudflare says the wiring between these layers now makes an agent's first
+    draft usually close enough to ship, which it says was not true six months earlier.
+
+observed:
+  - >
+    Cloudflare reports 3,683 internal users actively using AI coding tools, equal
+    to 60% of the company and 93% of R&D, across 295 teams. In the reported
+    30-day period it records 47.95 million AI requests, 20.18 million AI Gateway
+    requests, 241.37 billion tokens routed through AI Gateway, and 51.83 billion
+    tokens processed on Workers AI.
+  - >
+    Cloudflare organizes the internal stack into a platform layer for authentication,
+    routing and inference; a knowledge layer built around Backstage and AGENTS.md;
+    and an enforcement layer built around the AI Code Reviewer and Engineering Codex.
+  - >
+    Cloudflare says a single proxy Worker became the control point for AI access,
+    allowing per-user attribution, model-catalog management and permission enforcement
+    without changing client configurations.
+  - >
+    Cloudflare's AGENTS.md generation pipeline combines Backstage ownership,
+    dependency and system metadata with repository analysis and Engineering Codex
+    standards, then opens a merge request for the owning team. Cloudflare reports
+    roughly 3,900 repositories processed this way and says the AI Code Reviewer can
+    flag when repository changes suggest that AGENTS.md should be updated.
+  - >
+    Every merge request on Cloudflare's standard CI path receives AI review. A
+    multi-agent coordinator classifies each change by risk tier and delegates to
+    specialized agents for code quality, security, Codex compliance, documentation,
+    performance and release impact. Cloudflare reports 100% reviewer coverage across
+    repositories on that standard CI pipeline in the measured period.
+  - >
+    Review agents use centralized model configuration, repository AGENTS.md context,
+    and Engineering Codex rules. Findings are returned as structured merge-request
+    comments with severity and, where applicable, specific Codex rule identifiers.
+  - >
+    Cloudflare reports that its Network Firewall team used a multi-agent consensus
+    process to audit rampartd against Engineering Codex requirements, turning work it
+    says previously required weeks of manual effort into a structured repeatable process.
+  - >
+    Cloudflare states that the individual pieces are not especially novel; the
+    difference is their wiring. When agents can combine Backstage context, repository
+    instructions and Codex-based review in the same toolchain, Cloudflare says the
+    first draft is usually close enough to ship, unlike six months earlier.
+  - >
+    Cloudflare also uses workload-aware model routing for economics. Workers AI handles
+    about 15% of AI Code Reviewer traffic, mainly documentation review, while more
+    capable frontier models are used for security-sensitive and architecturally complex
+    reviews. Cloudflare separately reports a security-agent workload processing more
+    than 7 billion tokens per day on Workers AI at an estimated 77% lower cost than a
+    mid-tier proprietary-model alternative.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    3,683 active internal AI-tool users; 93% R&D adoption; 295 teams; 47.95M AI
+    requests in 30 days; 241.37B tokens routed through AI Gateway; roughly 3,900
+    repositories processed through the AGENTS.md generation pipeline; and 100% AI
+    code-review coverage for repositories using Cloudflare's standard CI path.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Selection
+    to: Cooperation
+    adjacent_stage: Specialization
+  conditions: [Context, Execution, Verification, Coordination, Observability, Economics, Learning]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: SUPPORTS
+  - id: C04
+    relationship: REFINES
+
+interpretation: >
+  Cloudflare's evidence shifts the useful unit of analysis away from model capability
+  alone and toward an integrated engineering environment. Context is externalized in
+  Backstage and AGENTS.md; execution and access are mediated through shared platform
+  infrastructure; verification and organizational standards are embedded in CI;
+  coordination appears in risk-tiered multi-agent review; AI Gateway makes usage and
+  cost observable; workload-specific routing constrains economics; and repository
+  context is maintained as code changes. The reported before/after observation that
+  the wired system now produces first drafts usually close enough to ship supports
+  Cooperation as a fitness advantage of integrated agents, humans and systems rather
+  than merely showing that orchestration exists. Stable differentiated reviewer roles
+  are an operational Specialization signal, but the source does not establish that
+  specialization itself produced the system-level advantage.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Selection pressure can move from choosing an individual agent configuration toward
+    engineering a persistent organizational environment in which context, execution,
+    verification, coordination, observability, economics and learning operate as shared
+    capabilities. Cloudflare's first-party before/after account provides evidence that
+    wiring those capabilities together can improve the fitness of agent-assisted
+    engineering work, supporting the transition from Selection toward Cooperation.
+    The multi-agent reviewer also shows stable differentiated roles inside that
+    cooperating environment, suggesting adjacent Specialization without yet proving
+    that persistent Cooperation caused the specialization or that specialization is
+    independently responsible for higher fitness. At this maturity, the integrated
+    engineering environment itself begins to look like a meaningful engineering object.
+
+what_this_does_not_establish:
+  - >
+    Cloudflare's adoption, usage, cost and productivity claims are first-party and are
+    not independently replicated measurements of the system's effectiveness.
+  - >
+    The reported increase in merge-request volume occurred alongside rising AI adoption,
+    but the source does not isolate the internal AI stack as the causal driver of that
+    increase or establish the quality of all additional merge requests.
+  - >
+    The statement that integrated context and enforcement make first drafts usually
+    close enough to ship is an operational before/after observation, not a controlled
+    comparison against an otherwise equivalent isolated-agent system.
+  - >
+    The specialized reviewer roles demonstrate durable differentiated functions, but
+    the source does not establish that specialization itself outperforms an equivalent
+    non-specialized reviewer architecture or that repeated Cooperation caused those roles.
+  - >
+    The source does not report 1,000 simultaneously executing coding agents or quantify
+    peak coding-agent concurrency.
+  - >
+    Cloudflare describes background coding agents as the next evolution of the stack;
+    the article does not establish those future background-agent workflows as already
+    operating at the reported organizational scale.
+
+open_question: >
+  When context, execution, verification, coordination, observability, economics and
+  learning are integrated into one organizational agentic engineering environment,
+  does that cooperating system become a more useful unit of fitness analysis than the
+  individual coding agent?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: centralized-ai-control-plane
+    use_case: "Provide many engineering clients and agents with governed access to models and internal capabilities."
+    problem: "Direct client-to-model integrations make attribution, permissions, model changes and cost control difficult to manage consistently at organizational scale."
+    reported_practice: "Route AI clients through a shared proxy Worker and AI Gateway so identity, permissions, model catalog configuration, usage attribution and routing can be changed centrally."
+    selection_conditions: [execution, observability, economics, coordination]
+  - id: generated-repository-agent-context
+    use_case: "Give coding agents repository-specific operational context across thousands of repositories."
+    problem: "Agents otherwise infer ownership, architecture, build commands, testing conventions and standards from incomplete repository exploration."
+    reported_practice: "Generate AGENTS.md from Backstage metadata, repository structure and Engineering Codex rules, open it as a merge request for owner review, and flag it for refresh when repository changes make it stale."
+    selection_conditions: [context, learning, verification]
+  - id: risk-tiered-specialized-ai-review
+    use_case: "Review every merge request on a standard CI path without applying the same review cost and expertise to every change."
+    problem: "Uniform generic review does not match the risk profile or expertise required by different engineering changes."
+    reported_practice: "Classify merge requests by risk tier and delegate review to specialized agents for code quality, security, standards compliance, documentation, performance and release impact."
+    selection_conditions: [verification, coordination, economics]
+  - id: engineering-codex-as-agent-skill
+    use_case: "Make organizational engineering standards directly usable by coding and review agents."
+    problem: "Standards remain weak selection pressure when they live only in human-readable documents disconnected from agent execution and review."
+    reported_practice: "Distill engineering standards into structured Codex rules and an agent skill, then cite those rules during automated review and use them in multi-agent compliance audits."
+    selection_conditions: [context, verification, learning]
+  - id: workload-aware-model-routing
+    use_case: "Control inference cost while retaining stronger reasoning for high-risk engineering work."
+    problem: "Using the most capable model for every review task makes high-volume agentic workflows unnecessarily expensive."
+    reported_practice: "Route documentation and lower-risk review workloads to lower-cost Workers AI models while reserving frontier models for security-sensitive and architecturally complex reviews."
+    selection_conditions: [economics, execution]
+  - id: integrated-context-enforcement-loop
+    use_case: "Increase the chance that agent-generated changes already fit repository and organizational constraints before human review."
+    problem: "Agent outputs remain plausible but locally wrong when context acquisition, execution and standards enforcement are disconnected."
+    reported_practice: "Wire Backstage context, repository AGENTS.md, centralized tools and Codex-backed AI review into one engineering path; Cloudflare reports that the resulting first draft is now usually close enough to ship."
+    selection_conditions: [context, execution, verification, coordination, observability, economics, learning]
+
+assessment:
+  assisted_by_ai: true
