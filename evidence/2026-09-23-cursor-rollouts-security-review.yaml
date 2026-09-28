@@ -1,0 +1,169 @@
+source:
+  title: "Bots for the last mile: Rollouts, Security Review"
+  producer: "Cursor"
+  producer_type: organization
+  date: "2026-09-23"
+  url: "https://cursor.com/blog/rollouts-and-security-reviewer"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Verification specializes across the change-to-production lifecycle"
+  summary: >
+    Cursor introduces two differentiated verification bots around a software
+    change. Security Reviewer analyzes pull requests for exploitable paths and
+    proposes fixes before merge. Rollouts follows a change from pull request
+    through deployment, builds an editable monitoring plan, compares production
+    signals with a baseline, and can recommend or initiate bounded remediation.
+
+observed:
+  - >
+    Cursor presents Rollouts and Security Reviewer as separate bots for work that
+    follows code creation: security analysis, deployment observation, regression
+    diagnosis, and restoring a healthy production state.
+  - >
+    Rollouts connects source control, deployment events, and telemetry systems.
+    Before merge, it reads the diff and produces an editable monitoring plan
+    describing risks, intended effects, and gaps where instrumentation cannot
+    establish whether the change worked.
+  - >
+    After deployment, Rollouts compares plan signals with a pre-deploy baseline.
+    When it detects a regression, it identifies the suspected change and proposed
+    action.
+  - >
+    Depending on configuration, Rollouts can notify the author, pause a
+    progressive rollout, or prepare a revert pull request for approval.
+  - >
+    Cursor says Rollouts can detect regressions confined to one endpoint and
+    region before a global alert fires, distinguish intended effects from
+    regressions, and identify missing instrumentation before merge.
+  - >
+    Security Reviewer runs on every pull request, analyzes the change in the
+    context of the whole codebase, and reports vulnerabilities with severity,
+    attack path, explanation, and a proposed one-click fix.
+  - >
+    Cursor reports that Security Reviewer reduced average review time from 4.8
+    minutes to 3.8 minutes and increased comment acceptance from 45–50% to
+    60–70%.
+  - >
+    Cursor says Security Reviewer examines injection, authentication and
+    authorization, exposed credentials, unsafe deserialization and redirects,
+    vulnerable dependencies, and insecure infrastructure or configuration
+    defaults.
+  - >
+    Both bots were released for Cursor Teams and Enterprise plans. Direct
+    feature-flag traffic control, release-train awareness, and deploy-freeze
+    awareness were described as future capabilities.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Cursor released both specialized bots to Teams and Enterprise customers and
+    reports lower average Security Reviewer review time plus higher comment
+    acceptance. It does not publish customer count, review volume, experiment
+    duration, rollout-monitoring volume, reliability distributions, or
+    statistical methods.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Cooperation
+    to: Specialization
+  conditions: [Context, Execution, Verification, Coordination, Observability]
+
+claims:
+  - id: C02
+    relationship: REFINES
+  - id: C03
+    relationship: INCONCLUSIVE
+  - id: C04
+    relationship: SUPPORTS
+
+interpretation: >
+  Verification is differentiating into roles with distinct context, timing, and
+  authority. Security Reviewer specializes in pre-merge exploit analysis, while
+  Rollouts specializes in connecting code changes to deployments and production
+  effects. The monitored software change becomes the shared object across source
+  control, deployment, and telemetry, extending the agentic engineering boundary
+  from producing code to regulating its runtime consequences. This supports
+  Specialization as differentiated capabilities become persistent parts of the
+  delivery system. Configurable remediation also refines Selection by showing
+  that organizational risk policy determines which actions the operational agent
+  may take. The source does not compare these roles with useful isolated
+  operation, so a Cooperation fitness advantage remains inconclusive.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports Specialization through persistent, differentiated verification
+    roles operating at distinct lifecycle stages around the same software change.
+    The source also refines the engineering environment as a fitness function:
+    access to code, deployment state, telemetry, baselines, instrumentation, and
+    configured remediation authority determines whether post-merge verification
+    can operate. Published Security Reviewer figures provide an outcome signal,
+    but do not establish the reliability or advantage of the overall integrated
+    lifecycle.
+
+what_this_does_not_establish:
+  - >
+    Cursor does not publish sample sizes, evaluation windows, workload mix,
+    comparison design, variance, or statistical significance for the reported
+    Security Reviewer time and acceptance changes.
+  - >
+    Comment acceptance does not by itself establish vulnerability recall,
+    precision, exploit prevention, security outcomes, or reduced human review
+    burden.
+  - >
+    Cursor publishes no Rollouts measurements for detection precision, false
+    positives, time to detection, mean time to recovery, rollback success,
+    production incidents prevented, or human attention required.
+  - >
+    The source describes capabilities and selected examples of what Rollouts does
+    well, rather than a controlled comparison with conventional monitoring and
+    incident-response workflows.
+  - >
+    Preparing a revert pull request for approval is not equivalent to autonomous
+    production recovery, and available actions depend on customer configuration.
+  - >
+    Feature-flag traffic control, release-train awareness, and deploy-freeze
+    awareness are future capabilities rather than observed behavior.
+  - >
+    Differentiated security and rollout roles support Specialization, but the
+    source does not establish that their cooperation outperforms useful isolated
+    verification or that failures improve later executions.
+  - >
+    The claims are first-party product evidence and have not been independently
+    replicated across other delivery systems or organizations.
+
+open_question: >
+  When security and rollout verification become specialized agent roles, do they
+  improve production reliability and reduce total human attention after false
+  positives, missed regressions, remediation approvals, and instrumentation work
+  are included?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: diff-derived-production-monitoring-plan
+    use_case: "Define how a particular code change will be verified after deployment."
+    problem: "Generic dashboards and alerts may not cover the risks, intended effects, or instrumentation gaps introduced by a specific diff."
+    reported_practice: "Read the pull-request diff before merge, draft an editable plan of expected effects and risk signals, and flag where telemetry cannot determine success."
+    selection_conditions: [context, verification, observability]
+  - id: change-linked-post-deploy-baseline
+    use_case: "Distinguish a production regression from expected effects after a deployment."
+    problem: "Operators must connect a changed signal to one of several deployed changes and decide whether the movement is intentional."
+    reported_practice: "Follow the change through deployment and compare its planned signals with a pre-deploy baseline to identify localized or unintended regressions."
+    selection_conditions: [context, verification, observability]
+  - id: policy-bounded-rollout-remediation
+    use_case: "Respond to a suspected deployment regression with authority appropriate to organizational risk."
+    problem: "A single remediation policy is either too passive for low-risk cases or too autonomous for consequential production changes."
+    reported_practice: "Configure the rollout bot to escalate to the author, pause progressive delivery, or prepare a revert pull request for human approval."
+    selection_conditions: [execution, coordination, verification]
+  - id: codebase-context-security-review
+    use_case: "Detect exploit paths introduced by a pull-request change."
+    problem: "Local pattern matching can flag superficial risks while missing vulnerabilities that depend on data flow, authorization, dependencies, or broader codebase context."
+    reported_practice: "Analyze every pull request against whole-codebase context and return severity, attack path, explanation, and a proposed fix for each finding."
+    selection_conditions: [context, verification]
+
+assessment:
+  assisted_by_ai: true
