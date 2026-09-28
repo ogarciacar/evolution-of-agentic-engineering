@@ -1,0 +1,165 @@
+source:
+  title: "Improved token efficiency for longer agent runs"
+  producer: "Cursor"
+  producer_type: organization
+  date: "2026-09-23"
+  url: "https://prod.cursor.com/blog/improved-token-efficiency"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Long-running agents make context an accumulating operational cost"
+  summary: >
+    Cursor reports production experiments across prompt size, dynamic tool
+    loading, cache boundaries, file reads, and subagent use that reduced user
+    token costs by 7% without reducing agent quality. Cursor also identifies a
+    cooperation trade-off: subagents can reduce context cost by starting fresh,
+    but isolated context creates a coordination tax through duplicated or
+    obsolete work.
+
+observed:
+  - >
+    Cursor reports that agents now run longer and carry more accumulated context
+    between steps, increasing the importance of how its harness assembles,
+    reuses, and partitions context.
+  - >
+    Cursor says changes across prompt construction, context reuse, and work
+    division reduced token costs for users by 7% without reducing agent quality.
+  - >
+    Cursor removed roughly 66% of its system prompt as stronger models required
+    less explicit instruction across model families. It says production A/B
+    testing was important because offline evals overrepresent hard tasks relative
+    to real user traffic.
+  - >
+    Moving MCP tool definitions into dynamic context had reduced total tokens by
+    46.9% across sessions that invoked an MCP tool.
+  - >
+    Cursor A/B tested which built-in tools needed to remain visible from the
+    start, tracking tokens, cost, latency, tool-call errors, and overall agent
+    usage. Dynamically loading the remaining tools cut static-context tool-
+    description tokens by 60%.
+  - >
+    Adding explicit cache breakpoints after stable request layers and moving
+    variable setup behind those boundaries reduced Cursor's cold-cache-miss rate
+    by 20%.
+  - >
+    Numbering only every tenth line in file-read output reduced cache-read tokens
+    by 1.6% with no reported reduction in quality.
+  - >
+    Cursor says subagents can reduce token spend because each typically starts
+    with fresh context and returns a result without adding its full working
+    history to the parent context.
+  - >
+    Cursor also reports a coordination tax when isolated subagents duplicate
+    work or continue tasks that are no longer necessary. It removed instructions
+    that strongly encouraged subagents for codebase exploration and constrained
+    alternate-model selection to cases directed by the user or harness.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Cursor describes A/B tests on a large production user base and reports an
+    aggregate 7% reduction in user token costs without reduced agent quality.
+    The article does not publish experiment sizes, traffic volume, time windows,
+    confidence intervals, quality definitions, or statistical significance.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Coordination, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: REFINES
+
+interpretation: >
+  Context becomes an environmental cost that accumulates as agent runs lengthen.
+  Cursor's production experiments show Selection operating on harness variants:
+  prompts, tool visibility, cache layout, file representation, and delegation
+  policy survive when they preserve reported quality while lowering token cost or
+  avoiding errors and latency. The subagent findings refine Cooperation because
+  delegation is not monotonically beneficial. Partitioning work can isolate
+  context and reduce inference cost, but isolation also weakens shared state and
+  can create duplicated or obsolete work. Cooperation therefore has an economic
+  fitness function: context savings must exceed the coordination tax.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Supports Selection with production A/B evidence that harness configuration
+    materially affects agent economics without a reported quality loss. Refines
+    Cooperation by identifying context partitioning as a benefit of subagents and
+    coordination overhead as its countervailing cost. This makes efficient
+    cooperation conditional on the surrounding context and coordination design,
+    rather than on increasing the number of delegated agents.
+
+what_this_does_not_establish:
+  - >
+    The 7% user token-cost reduction aggregates changes across several harness
+    layers and does not isolate the contribution of each intervention.
+  - >
+    Cursor does not publish sample sizes, experiment durations, model mix,
+    confidence intervals, statistical significance, or its definition and
+    measurements of unchanged agent quality.
+  - >
+    The 46.9% result applies only to sessions that invoked an MCP tool and should
+    not be interpreted as a reduction across all agent sessions.
+  - >
+    The 60% result concerns static-context tool-description tokens, the 20%
+    result concerns the rate of cold cache misses, and the 1.6% result concerns
+    cache-read tokens; none is an end-to-end user cost reduction by itself.
+  - >
+    Cursor does not quantify the token savings from subagents, the frequency or
+    cost of duplicated work, or the net effect of its revised delegation policy.
+  - >
+    Removing explicit encouragement of subagents demonstrates policy adjustment,
+    not that a particular level or topology of cooperation is generally optimal.
+  - >
+    The results are first-party and specific to Cursor's production traffic,
+    models, agent harness, pricing, caching behavior, and tool distribution.
+
+open_question: >
+  Across longer engineering tasks, when do the context savings from subagent
+  isolation exceed the added token, latency, duplicated-work, and reconciliation
+  costs of coordination?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: production-test-agent-context-policy
+    use_case: "Optimize context construction for the real distribution of agent tasks."
+    problem: "Offline evals can overrepresent hard tasks and miss the token, latency, and behavior effects seen in ordinary production traffic."
+    reported_practice: "A/B test context configurations on production traffic while tracking token use, cost, latency, tool-call errors, agent usage, and quality."
+    selection_conditions: [context, economics]
+  - id: prune-model-obsolete-instructions
+    use_case: "Avoid repeatedly sending harness instructions that current models no longer need."
+    problem: "Legacy behavioral guidance remains in every turn after models learn to follow simpler tool definitions."
+    reported_practice: "Re-test system instructions across model families and remove directions whose absence does not degrade production behavior."
+    selection_conditions: [context, economics]
+  - id: dynamically-load-low-frequency-tools
+    use_case: "Keep a broad tool set available without placing every definition in every model request."
+    problem: "Most specialized tools are used in a minority of conversations, but static definitions consume context throughout every turn."
+    reported_practice: "Keep high-frequency and flow-critical tools in static context and load lower-frequency MCP and built-in tool definitions only when needed."
+    selection_conditions: [context, execution, economics]
+  - id: separate-stable-and-variable-cache-layers
+    use_case: "Reuse unchanged prompt prefixes as an agent conversation grows."
+    problem: "Variable setup mixed with stable instructions and tools prevents effective prefix-cache reuse across turns."
+    reported_practice: "Place explicit cache breakpoints after stable request layers and move user- and request-specific setup behind those boundaries."
+    selection_conditions: [context, economics]
+  - id: context-efficient-file-read-format
+    use_case: "Preserve source-location guidance while reducing context added by large file reads."
+    problem: "Numbering every source line adds substantial repeated context when agents read tens of thousands of lines."
+    reported_practice: "Include line numbers at a sparser interval that remains sufficient for model citations, then verify quality before rollout."
+    selection_conditions: [context, economics]
+  - id: coordination-aware-subagent-policy
+    use_case: "Delegate work when fresh subagent context saves more than coordination costs."
+    problem: "Isolated subagents can reduce inherited context but may duplicate work or pursue tasks invalidated by the parent's progress."
+    reported_practice: "Avoid blanket instructions to delegate exploration and constrain alternate-model selection to cases directed by the user or harness."
+    selection_conditions: [context, coordination, economics]
+
+assessment:
+  assisted_by_ai: true
