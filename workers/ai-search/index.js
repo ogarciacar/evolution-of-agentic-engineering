@@ -1,3 +1,5 @@
+import { buildEvidencePackage } from "./evidence-package.js";
+
 const SITE_ORIGIN = "https://agenticengineering.science";
 const MAX_QUERY_LENGTH = 500;
 const MAX_RESULTS = 5;
@@ -128,8 +130,10 @@ export async function handleRequest(request, env) {
       },
     });
 
-    const candidates = search?.chunks || [];
+    const candidates = search?.chunks;
+    if (!Array.isArray(candidates)) throw new Error("Invalid retrieval response");
     const results = uniqueResults(candidates);
+    const evidence = url.searchParams.get("passages") === "1" ? await buildEvidencePackage(candidates) : undefined;
     const latencyMs = Date.now() - startedAt;
     console.log(JSON.stringify({
       event: "ai_search",
@@ -140,7 +144,7 @@ export async function handleRequest(request, env) {
       zero_results: results.length === 0,
     }));
 
-    return json({ query, results });
+    return json({ query, results, ...(evidence ? { evidence } : {}) });
   } catch {
     const latencyMs = Date.now() - startedAt;
     console.log(JSON.stringify({

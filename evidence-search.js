@@ -34,12 +34,16 @@
           const results = await request(query, { signal: current.controller.signal });
           if (active !== current) return;
           active = null;
-          publish({ phase: "complete", query, error: "", results, stopped: false });
+          publish({ phase: results.length ? "complete" : "limited", query, error: "", results, stopped: false });
         } catch {
           if (active !== current) return;
           active = null;
           publish({ phase: "failed", query, error: "", results: [], stopped: false });
         }
+      },
+      refine() {
+        if (active || state.phase !== "limited") return;
+        publish({ phase: "editing", query: state.query, error: "", results: [], stopped: false });
       },
       stop() {
         if (!active) return;
@@ -78,6 +82,13 @@
     } catch {
       return null;
     }
+  }
+
+  function safeOriginalUrl(value) {
+    try {
+      const url = new URL(value);
+      return url.protocol === "https:" && !url.username && !url.password ? url.href : null;
+    } catch { return null; }
   }
 
   function normalizedPath(value) {
@@ -168,11 +179,42 @@
     return results.map(normalizeResult).filter(Boolean);
   }
 
+  function normalizeEvidenceResults(data) {
+    // Pages and the search Worker deploy separately. Older Workers continue
+    // serving working cards until the opt-in passage contract is available.
+    if (data.evidence === undefined) {
+      if (!Array.isArray(data.results)) throw new Error("Invalid search response");
+      return normalizeResults(data.results);
+    }
+    const evidence = data.evidence;
+    if (evidence?.version !== 1 || evidence.provenance !== "indexed_eae_pages" || !Array.isArray(evidence.sources)) {
+      throw new Error("Invalid evidence package");
+    }
+    if (evidence.outcome === "no_matching_evidence" && evidence.sources.length === 0) return [];
+    if (evidence.outcome !== "evidence_found" || !evidence.sources.length || evidence.sources.length > 5) {
+      throw new Error("Evidence passages unavailable");
+    }
+    return evidence.sources.map(source => {
+      if (!/^source:[a-f0-9]{64}$/.test(source.id) || !safeSourceUrl(source.url) || !isAllowedSearchUrl(source.url)
+        || !["eae_signal", "eae_collection"].includes(source.kind)
+        || !Array.isArray(source.passages) || !source.passages.length || source.passages.length > 3
+        || source.passages.some(p => !/^passage:[a-f0-9]{64}$/.test(p.id) || typeof p.text !== "string" || !p.text.trim()
+          || new TextEncoder().encode(p.text).byteLength > 12000)) {
+        throw new Error("Invalid evidence source");
+      }
+      const legacy = (data.results || []).find(result => normalizedPath(result.url) === normalizedPath(source.url));
+      const result = normalizeResult({ title: source.title, url: source.url, excerpt: legacy?.excerpt || source.passages[0].text });
+      return { ...result, retrieved: { ...source, truncated: Boolean(evidence.truncated) } };
+    });
+  }
+
   function normalizeEvidence(record, expectedId) {
     if (!record || record.id !== expectedId) return null;
     return {
       id: record.id,
       source: {
+        title: String(record.source?.title ?? ""),
+        url: safeOriginalUrl(record.source?.url),
         date: String(record.source?.date ?? ""),
         producer: String(record.source?.producer ?? ""),
       },
@@ -212,7 +254,7 @@
   function createSearchRequest(fetchImpl) {
     return async (query, { signal } = {}) => {
       signal?.throwIfAborted();
-      const response = await fetchImpl(`/api/search?q=${encodeURIComponent(query)}`, {
+      const response = await fetchImpl(`/api/search?q=${encodeURIComponent(query)}&passages=1`, {
         headers: { Accept: "application/json" },
         signal,
       });
@@ -220,7 +262,7 @@
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       signal?.throwIfAborted();
-      const results = await enrichResults(normalizeResults(data.results), fetchImpl, signal);
+      const results = await enrichResults(normalizeEvidenceResults(data), fetchImpl, signal);
       signal?.throwIfAborted();
       return results;
     };
@@ -250,10 +292,23 @@
   }
 
   function renderResult(result) {
-    if (isPracticesUrl(result.url)) return renderPracticesResult(result);
-    if (result.evidence) return renderSignalResult(result);
-    if (signalIdFromUrl(result.url)) return renderSignalFallbackResult(result);
-    return "";
+    let markup = isPracticesUrl(result.url) ? renderPracticesResult(result)
+      : result.evidence ? renderSignalResult(result)
+      : signalIdFromUrl(result.url) ? renderSignalFallbackResult(result) : "";
+    if (markup && result.retrieved) {
+      markup = markup.replace("</article>", `<button class="evidence-inspect" type="button" data-source-id="${esc(result.retrieved.id, true)}">Inspect passages</button></article>`);
+    }
+    return markup;
+  }
+
+  function renderEvidenceDetails(result) {
+    const source = result.retrieved;
+    const original = result.evidence?.source;
+    const originalUrl = safeOriginalUrl(original?.url);
+    const metadata = originalUrl
+      ? `<section class="evidence-origin"><h4>Original source</h4><p>${esc(original.title || "Source report")}</p><p>${esc([formatDate(original.date), original.producer].filter(Boolean).join(" · "))}</p><a class="source" href="${esc(originalUrl, true)}" target="_blank" rel="noopener noreferrer">Open original source</a><p class="ask-note">Source metadata comes from the current EAE record; the passages below come from the search index and may reflect an earlier page version.</p></section>`
+      : `<p class="ask-note">Original-source metadata is unavailable. Use the EAE page to check its references.</p>`;
+    return `<h3>${esc(result.title)}</h3><p>Passages from the indexed EAE page. These may include EAE interpretation and are not verified quotations from the original source.</p><a class="source" href="${esc(source.url, true)}" target="_blank" rel="noopener noreferrer">Open EAE page</a>${metadata}${source.truncated ? '<p class="ask-note">Showing a bounded selection of retrieved passages. Open the EAE page for full context.</p>' : ""}${source.passages.map((passage, index) => `<section class="evidence-passage-block"><h4>Passage ${index + 1}</h4><div class="evidence-passage">${esc(passage.text)}</div></section>`).join("")}`;
   }
 
   function init(doc = globalThis.document, fetchImpl = globalThis.fetch) {
@@ -266,12 +321,20 @@
     const results = doc.getElementById("ask-evidence-results");
     const stop = doc.getElementById("ask-evidence-stop");
     const error = doc.getElementById("ask-evidence-error");
-    if (!form || !input || !button || !count || !status || !results || !stop || !error) return;
+    const empty = doc.getElementById("ask-evidence-empty");
+    const refine = doc.getElementById("ask-evidence-refine");
+    const dialog = doc.getElementById("evidence-dialog");
+    const details = doc.getElementById("evidence-details");
+    const close = doc.getElementById("evidence-close");
+    let inspectedFrom = null;
+    if (!form || !input || !button || !count || !status || !results || !stop || !error || !empty || !refine || !dialog || !details || !close) return;
 
     const investigation = createInvestigation({
       request: createSearchRequest(fetchImpl),
       onState(state) {
         const finding = state.phase === "finding";
+        if (dialog.open) dialog.close();
+        empty.hidden = state.phase !== "limited";
         button.disabled = finding;
         input.readOnly = finding;
         stop.hidden = !finding;
@@ -284,6 +347,7 @@
         results.innerHTML = "";
         status.textContent = finding ? "Finding relevant evidence…"
           : state.stopped ? "Investigation stopped. You can edit your question and try again."
+          : state.phase === "limited" ? "No matching evidence in this corpus."
           : state.phase === "failed" ? "Search is temporarily unavailable. Please try again or explore the Evidence page."
           : "";
         if (state.phase === "complete") {
@@ -303,6 +367,21 @@
       void investigation.submit(input.value);
     });
     stop.addEventListener("click", () => investigation.stop());
+    refine.addEventListener("click", () => { investigation.refine(); input.focus(); });
+    results.addEventListener("click", event => {
+      const trigger = event.target.closest("[data-source-id]");
+      if (!trigger) return;
+      const result = investigation.state.results.find(item => item.retrieved?.id === trigger.dataset.sourceId);
+      if (!result) return;
+      inspectedFrom = trigger;
+      details.innerHTML = renderEvidenceDetails(result);
+      dialog.showModal();
+    });
+    close.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("close", () => {
+      if (inspectedFrom?.isConnected) inspectedFrom.focus({ preventScroll: true });
+      inspectedFrom = null;
+    });
     input.addEventListener("input", () => {
       error.textContent = "";
       input.removeAttribute("aria-invalid");
@@ -311,6 +390,8 @@
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
+      normalizeEvidenceResults,
+      renderEvidenceDetails,
       validateQuestion,
       createInvestigation,
       createSearchRequest,
