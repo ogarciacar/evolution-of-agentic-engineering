@@ -12,3 +12,7 @@ research-frontier.json
 evaluate.html
 synthesis.html
 sitemap.xml
+
+# Generated Worker deployment configuration and local answer evaluations.
+workers/ai-search/wrangler.deploy.json
+.artifacts/answer-evaluation*.json

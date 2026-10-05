@@ -1,5 +1,12 @@
 {
   "name": "eae-investigate-tests",
   "main": "../../workers/ai-search/index.js",
-  "compatibility_date": "2026-09-05"
+  "compatibility_date": "2026-09-05",
+  "d1_databases": [
+    {
+      "binding": "EVIDENCE_DB",
+      "database_name": "eae-answer-test",
+      "database_id": "00000000-0000-0000-0000-000000000001"
+    }
+  ]
 }

@@ -7,6 +7,9 @@ on:
       - "evidence-search.*"
       - "workers/ai-search/**"
       - "functions/api/search.js"
+      - "functions/api/search/**"
+      - "functions/_lib/evidence-read-model.js"
+      - "migrations/**"
       - "tests/investigate/**"
       - "package.json"
       - "package-lock.json"
@@ -18,6 +21,9 @@ on:
       - "evidence-search.*"
       - "workers/ai-search/**"
       - "functions/api/search.js"
+      - "functions/api/search/**"
+      - "functions/_lib/evidence-read-model.js"
+      - "migrations/**"
       - "tests/investigate/**"
       - "package.json"
       - "package-lock.json"
@@ -46,6 +52,13 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run check
+      - name: Build Worker with answer bindings without deploying
+        env:
+          EVIDENCE_DB_NAME: eae-answer-test
+          EVIDENCE_DB_ID: 00000000-0000-0000-0000-000000000001
+        run: |
+          node workers/ai-search/configure-deploy.mjs
+          npx --no-install wrangler deploy --dry-run --config workers/ai-search/wrangler.deploy.json
       - name: Upload browser diagnostics
         if: failure()
         uses: actions/upload-artifact@v7

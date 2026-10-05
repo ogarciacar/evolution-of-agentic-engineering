@@ -6,7 +6,8 @@
     "test:worker": "vitest run --config tests/investigate/vitest.worker.config.mjs",
     "test:acceptance": "playwright test --config tests/investigate/playwright.config.mjs",
     "test:contracts": "node workers/ai-search/check-search-endpoint.mjs && node workers/ai-search/check-preview-bridge.mjs && node workers/ai-search/check-search-ui.mjs",
-    "check": "npm run test:unit && npm run test:worker && npm run test:contracts && npm run test:acceptance"
+    "check": "npm run test:unit && npm run test:worker && npm run test:contracts && npm run test:acceptance",
+    "eval:answer": "node workers/ai-search/evaluate-answers.mjs"
   },
   "engines": {
     "node": ">=22"
