@@ -194,6 +194,11 @@ Raw user query text is not logged.
 
 ## Checks and evaluation
 
+The homepage investigation lifecycle now has deterministic unit, Cloudflare
+runtime and desktop/mobile browser acceptance tests. See
+[`tests/investigate/README.md`](../tests/investigate/README.md) for setup,
+transition criteria and the shared local/CI command `npm run check`.
+
 Deterministic repository contracts:
 
 ```bash

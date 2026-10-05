@@ -1,0 +1,57 @@
+name: CI · Investigate interaction
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "evidence-search.*"
+      - "workers/ai-search/**"
+      - "functions/api/search.js"
+      - "tests/investigate/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/investigate-interaction.yml"
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "evidence-search.*"
+      - "workers/ai-search/**"
+      - "functions/api/search.js"
+      - "tests/investigate/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/investigate-interaction.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: investigate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interaction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run check
+      - name: Upload browser diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: investigate-browser-diagnostics
+          path: |
+            test-results/investigate/
+            playwright-report/investigate/
+          retention-days: 14

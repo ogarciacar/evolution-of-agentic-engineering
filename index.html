@@ -118,12 +118,13 @@
     <h1>Navigate what changes as coding agents become engineering systems.</h1>
     <p class="lead">Search real-world evidence, explore emerging patterns, and understand what may become necessary next as engineering with coding agents scales.</p>
     <div class="ask-panel hero-search">
-      <form class="ask-form" id="ask-evidence-form">
+      <form class="ask-form" id="ask-evidence-form" novalidate>
         <label class="ask-label" for="ask-evidence-input">What are you trying to understand?</label>
-        <div class="ask-controls"><input class="ask-input" id="ask-evidence-input" name="q" type="search" maxlength="500" required autocomplete="off" placeholder="e.g. What becomes a constraint as coding-agent volume increases?"/><button class="ask-submit" id="ask-evidence-submit" type="submit">Investigate</button></div>
-        <p class="ask-note">Search the published AgenticEngineering.science evidence corpus. Every result is traceable to its underlying evidence.</p>
+        <div class="ask-controls"><input class="ask-input" id="ask-evidence-input" name="q" type="search" maxlength="500" required autocomplete="off" aria-describedby="ask-evidence-note ask-evidence-error" placeholder="e.g. What becomes a constraint as coding-agent volume increases?"/><button class="ask-submit" id="ask-evidence-submit" type="submit">Investigate</button></div>
+        <p class="ask-error" id="ask-evidence-error" role="alert"></p>
+        <p class="ask-note" id="ask-evidence-note">Search the published AgenticEngineering.science evidence corpus. Every result is traceable to its underlying evidence.</p>
       </form>
-      <div class="ask-summary"><span class="ask-count" id="ask-evidence-count"></span><span class="ask-status" id="ask-evidence-status" role="status" aria-live="polite"></span></div>
+      <div class="ask-summary"><span class="ask-count" id="ask-evidence-count"></span><span class="ask-status" id="ask-evidence-status" role="status" aria-live="polite"></span><button class="ask-stop" id="ask-evidence-stop" type="button" hidden>Stop</button></div>
       <div class="ask-results" id="ask-evidence-results"></div>
     </div>
   </header>
@@ -211,6 +212,7 @@ Use agenticengineering.science.</pre>
   if (!input || !form || !searchSection) return;
 
   const runSearch = (query, updateUrl = false) => {
+    if (form.getAttribute("aria-busy") === "true") return;
     input.value = query;
     searchSection.scrollIntoView({ behavior: "smooth", block: "start" });
     if (updateUrl) {
@@ -218,7 +220,7 @@ Use agenticengineering.science.</pre>
       url.searchParams.set("q", query);
       window.history.replaceState({}, "", url);
     }
-    window.setTimeout(() => form.requestSubmit(), 250);
+    form.requestSubmit();
   };
 
   document.querySelectorAll("[data-question]").forEach((button) => {
