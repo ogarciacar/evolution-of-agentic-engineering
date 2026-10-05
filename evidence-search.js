@@ -13,26 +13,36 @@
 
   // Request identity is independent of AbortSignal: an adapter may finish even
   // after cancellation. Only the current request may update the visible state.
-  function createInvestigation({ request, onState = () => {} }) {
+  function createInvestigation({ request, generate, onState = () => {} }) {
     let state = { phase: "editing", query: "", error: "", results: [], stopped: false };
     let active = null;
-    const publish = (next) => { state = next; onState(state); };
-
+    const publish = next => { state = next; onState(state); };
+    async function prepare(current, query, results) {
+      publish({ phase: "preparing", query, error: "", results, stopped: false });
+      try {
+        const answer = await generate(query, results, { signal: current.controller.signal });
+        if (active !== current) return;
+        active = null;
+        publish({ phase: answer.answer.outcome === "insufficient" ? "answer_limited" : "complete", query, error: "", results, answer, stopped: false });
+      } catch (error) {
+        if (active !== current) return;
+        active = null;
+        publish({ phase: "answer_failed", query, error: "", results, rateLimited: error.status === 429, stopped: false });
+      }
+    }
     return {
       get state() { return state; },
       async submit(value) {
         if (active) return;
         const { query, error } = validateQuestion(value);
-        if (error) {
-          publish({ phase: "editing", query, error, results: [], stopped: false });
-          return;
-        }
+        if (error) { publish({ phase: "editing", query, error, results: [], stopped: false }); return; }
         const current = { controller: new AbortController() };
         active = current;
         publish({ phase: "finding", query, error: "", results: [], stopped: false });
         try {
           const results = await request(query, { signal: current.controller.signal });
           if (active !== current) return;
+          if (results.length && results.canAnswer && generate) return await prepare(current, query, results);
           active = null;
           publish({ phase: results.length ? "complete" : "limited", query, error: "", results, stopped: false });
         } catch {
@@ -41,8 +51,14 @@
           publish({ phase: "failed", query, error: "", results: [], stopped: false });
         }
       },
+      async retryAnswer() {
+        if (active || state.phase !== "answer_failed") return;
+        const current = { controller: new AbortController() };
+        active = current;
+        return prepare(current, state.query, state.results);
+      },
       refine() {
-        if (active || state.phase !== "limited") return;
+        if (active || !["limited", "answer_limited", "complete", "answer_failed"].includes(state.phase)) return;
         publish({ phase: "editing", query: state.query, error: "", results: [], stopped: false });
       },
       stop() {
@@ -264,8 +280,71 @@
       signal?.throwIfAborted();
       const results = await enrichResults(normalizeEvidenceResults(data), fetchImpl, signal);
       signal?.throwIfAborted();
+      if (data.answer_available === true) results.canAnswer = true;
       return results;
     };
+  }
+
+  function normalizeAnswer(data) {
+    const a = data?.answer;
+    if (data?.version !== 1 || data.provenance !== "canonical_eae_records" || !Array.isArray(data.sources) || data.sources.length > 5
+      || !["answered", "insufficient"].includes(a?.outcome) || typeof a.summary?.text !== "string" || !Array.isArray(a.summary.citations)
+      || !Array.isArray(a.claims) || !Array.isArray(a.uncertainties) || !a.uncertainties.length) throw new Error("Invalid answer");
+    for (const source of data.sources) {
+      if (!/^source:[a-f0-9]{64}$/.test(source.id) || !safeSourceUrl(source.url) || !signalIdFromUrl(source.url)
+        || !Array.isArray(source.passages) || !source.passages.length || source.passages.some(p => !/^passage:[a-f0-9]{64}$/.test(p.id) || typeof p.text !== "string" || typeof p.field !== "string")) throw new Error("Invalid source");
+    }
+    const statements = [a.summary, ...a.claims, ...(a.next_step ? [a.next_step] : [])];
+    for (const statement of statements) {
+      if (!Array.isArray(statement.citations)) throw new Error("Missing citations");
+      for (const cite of statement.citations) {
+        const source = data.sources.find(s => s.id === cite.source_id);
+        const passage = source?.passages.find(p => p.id === cite.passage_id);
+        if (!passage || typeof cite.quote !== "string" || !cite.quote.trim() || !passage.text.includes(cite.quote)) throw new Error("Invalid citation");
+      }
+    }
+    if (a.outcome === "answered" && (!a.summary.citations.length || !a.claims.length || !a.next_step?.action || !a.next_step.measure || !a.next_step.decision_rule)) throw new Error("Incomplete answer");
+    return data;
+  }
+
+  function createAnswerRequest(fetchImpl = globalThis.fetch) {
+    return async (query, results, { signal } = {}) => {
+      const record_ids = [...new Set(results.map(r => r.retrieved?.record_id).filter(Boolean))].slice(0, 5);
+      const response = await fetchImpl("/api/search/answer", { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ query, record_ids }), signal });
+      signal?.throwIfAborted();
+      if (!response.ok) { const error = new Error("Answer unavailable"); error.status = response.status; throw error; }
+      const data = normalizeAnswer(await response.json());
+      signal?.throwIfAborted();
+      return data;
+    };
+  }
+
+  function renderAnswer(data) {
+    const a = data.answer;
+    const citations = items => items.map(c => {
+      const index = data.sources.findIndex(s => s.id === c.source_id) + 1;
+      return `<button type="button" class="answer-citation" data-citation-source="${esc(c.source_id, true)}" data-passage-id="${esc(c.passage_id, true)}" data-citation-quote="${esc(c.quote, true)}" aria-label="Inspect citation ${index}">[${index}]</button>`;
+    }).join(" ");
+    const limits = `<div class="answer-limits"><h4>What remains uncertain</h4><ul>${a.uncertainties.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>`;
+    if (a.outcome === "insufficient") return `<article class="answer-card"><span class="answer-eyebrow">Evidence boundary</span><h3>Not enough evidence to answer</h3><p>${esc(a.summary.text)} ${citations(a.summary.citations)}</p>${limits}<button type="button" class="evidence-inspect" data-answer-refine>Refine question</button></article>`;
+    return `<article class="answer-card"><span class="answer-eyebrow">AI interpretation · check the evidence</span><h3>What the evidence suggests</h3><p class="answer-summary">${esc(a.summary.text)} ${citations(a.summary.citations)}</p><div class="answer-claims">${a.claims.map(c => `<div><b>${c.kind === "observation" ? "Reported observation" : "Interpretation"}</b><p>${esc(c.text)} ${citations(c.citations)}</p></div>`).join("")}</div>${limits}<section class="answer-next"><span class="answer-eyebrow">Proposed experiment</span><h3>One next step</h3><p>${esc(a.next_step.action)} ${citations(a.next_step.citations)}</p><dl><dt>Measure</dt><dd>${esc(a.next_step.measure)}</dd><dt>Decide</dt><dd>${esc(a.next_step.decision_rule)}</dd></dl></section><p class="ask-note">Based on ${data.sources.length} current EAE record${data.sources.length === 1 ? "" : "s"}. Reports may share an original source; this is not a count of independent confirmations.${data.omitted_records ? " Some retrieved records were unavailable or exceeded the evidence limit." : ""}</p><div class="answer-actions"><button type="button" class="evidence-inspect" data-answer-copy>Copy answer with sources</button><button type="button" class="evidence-inspect" data-answer-refine>Refine question</button><span class="ask-note" data-copy-status aria-live="polite"></span></div></article>`;
+  }
+
+  function answerText(data, query) {
+    const a = data.answer;
+    const refs = items => items.map(c => `[${data.sources.findIndex(s => s.id === c.source_id) + 1}]`).join(" ");
+    return [`Question: ${query}`, "AI interpretation — check the evidence", `${a.summary.text} ${refs(a.summary.citations)}`,
+      ...a.claims.map(c => `${c.kind}: ${c.text} ${refs(c.citations)}`), "What remains uncertain:", ...a.uncertainties.map(t => `- ${t}`),
+      ...(a.next_step ? ["Proposed experiment:", `${a.next_step.action} ${refs(a.next_step.citations)}`, `Measure: ${a.next_step.measure}`, `Decide: ${a.next_step.decision_rule}`] : []),
+      `Canonical EAE records loaded: ${data.loaded_at}`,
+      ...data.sources.map((s, i) => `[${i + 1}] ${s.title} — ${s.url}\nOriginal: ${safeOriginalUrl(s.original?.url) || "Unavailable"}\nRecord snapshot: ${s.snapshot_id}`),
+      "EAE records contain attributed reports and interpretations, not independent verification."
+    ].join("\n\n");
+  }
+
+  function renderCanonicalDetails(source, passageId, quote = "") {
+    const originalUrl = safeOriginalUrl(source.original?.url);
+    return `<h3>${esc(source.title)}</h3>${quote ? `<blockquote class="answer-quote"><b>Cited excerpt</b><p>${esc(quote)}</p></blockquote>` : ""}<p>Current EAE record. Observations are attributed reports; interpretations and limitations are shown separately. These are not verified quotations from the original source.</p><a class="source" href="${esc(source.url, true)}" target="_blank" rel="noopener noreferrer">Open EAE page</a><section class="evidence-origin"><h4>Original source</h4><p>${esc(source.original?.title)}</p><p>${esc([source.original?.producer, formatDate(source.original?.date)].filter(Boolean).join(" · "))}</p>${originalUrl ? `<a class="source" href="${esc(originalUrl, true)}" target="_blank" rel="noopener noreferrer">Open original source</a>` : ""}</section>${source.passages.map(p => `<section class="evidence-passage-block${p.id === passageId ? " cited-passage" : ""}" ${p.id === passageId ? 'data-cited-passage tabindex="-1"' : ""}><h4>${p.field.startsWith("observed.") ? "Reported observation" : p.field.startsWith("what_this_does_not_establish.") ? "What this does not establish" : p.field === "open_question" ? "Open question" : "EAE interpretation"}${p.id === passageId ? " · cited passage" : ""}</h4><div class="evidence-passage">${esc(p.text)}</div></section>`).join("")}`;
   }
 
   function renderPracticesResult(result) {
@@ -319,6 +398,7 @@
     const count = doc.getElementById("ask-evidence-count");
     const status = doc.getElementById("ask-evidence-status");
     const results = doc.getElementById("ask-evidence-results");
+    const answerPanel = doc.getElementById("ask-evidence-answer");
     const stop = doc.getElementById("ask-evidence-stop");
     const error = doc.getElementById("ask-evidence-error");
     const empty = doc.getElementById("ask-evidence-empty");
@@ -327,13 +407,15 @@
     const details = doc.getElementById("evidence-details");
     const close = doc.getElementById("evidence-close");
     let inspectedFrom = null;
+    let renderedResults = null;
     if (!form || !input || !button || !count || !status || !results || !stop || !error || !empty || !refine || !dialog || !details || !close) return;
 
     const investigation = createInvestigation({
       request: createSearchRequest(fetchImpl),
+      generate: createAnswerRequest(fetchImpl),
       onState(state) {
-        const finding = state.phase === "finding";
-        if (dialog.open) dialog.close();
+        const finding = ["finding", "preparing"].includes(state.phase);
+        if (dialog.open && ["editing", "finding", "failed"].includes(state.phase)) dialog.close();
         empty.hidden = state.phase !== "limited";
         button.disabled = finding;
         input.readOnly = finding;
@@ -344,17 +426,26 @@
         if (state.error) input.setAttribute("aria-invalid", "true");
         else input.removeAttribute("aria-invalid");
         count.textContent = "";
-        results.innerHTML = "";
-        status.textContent = finding ? "Finding relevant evidence…"
+        if (renderedResults !== state.results) {
+          results.innerHTML = state.results.map(renderResult).join("");
+          renderedResults = state.results;
+        }
+        status.textContent = state.phase === "preparing" ? "Preparing an answer from current evidence…"
+          : finding ? "Finding relevant evidence…"
           : state.stopped ? "Investigation stopped. You can edit your question and try again."
           : state.phase === "limited" ? "No matching evidence in this corpus."
           : state.phase === "failed" ? "Search is temporarily unavailable. Please try again or explore the Evidence page."
           : "";
-        if (state.phase === "complete") {
+        if (["complete", "preparing", "answer_limited", "answer_failed"].includes(state.phase)) {
           const total = state.results.length;
           count.textContent = total ? `${total} ${total === 1 ? "result" : "results"}` : "";
-          status.textContent = total ? "" : "No evidence matched this question.";
-          results.innerHTML = state.results.map(renderResult).join("");
+          if (state.phase === "complete") status.textContent = state.answer ? "Answer ready. Check its evidence and proposed next step." : total ? "" : "No evidence matched this question.";
+        }
+        if (answerPanel) {
+          answerPanel.innerHTML = state.answer ? renderAnswer(state.answer)
+            : state.phase === "answer_failed" ? `<article class="answer-card"><h3>The answer could not be prepared</h3><p>${state.rateLimited ? "Please wait a minute before retrying." : "Your evidence is still available below. Try preparing the answer again."}</p><button type="button" class="evidence-inspect" data-answer-retry>Retry answer</button><button type="button" class="evidence-inspect" data-answer-refine>Refine question</button></article>` : "";
+          if (state.phase === "answer_limited") status.textContent = "The evidence is not sufficient to answer this question.";
+          if (state.phase === "answer_failed") status.textContent = "Answer unavailable. Retrieved evidence remains available.";
         }
         // Keep cancellation reachable below the tall homepage hero on mobile.
         if (finding) stop.scrollIntoView({ block: "nearest", behavior: "instant" });
@@ -377,6 +468,26 @@
       details.innerHTML = renderEvidenceDetails(result);
       dialog.showModal();
     });
+    answerPanel?.addEventListener("click", async event => {
+      const trigger = event.target.closest("button");
+      if (!trigger) return;
+      if (trigger.hasAttribute("data-answer-refine")) { investigation.refine(); input.focus(); }
+      else if (trigger.hasAttribute("data-answer-retry")) await investigation.retryAnswer();
+      else if (trigger.hasAttribute("data-answer-copy")) {
+        const copyStatus = answerPanel.querySelector("[data-copy-status]");
+        try {
+          await navigator.clipboard.writeText(answerText(investigation.state.answer, investigation.state.query));
+          if (copyStatus?.isConnected) copyStatus.textContent = "Copied with sources and uncertainties.";
+        } catch { if (copyStatus?.isConnected) copyStatus.textContent = "Copy unavailable. Select the answer text to copy it."; }
+      } else if (trigger.dataset.citationSource) {
+        const source = investigation.state.answer?.sources.find(s => s.id === trigger.dataset.citationSource);
+        if (!source) return;
+        inspectedFrom = trigger;
+        details.innerHTML = renderCanonicalDetails(source, trigger.dataset.passageId, trigger.dataset.citationQuote);
+        dialog.showModal();
+        details.querySelector("[data-cited-passage]")?.scrollIntoView({ block: "center", behavior: "instant" });
+      }
+    });
     close.addEventListener("click", () => dialog.close());
     dialog.addEventListener("close", () => {
       if (inspectedFrom?.isConnected) inspectedFrom.focus({ preventScroll: true });
@@ -390,6 +501,7 @@
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
+      normalizeAnswer, createAnswerRequest, renderAnswer, renderCanonicalDetails, answerText,
       normalizeEvidenceResults,
       renderEvidenceDetails,
       validateQuestion,

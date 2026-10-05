@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "workers/ai-search/**"
+      - "functions/_lib/evidence-read-model.js"
       - ".github/workflows/deploy-ai-search-worker.yml"
   workflow_dispatch:
 
@@ -21,6 +22,9 @@ jobs:
     environment: production
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      EVIDENCE_DB_NAME: ${{ vars.EVIDENCE_DB_NAME }}
+      EVIDENCE_DB_ID: ${{ vars.EVIDENCE_DB_ID }}
+      EAE_ANSWER_ENABLED: ${{ vars.EAE_ANSWER_ENABLED || 'true' }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
@@ -37,8 +41,11 @@ jobs:
       - name: Check AI Search Worker contract
         run: node workers/ai-search/check-search-endpoint.mjs
 
+      - name: Bind the existing production evidence database
+        run: node workers/ai-search/configure-deploy.mjs
+
       - name: Deploy AI Search Worker
-        run: npx --yes wrangler@4 deploy --config workers/ai-search/wrangler.jsonc
+        run: npx --yes wrangler@4 deploy --config workers/ai-search/wrangler.deploy.json
 
       - name: Verify production search endpoint
         shell: bash
@@ -80,4 +87,23 @@ jobs:
                   assert passage["id"].startswith("passage:") and passage["text"].strip()
 
           print(f"Production AI Search healthy: {len(results)} allowed result(s)")
+          PY
+
+      - name: Verify answer route and canonical database access without inference
+        if: env.EAE_ANSWER_ENABLED == 'true'
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --header 'Content-Type: application/json' \
+            --data '{"query":"Readiness probe","record_ids":["__eae_readiness_probe__"]}' \
+            'https://agenticengineering.science/api/search/answer' \
+            --output answer-readiness.json
+          python - <<'PY'
+          import json
+          with open("answer-readiness.json", encoding="utf-8") as f:
+              data = json.load(f)
+          assert data["version"] == 1
+          assert data["provenance"] == "canonical_eae_records"
+          assert data["answer"]["outcome"] == "insufficient"
+          assert data["sources"] == []
+          print("Answer route and canonical D1 read healthy; no inference performed")
           PY

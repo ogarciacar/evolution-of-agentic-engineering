@@ -1,0 +1,73 @@
+import { createRequire } from 'node:module';
+import { expect, it, vi } from 'vitest';
+const { createInvestigation } = createRequire(import.meta.url)('../../evidence-search.js');
+const results = Object.assign([{ title: 'Evidence', retrieved: { record_id: 'context' } }], { canAnswer: true });
+const deferred = () => { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; };
+it('T03/T04: preserves evidence during preparation and then publishes the answer', async () => {
+  const phases = [];
+  const investigation = createInvestigation({ request: async () => results, generate: async () => ({ answer: { outcome: 'answered' } }), onState: s => phases.push(s.phase) });
+  await investigation.submit('Q');
+  expect(phases).toEqual(['finding', 'preparing', 'complete']);
+  expect(investigation.state.answer.answer.outcome).toBe('answered');
+});
+it('T07: stopping generation ignores late completion and retains the question', async () => {
+  const pending = deferred();
+  const generate = vi.fn(() => pending.promise);
+  const investigation = createInvestigation({ request: async () => results, generate });
+  const done = investigation.submit('Q');
+  await Promise.resolve();
+  expect(investigation.state.phase).toBe('preparing');
+  investigation.stop();
+  pending.resolve({ answer: { outcome: 'answered' } });
+  await done;
+  expect(investigation.state).toMatchObject({ phase: 'editing', query: 'Q', stopped: true });
+  expect(investigation.state.answer).toBeUndefined();
+});
+it('T06/T08: generation failure keeps evidence and retry generates without retrieving again', async () => {
+  const request = vi.fn(async () => results);
+  const generate = vi.fn().mockRejectedValueOnce(Error('offline')).mockResolvedValueOnce({ answer: { outcome: 'answered' } });
+  const investigation = createInvestigation({ request, generate });
+  await investigation.submit('Q');
+  expect(investigation.state).toMatchObject({ phase: 'answer_failed', results });
+  await investigation.retryAnswer();
+  expect(investigation.state.phase).toBe('complete');
+  expect(request).toHaveBeenCalledTimes(1);
+  expect(generate).toHaveBeenCalledTimes(2);
+});
+it('T05/T10: insufficient answer retains evidence and permits refinement', async () => {
+  const investigation = createInvestigation({ request: async () => results, generate: async () => ({ answer: { outcome: 'insufficient' } }) });
+  await investigation.submit('Q');
+  expect(investigation.state.phase).toBe('answer_limited');
+  investigation.refine();
+  expect(investigation.state.phase).toBe('editing');
+  expect(investigation.state.query).toBe('Q');
+});
+it('copy keeps the question, proposed experiment, uncertainties and source lineage; rendering escapes model text', async () => {
+  const { canonicalSources } = await import('../../workers/ai-search/answer.js');
+  const { record, answerFor } = await import('./answer-fixtures.mjs');
+  const { answerText, renderAnswer, normalizeAnswer } = createRequire(import.meta.url)('../../evidence-search.js');
+  const { sources } = await canonicalSources([record]);
+  const answer = answerFor(sources);
+  answer.summary.text = '<script>bad()</script>';
+  const data = normalizeAnswer({ version: 1, provenance: 'canonical_eae_records', sources, answer, loaded_at: '2026-10-05T00:00:00Z' });
+  expect(renderAnswer(data)).toContain('&lt;script&gt;');
+  expect(renderAnswer(data)).not.toContain('<script>');
+  const copy = answerText(data, 'Context?');
+  expect(copy).toContain('Question: Context?');
+  expect(copy).toContain(answer.next_step.measure);
+  expect(copy).toContain(answer.uncertainties[0]);
+  expect(copy).toContain(record.source.url);
+  expect(copy).toContain(sources[0].snapshot_id);
+});
+it('a stopped preparation cannot replace a later answer', async () => {
+  const pending = deferred();
+  const generate = vi.fn().mockImplementationOnce(() => pending.promise).mockResolvedValueOnce({ answer: { outcome: 'answered', marker: 'new' } });
+  const investigation = createInvestigation({ request: async () => results, generate });
+  const old = investigation.submit('Old');
+  await Promise.resolve();
+  investigation.stop();
+  await investigation.submit('New');
+  pending.resolve({ answer: { outcome: 'answered', marker: 'old' } });
+  await old;
+  expect(investigation.state.answer.answer.marker).toBe('new');
+});

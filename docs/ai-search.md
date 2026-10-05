@@ -30,7 +30,7 @@ AI_SEARCH namespace binding
 agentic-engineering-search
 ```
 
-The canonical research source and D1 projection remain governed by the [evidence projection contract](evidence-projection.md). The search Worker does not bind to or read `EVIDENCE_DB`.
+The canonical research source and D1 projection remain governed by the [evidence projection contract](evidence-projection.md). Retrieval itself does not read `EVIDENCE_DB`. The answer endpoint reads the existing database’s `main` projection to ground synthesis in canonical records; see [evidence-grounded answers](evidence-answers.md).
 
 ## Cloudflare resources
 

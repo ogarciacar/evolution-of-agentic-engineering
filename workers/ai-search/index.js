@@ -1,3 +1,4 @@
+import { handleAnswer, answerAvailable } from "./answer.js";
 import { buildEvidencePackage } from "./evidence-package.js";
 
 const SITE_ORIGIN = "https://agenticengineering.science";
@@ -107,6 +108,7 @@ function uniqueResults(chunks) {
 
 export async function handleRequest(request, env) {
   const url = new URL(request.url);
+  if (url.pathname === "/api/search/answer") return handleAnswer(request, env);
   if (url.pathname !== "/api/search") return json({ error: "Not found" }, 404);
   if (request.method !== "GET") return json({ error: "Method not allowed" }, 405, { Allow: "GET" });
 
@@ -144,7 +146,7 @@ export async function handleRequest(request, env) {
       zero_results: results.length === 0,
     }));
 
-    return json({ query, results, ...(evidence ? { evidence } : {}) });
+    return json({ query, results, ...(evidence ? { evidence, ...(answerAvailable(env) ? { answer_available: true } : {}) } : {}) });
   } catch {
     const latencyMs = Date.now() - startedAt;
     console.log(JSON.stringify({

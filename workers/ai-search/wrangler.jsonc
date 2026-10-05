@@ -15,5 +15,21 @@
       "namespace": "default",
       "remote": true
     }
+  ],
+  "ai": {
+    "binding": "AI"
+  },
+  "vars": {
+    "ANSWER_ENABLED": "true"
+  },
+  "ratelimits": [
+    {
+      "name": "ANSWER_RATE_LIMITER",
+      "namespace_id": "2026100501",
+      "simple": {
+        "limit": 6,
+        "period": 60
+      }
+    }
   ]
 }

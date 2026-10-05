@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const { EVIDENCE_DB_NAME, EVIDENCE_DB_ID, EAE_ANSWER_ENABLED = 'true' } = process.env;
+if (!EVIDENCE_DB_NAME || !/^[a-f0-9-]{36}$/i.test(EVIDENCE_DB_ID || '')) throw Error('Existing production EVIDENCE_DB_NAME and EVIDENCE_DB_ID are required');
+if (!['true', 'false'].includes(EAE_ANSWER_ENABLED)) throw Error('EAE_ANSWER_ENABLED must be true or false');
+const dir = new URL('./', import.meta.url);
+const config = JSON.parse(fs.readFileSync(new URL('wrangler.jsonc', dir), 'utf8'));
+config.vars.ANSWER_ENABLED = EAE_ANSWER_ENABLED;
+config.d1_databases = [{ binding: 'EVIDENCE_DB', database_name: EVIDENCE_DB_NAME, database_id: EVIDENCE_DB_ID }];
+fs.writeFileSync(new URL('wrangler.deploy.json', dir), JSON.stringify(config, null, 2) + '\n');
+console.log('Worker configuration ready with existing D1 database and bounded answer generation');

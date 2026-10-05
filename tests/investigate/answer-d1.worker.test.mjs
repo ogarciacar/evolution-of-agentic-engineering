@@ -1,0 +1,21 @@
+import { beforeAll, expect, it } from 'vitest';
+import { env, applyD1Migrations } from 'cloudflare:test';
+import { handleRequest } from '../../workers/ai-search/index.js';
+import { fixtureEnv, rowFor } from './answer-fixtures.mjs';
+beforeAll(async () => { await applyD1Migrations(env.EVIDENCE_DB, env.TEST_MIGRATIONS); });
+it('loads only the main canonical projection through the real D1 binding and existing migrations', async () => {
+  const base = rowFor();
+  delete base.stages_json; delete base.conditions_json;
+  const row = { ...base, projection_id: 'main', scale_label: 'Scale signal', scale_summary: 'Reported activity', assisted_by_ai: 0 };
+  const keys = Object.keys(row);
+  const insert = `INSERT INTO evidence (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`;
+  await env.EVIDENCE_DB.prepare(insert).bind(...Object.values(row)).run();
+  await env.EVIDENCE_DB.prepare(insert).bind(...Object.values({ ...row, observed_json: '["Preview-only unsupported claim"]', projection_id: 'pr-999' })).run();
+  const req = new Request('https://eae.test/api/search/answer', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-EAE-Projection': 'pr-999' }, body: JSON.stringify({ query: 'Context?', record_ids: ['context'] }) });
+  const response = await handleRequest(req, fixtureEnv(undefined, { EVIDENCE_DB: env.EVIDENCE_DB }));
+  expect(response.status).toBe(200);
+  const data = await response.json();
+  expect(data.projection).toBe('main');
+  expect(data.sources[0].passages[0].text).toContain('locating repository conventions');
+  expect(JSON.stringify(data)).not.toContain('Preview-only');
+});
