@@ -239,3 +239,58 @@ canonical evidence → validation → D1 projection → website → AI Search
 ```
 
 AI Search is disposable derived infrastructure. Removing it must not require a D1 rollback, evidence migration, projection rebuild, or change to canonical evidence.
+
+## Inspectable passages (Explore and Reason, slice 2)
+
+The homepage requests `GET /api/search?q=<question>&passages=1`. This opt-in
+adds an `evidence` package; the existing `query` and `results` fields and default
+endpoint remain compatible with earlier clients and evaluation scripts.
+
+The package has `version: 1`, `provenance: indexed_eae_pages`, `retrieved_at`,
+`indexed_at: null` (the provider does not expose a verified index timestamp),
+`truncated`, `limits`, `outcome`, and `sources`. Each source contains a stable
+`source:<sha256>` ID, canonical EAE URL, title, `kind` (`eae_signal` or
+`eae_collection`), optional canonical `record_id`, and passages with stable
+`passage:<sha256>` IDs and exact indexed text. A passage hash covers its
+canonical EAE URL and exact text; rankings, query strings, fragments and
+retrieval times do not change IDs. Content edits do. These are content identity
+keys, not a permanent archive or a claim of truth/freshness.
+
+At most 100 candidate chunks are examined, returning up to five EAE pages and
+three distinct passages per page. Each passage is at most 12,000 UTF-8 bytes.
+Oversized passages are omitted, never silently clipped. Other count omissions
+set `truncated: true`. Source ordering follows retrieval ordering; this is not a
+new reranker. Multiple passages on one EAE page stay grouped and do not count as
+independent evidence. Multiple pages may still cite the same primary source;
+primary-source independence must be assessed before answer synthesis.
+
+Outcomes:
+
+- `evidence_found`: at least one traceable passage is available; this does not
+  establish that it supports an answer or recommendation.
+- `no_matching_evidence`: no eligible nonempty passages matched within the
+  examined corpus response. The UI offers question refinement without implying
+  that no evidence exists elsewhere.
+- `evidence_unavailable`: candidates were omitted by limits and no passages
+  remain. The UI treats this as a retrieval failure, not as an evidence gap.
+- Invalid provider responses and provider errors return 503.
+
+The existing result cards remain concise. “Inspect passages” opens an accessible
+modal with the full retrieved text rendered as escaped plain text. Escape/Close
+returns focus to the invoking control. Original-source metadata, when available,
+comes from the existing `/api/evidence/<id>` read model. It is labelled separately
+from indexed EAE text. Missing metadata leaves the EAE page link available; the UI
+does not invent dates, authors or original-source links. Index passages can lag
+the current evidence record, and the inspector states this limitation.
+
+This is the evidence retrieval/inspection foundation, not answer generation.
+The future reasoning path must resolve canonical source metadata server-side,
+check source lineage and freshness, and validate cited claim support; it must not
+trust browser-supplied enrichment or equate a search match with sufficient evidence.
+
+Pages and the Worker deploy separately. Until the Worker supports the opt-in,
+the new UI falls back to existing cards without an inspector. Preview service
+bindings use the deployed production Worker, so deterministic browser acceptance
+tests exercise the candidate Worker with fixture bindings in-process to verify
+the new contract before merge. After merge, the Worker deployment smoke check
+also verifies the opt-in package.

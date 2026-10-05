@@ -126,6 +126,15 @@
       </form>
       <div class="ask-summary"><span class="ask-count" id="ask-evidence-count"></span><span class="ask-status" id="ask-evidence-status" role="status" aria-live="polite"></span><button class="ask-stop" id="ask-evidence-stop" type="button" hidden>Stop</button></div>
       <div class="ask-results" id="ask-evidence-results"></div>
+      <div class="ask-empty" id="ask-evidence-empty" hidden>
+        <h3>No matching evidence in this corpus</h3>
+        <p>This does not establish that evidence does not exist elsewhere. Try a narrower question or name a practice or organisation.</p>
+        <button class="evidence-inspect" id="ask-evidence-refine" type="button">Refine question</button>
+      </div>
+      <dialog class="evidence-dialog" id="evidence-dialog" aria-labelledby="evidence-dialog-title">
+        <div class="evidence-dialog-head"><h2 id="evidence-dialog-title">Retrieved evidence</h2><button class="evidence-close" id="evidence-close" type="button" autofocus>Close</button></div>
+        <div id="evidence-details"></div>
+      </dialog>
     </div>
   </header>
 

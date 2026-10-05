@@ -28,6 +28,12 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Install locked test dependencies
+        run: npm ci
+
+      - name: Check evidence packages in Workers runtime
+        run: npm run test:worker
+
       - name: Check AI Search Worker contract
         run: node workers/ai-search/check-search-endpoint.mjs
 
@@ -46,7 +52,7 @@ jobs:
             --retry-all-errors \
             --retry-delay 3 \
             --header 'Accept: application/json' \
-            'https://agenticengineering.science/api/search?q=Spotify' \
+            'https://agenticengineering.science/api/search?q=Spotify&passages=1' \
             --output response.json
 
           python - <<'PY'
@@ -63,6 +69,15 @@ jobs:
           for result in results:
               path = urlparse(result["url"]).path.rstrip("/")
               assert path == "/practices" or path.startswith("/signals/"), path
+
+          evidence = data.get("evidence")
+          assert isinstance(evidence, dict), "Missing opt-in evidence package"
+          assert evidence.get("version") == 1
+          assert evidence.get("outcome") in ("evidence_found", "no_matching_evidence")
+          for source in evidence.get("sources", []):
+              assert source["id"].startswith("source:")
+              for passage in source["passages"]:
+                  assert passage["id"].startswith("passage:") and passage["text"].strip()
 
           print(f"Production AI Search healthy: {len(results)} allowed result(s)")
           PY

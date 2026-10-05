@@ -58,3 +58,18 @@ interaction contract, not evidence or answer quality.
 
 Framework reference:
 https://developers.cloudflare.com/workers/testing/vitest-integration/
+
+## Slice 2: inspectable evidence
+
+| Transition / rule | Acceptance | Supporting tests |
+| --- | --- | --- |
+| T11/T12: results → inspect → results | Exact full passages, separate original provenance, Escape restores focus, no horizontal overflow | Package normalization; escaped rendering and URL validation; stable IDs and exact text in Workers runtime |
+| T05/T10: search → limited → editing | Corpus-scoped no-match message; Refine retains question and sends no request | Explicit limited/refine lifecycle; empty/invalid/off-site chunks |
+| Metadata unavailable | Passages and EAE link remain, no invented original-source attribution | Validated source metadata; unsafe link rejection |
+| Retrieval failure | Failure never renders the no-match panel | Malformed provider output; all candidates exceeding bounds |
+
+`evidence.spec.mjs` routes browser requests through the actual candidate Worker
+handler with fixed AI Search bindings, so its response fixtures use the same
+package-building code that will be deployed. These tests do not call live AI.
+Package unit tests run inside Cloudflare's runtime, including SHA-256 identity,
+source/fragment deduplication, bounded output and exact practices passages.

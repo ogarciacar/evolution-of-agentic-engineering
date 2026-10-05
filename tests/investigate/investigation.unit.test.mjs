@@ -47,7 +47,7 @@ describe('investigation lifecycle', () => {
     expect(request.mock.calls[0][0]).toBe('Context?');
     pending.resolve([]);
     await first;
-    expect(investigation.state.phase).toBe('complete');
+    expect(investigation.state.phase).toBe('limited');
   });
   it('T07 stops immediately, aborts the adapter and preserves the question', async () => {
     const pending = deferred();
@@ -83,7 +83,7 @@ describe('investigation lifecycle', () => {
     await investigation.submit('Context?');
     expect(investigation.state).toMatchObject({ phase: 'failed', query: 'Context?' });
     await investigation.submit('Context?');
-    expect(investigation.state.phase).toBe('complete');
+    expect(investigation.state.phase).toBe('limited');
     expect(request).toHaveBeenCalledTimes(2);
   });
 });
@@ -95,7 +95,7 @@ describe('search request adapter', () => {
       .mockResolvedValueOnce({ ok: true, json: async () => ({ results: [{ title: 'Source', url: '/signals/context/', excerpt: 'Evidence' }] }) })
       .mockResolvedValueOnce({ ok: false });
     const results = await createSearchRequest(fetch)('A & B?', { signal: controller.signal });
-    expect(fetch.mock.calls[0][0]).toBe('/api/search?q=A%20%26%20B%3F');
+    expect(fetch.mock.calls[0][0]).toBe('/api/search?q=A%20%26%20B%3F&passages=1');
     expect(fetch.mock.calls[0][1].signal).toBe(controller.signal);
     expect(fetch.mock.calls[1][1].signal).toBe(controller.signal);
     expect(results[0].title).toBe('Source');
