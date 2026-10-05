@@ -2,6 +2,54 @@
   const SITE_ORIGIN = "https://agenticengineering.science";
   const MAX_EXCERPT_CHARS = 620;
   const MAX_EPISTEMIC_CHARS = 300;
+  const MAX_QUERY_LENGTH = 500;
+
+  function validateQuestion(value) {
+    const query = String(value ?? "").trim();
+    const error = !query ? "Enter a question to search the evidence."
+      : query.length > MAX_QUERY_LENGTH ? "Use 500 characters or fewer." : "";
+    return { query, error };
+  }
+
+  // Request identity is independent of AbortSignal: an adapter may finish even
+  // after cancellation. Only the current request may update the visible state.
+  function createInvestigation({ request, onState = () => {} }) {
+    let state = { phase: "editing", query: "", error: "", results: [], stopped: false };
+    let active = null;
+    const publish = (next) => { state = next; onState(state); };
+
+    return {
+      get state() { return state; },
+      async submit(value) {
+        if (active) return;
+        const { query, error } = validateQuestion(value);
+        if (error) {
+          publish({ phase: "editing", query, error, results: [], stopped: false });
+          return;
+        }
+        const current = { controller: new AbortController() };
+        active = current;
+        publish({ phase: "finding", query, error: "", results: [], stopped: false });
+        try {
+          const results = await request(query, { signal: current.controller.signal });
+          if (active !== current) return;
+          active = null;
+          publish({ phase: "complete", query, error: "", results, stopped: false });
+        } catch {
+          if (active !== current) return;
+          active = null;
+          publish({ phase: "failed", query, error: "", results: [], stopped: false });
+        }
+      },
+      stop() {
+        if (!active) return;
+        const current = active;
+        active = null;
+        current.controller.abort();
+        publish({ phase: "editing", query: state.query, error: "", results: [], stopped: true });
+      },
+    };
+  }
 
   function esc(value, quote = false) {
     let out = String(value ?? "")
@@ -140,13 +188,14 @@
     };
   }
 
-  async function enrichResult(result, fetchImpl) {
+  async function enrichResult(result, fetchImpl, signal) {
     const id = signalIdFromUrl(result.url);
     if (!id) return result;
 
     try {
       const response = await fetchImpl(`/api/evidence/${encodeURIComponent(id)}`, {
         headers: { Accept: "application/json" },
+        signal,
       });
       if (!response.ok) return result;
       const evidence = normalizeEvidence(await response.json(), id);
@@ -156,8 +205,25 @@
     }
   }
 
-  async function enrichResults(results, fetchImpl) {
-    return Promise.all(results.map((result) => enrichResult(result, fetchImpl)));
+  async function enrichResults(results, fetchImpl, signal) {
+    return Promise.all(results.map((result) => enrichResult(result, fetchImpl, signal)));
+  }
+
+  function createSearchRequest(fetchImpl) {
+    return async (query, { signal } = {}) => {
+      signal?.throwIfAborted();
+      const response = await fetchImpl(`/api/search?q=${encodeURIComponent(query)}`, {
+        headers: { Accept: "application/json" },
+        signal,
+      });
+      signal?.throwIfAborted();
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      signal?.throwIfAborted();
+      const results = await enrichResults(normalizeResults(data.results), fetchImpl, signal);
+      signal?.throwIfAborted();
+      return results;
+    };
   }
 
   function renderPracticesResult(result) {
@@ -198,50 +264,56 @@
     const count = doc.getElementById("ask-evidence-count");
     const status = doc.getElementById("ask-evidence-status");
     const results = doc.getElementById("ask-evidence-results");
-    if (!form || !input || !button || !count || !status || !results) return;
+    const stop = doc.getElementById("ask-evidence-stop");
+    const error = doc.getElementById("ask-evidence-error");
+    if (!form || !input || !button || !count || !status || !results || !stop || !error) return;
 
-    form.addEventListener("submit", async (event) => {
+    const investigation = createInvestigation({
+      request: createSearchRequest(fetchImpl),
+      onState(state) {
+        const finding = state.phase === "finding";
+        button.disabled = finding;
+        input.readOnly = finding;
+        stop.hidden = !finding;
+        if (finding) form.setAttribute("aria-busy", "true");
+        else form.removeAttribute("aria-busy");
+        error.textContent = state.error;
+        if (state.error) input.setAttribute("aria-invalid", "true");
+        else input.removeAttribute("aria-invalid");
+        count.textContent = "";
+        results.innerHTML = "";
+        status.textContent = finding ? "Finding relevant evidence…"
+          : state.stopped ? "Investigation stopped. You can edit your question and try again."
+          : state.phase === "failed" ? "Search is temporarily unavailable. Please try again or explore the Evidence page."
+          : "";
+        if (state.phase === "complete") {
+          const total = state.results.length;
+          count.textContent = total ? `${total} ${total === 1 ? "result" : "results"}` : "";
+          status.textContent = total ? "" : "No evidence matched this question.";
+          results.innerHTML = state.results.map(renderResult).join("");
+        }
+        // Keep cancellation reachable below the tall homepage hero on mobile.
+        if (finding) stop.scrollIntoView({ block: "nearest", behavior: "instant" });
+        if (state.error || state.stopped) input.focus();
+      },
+    });
+
+    form.addEventListener("submit", (event) => {
       event.preventDefault();
-      if (button.disabled) return;
-
-      const query = input.value.trim();
-      if (!query) {
-        count.textContent = "";
-        status.textContent = "Enter a question to search the evidence.";
-        input.focus();
-        return;
-      }
-
-      button.disabled = true;
-      form.setAttribute("aria-busy", "true");
-      count.textContent = "";
-      status.textContent = "Searching evidence…";
-      results.innerHTML = "";
-
-      try {
-        const response = await fetchImpl(`/api/search?q=${encodeURIComponent(query)}`, {
-          headers: { Accept: "application/json" },
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-        const normalized = normalizeResults(data.results);
-        const enriched = await enrichResults(normalized, fetchImpl);
-        count.textContent = enriched.length ? `${enriched.length} ${enriched.length === 1 ? "result" : "results"}` : "";
-        status.textContent = enriched.length ? "" : "No evidence matched this question.";
-        results.innerHTML = enriched.map(renderResult).join("");
-      } catch {
-        count.textContent = "";
-        status.textContent = "Search is temporarily unavailable. You can still use the structured evidence filters below.";
-      } finally {
-        button.disabled = false;
-        form.removeAttribute("aria-busy");
-      }
+      void investigation.submit(input.value);
+    });
+    stop.addEventListener("click", () => investigation.stop());
+    input.addEventListener("input", () => {
+      error.textContent = "";
+      input.removeAttribute("aria-invalid");
     });
   }
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
+      validateQuestion,
+      createInvestigation,
+      createSearchRequest,
       shortExcerpt,
       safeSourceUrl,
       isPracticesUrl,
