@@ -1,0 +1,178 @@
+source:
+  title: "Engineering Sustainable Agents: A Systematic Comparison of Agentic LLMs for Developer Workflows"
+  producer: "Astekin et al."
+  producer_type: authors
+  date: "2026-10-02"
+  url: "https://arxiv.org/abs/2610.03010"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Multi-agent cooperation rarely reached the accuracy-energy-latency frontier"
+  summary: >
+    Astekin et al. compare non-agentic, single-agent, dual-agent, and multi-agent
+    configurations across five software-engineering tasks, six open-weight
+    models, two prompting strategies, and three hardware platforms. Multi-agent
+    configurations averaged 6.36 times the energy and 6.07 times the latency of
+    non-agentic baselines. They improved vulnerability detection on average, but
+    represented only one of 66 Pareto-optimal configurations.
+
+observed:
+  - >
+    The study evaluates code generation, technical-debt identification, code-
+    vulnerability detection, log parsing, and log analysis using HumanEval,
+    MLCQ, PrimeVul, and LogHub HDFS datasets.
+  - >
+    The experimental ladder compares a non-agentic single query, a single-agent
+    setup, a dual-agent configuration, and a multi-agent workflow using an
+    AG2/AutoGen-style orchestration framework.
+  - >
+    The core factorial design contains 1,800 runs across five tasks, four agent
+    configurations, two prompt strategies, five models, three hardware
+    platforms, and three repetitions. Forty additional GPT-OSS runs bring the
+    reported total to 1,840.
+  - >
+    The evaluated models are instruction-tuned open-weight Gemma, CodeGemma,
+    Qwen, Qwen-Coder, DeepSeek-Coder, and GPT-OSS variants. The hardware ranges
+    from a developer workstation to two GPU servers.
+  - >
+    The protocol fixes temperature at zero, restarts Ollama for each run,
+    disables orchestration caching, attributes process-level energy with
+    CodeCarbon, and applies Friedman and Wilcoxon tests with matched-pairs effect
+    sizes.
+  - >
+    Averaged across the study, multi-agent configurations consumed 6.36 times as
+    much energy and took 6.07 times as long as the non-agentic baseline. The
+    largest reported slowdown for a task-hardware pair was 160 times.
+  - >
+    The non-agentic configuration achieved the highest average accuracy in four
+    of five tasks. Multi-agent configuration achieved the highest average result
+    for vulnerability detection.
+  - >
+    Of 66 configurations on the three-dimensional accuracy, energy, and latency
+    Pareto front, 36 were non-agentic, 23 single-agent, six dual-agent, and one
+    multi-agent. Non-agentic and single-agent configurations therefore accounted
+    for 59 of 66 Pareto-optimal results.
+  - >
+    Model and prompt effects varied by task rather than producing one global
+    winner. The paper reports that prompt strategy alone changed log-parsing
+    accuracy from 3.4% to 54.3% in one comparison.
+  - >
+    Hardware differences became more important for heavier configurations: a
+    high-end server was up to 3.4 times faster than a workstation for multi-agent
+    work. Energy and latency were strongly correlated in log-log space, with a
+    reported Pearson correlation of 0.987.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The controlled study reports 1,840 runs spanning five tasks, four agentic
+    complexity levels, six open-weight models, two prompt strategies, and three
+    hardware platforms. This is broad comparative benchmark evidence, not
+    sustained production operation or evidence of organizational agent fleets.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Execution, Verification, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: REFINES
+
+interpretation: >
+  The study makes agentic configuration an explicit variant exposed to a
+  task-specific fitness function. Task, model, prompt, hardware, accuracy,
+  latency, and energy jointly determine which configuration is viable; no single
+  architecture dominates across environments. Its strongest implication is for
+  Cooperation. Adding coordinating agents imposed a systematic resource cost,
+  while measurable accuracy benefit was limited to particular work such as
+  vulnerability detection. Cooperation is therefore not a monotonic consequence
+  of increasing agent count. It remains fit only where task-specific outcome
+  gains exceed its coordination, execution, latency, and energy costs.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Supports Selection with a controlled factorial comparison showing that
+    materially different agent configurations occupy different accuracy,
+    latency, and energy positions as the task, model, prompt, and hardware
+    environment changes. Refines Cooperation by providing counterevidence to a
+    general cooperation advantage: multi-agent systems can improve a selected
+    task, but lightweight configurations dominate most measured Pareto-optimal
+    choices. C03 should therefore be read as conditional on demonstrated net
+    fitness relative to useful isolated operation.
+
+what_this_does_not_establish:
+  - >
+    The paper is an arXiv preprint and does not establish completed peer review
+    or independent replication of the reported findings.
+  - >
+    The study evaluates benchmark tasks with local open-weight models and one
+    orchestration framework; results may differ with frontier hosted models,
+    other agent architectures, tool environments, or production repositories.
+  - >
+    The evaluated task configurations differ in task-specific workflow and role
+    design, so agent count is not isolated from every other orchestration detail.
+  - >
+    Accuracy uses task-specific metrics that are not interchangeable across code
+    generation, debt detection, vulnerability detection, and log work.
+  - >
+    CodeCarbon attributes process energy and estimates emissions using a fixed
+    Canadian carbon-intensity assumption; the measurements do not establish the
+    lifecycle environmental footprint of deployed agent services.
+  - >
+    Most core experiments were repeated three times, while the additional
+    GPT-OSS configurations were run once because of resource constraints.
+  - >
+    Benchmark latency and energy do not directly establish monetary cost,
+    developer attention, maintainability, production reliability, or business
+    value.
+  - >
+    The results do not establish that multi-agent cooperation is generally
+    harmful: the vulnerability-detection result shows that benefits can be
+    task-specific and may justify additional cost under different priorities.
+  - >
+    The study does not examine persistent differentiated cooperation that forms
+    a higher-order engineering object under C04.
+
+open_question: >
+  Which observable task characteristics predict when the outcome improvement
+  from multi-agent cooperation will exceed its additional coordination, latency,
+  energy, verification, and human-attention costs in production engineering?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: benchmark-agentic-complexity-ladder
+    use_case: "Decide whether an engineering task needs non-agentic, single-agent, or multi-agent execution."
+    problem: "Selecting a complex agent architecture without a lightweight baseline can hide whether cooperation contributes any task-specific benefit."
+    reported_practice: "Evaluate an explicit ladder from direct model query through single-, dual-, and multi-agent configurations under matched task conditions."
+    selection_conditions: [coordination, verification, economics]
+  - id: optimize-agent-configurations-on-pareto-front
+    use_case: "Choose an agent configuration when outcome quality, response time, and resource use all matter."
+    problem: "Ranking only by task accuracy can select a configuration whose small benefit carries disproportionate latency and energy costs."
+    reported_practice: "Compare configurations on a joint accuracy, latency, and energy Pareto front rather than optimizing one metric in isolation."
+    selection_conditions: [verification, observability, economics]
+  - id: escalate-to-cooperation-by-task-evidence
+    use_case: "Introduce multi-agent cooperation for a bounded software-engineering workflow."
+    problem: "Additional agents impose systematic execution costs while accuracy gains vary by task."
+    reported_practice: "Begin with a lightweight task-aware baseline and adopt multi-agent workflows only when comparative evaluation demonstrates a benefit that justifies the added cost."
+    selection_conditions: [coordination, verification, economics]
+  - id: evaluate-agent-runtime-and-hardware-together
+    use_case: "Deploy heavier agent workflows whose latency and energy depend on the execution platform."
+    problem: "A configuration that appears viable on high-end server hardware may be too slow or inefficient on a developer workstation."
+    reported_practice: "Measure the same agent configurations across representative hardware and include runtime environment in the selection decision."
+    selection_conditions: [execution, economics]
+  - id: test-model-and-prompt-fit-per-task
+    use_case: "Select models and prompting strategies across different engineering task families."
+    problem: "One model or prompt strategy does not remain optimal across code, vulnerability, debt, and log-analysis work."
+    reported_practice: "Treat model and prompt choice as task-specific experimental variables rather than global defaults."
+    selection_conditions: [execution, verification]
+
+assessment:
+  assisted_by_ai: true
