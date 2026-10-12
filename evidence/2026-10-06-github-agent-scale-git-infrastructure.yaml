@@ -1,0 +1,169 @@
+source:
+  title: "Building Git infrastructure for agent-scale development"
+  producer: "GitHub"
+  producer_type: organization
+  date: "2026-10-06"
+  url: "https://github.blog/engineering/architecture-optimization/building-git-infrastructure-for-agent-scale-development/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Agent concurrency turns repository writes into infrastructure selection pressure"
+  summary: >
+    GitHub reports that rapidly increasing developer and agent activity is forcing a
+    redesign of its Git infrastructure. The proposed architecture narrows the
+    coordination-critical path, moves repository maintenance away from request
+    serving, and decouples durable storage from elastic compute; GitHub reports up
+    to 35 times higher write throughput in internal benchmarks.
+
+observed:
+  - >
+    GitHub reports that total Git activity increased from 218.2 billion events in
+    September 2025 to 473.3 billion events in August 2026, while its busiest
+    repository received roughly one billion requests during August 2026.
+  - >
+    GitHub reports 7.38 billion commits in September 2026, more than five times the
+    volume one year earlier. The reported figure combines activity from developers
+    and agents rather than attributing a measured share to either group.
+  - >
+    Pushes increased from 0.69 billion to 3.35 billion per month year over year,
+    and pull-request merges grew to nearly four times their earlier volume.
+  - >
+    GitHub Actions ran 3.26 billion times in September 2026, more than four times
+    the volume one year earlier. GitHub describes how each push can fan out into
+    thousands of reads from systems such as CI and code scanning.
+  - >
+    GitHub identifies several constraints in agent-scale workloads: tight agent
+    loops make individual push latency material, thousands of agents writing on
+    separate branches produce sustained write pressure, and merges contend on a
+    shared reference.
+  - >
+    GitHub's existing Spokes architecture stores full repository copies on several
+    fileservers, five by default, and uses a three-phase commit protocol with a
+    quorum for reference updates. Adding replicas increases read capacity but also
+    adds participants to each write, coupling read scale, durability, and write
+    latency.
+  - >
+    The new architecture is designed to coordinate only the reference update that
+    requires agreement while allowing object storage, connectivity validation, and
+    secret scanning to proceed independently or in parallel.
+  - >
+    GitHub is moving compaction and garbage collection away from request-serving
+    hosts into separate workers operating against durable storage so repository
+    maintenance does not share the serving path with pushes and fetches.
+  - >
+    GitHub is separating authoritative repository storage in Azure Blob Storage
+    from lightweight compute workers that cache and serve data, allowing read
+    capacity to scale without adding durable replicas to every write path.
+  - >
+    GitHub states that the architecture must retain existing branching, review,
+    merge, history, branch-protection, audit, visibility, and approval controls as
+    automated activity increases.
+  - >
+    GitHub reports that the new architecture has delivered up to 35 times higher
+    write throughput in internal benchmarks, with read capacity scaling
+    independently.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    GitHub reports 473.3 billion monthly Git events in August 2026, 7.38 billion
+    developer-and-agent commits and 3.26 billion Actions runs in September 2026,
+    and a target workload that includes thousands of agents operating against one
+    codebase. The source reports global aggregate activity and internal benchmarks,
+    not a causal measurement of agent-only traffic or a completed production
+    migration.
+
+mapping:
+  stages: [Selection]
+  conditions: [Execution, Verification, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
+interpretation: >
+  GitHub provides direct infrastructure-level evidence for Selection. Repository
+  architecture that was viable for predominantly human-paced development encounters
+  new constraints when automated actors commit, push, fetch, validate, and merge at
+  much higher frequency and concurrency. Push latency, durable write throughput,
+  shared-reference contention, read fan-out, maintenance work, failure recovery,
+  governance, and observability become environmental conditions that determine
+  whether agent fleets can operate reliably at scale. GitHub's response also shows
+  that scaling is not only a matter of adding compute: the substrate must reduce
+  unnecessary coordination while preserving the narrow agreement points and human
+  controls required for correctness.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports Selection by documenting an engineering environment being redesigned
+    around the observed and anticipated workload characteristics of concurrent
+    developers and agents. It supplies quantitative scale indicators and identifies
+    concrete constraints that select against the existing coupled architecture.
+    The source does not support C03 by itself: concurrent activity and infrastructure
+    coordination do not establish that cooperation among agentic engineering objects
+    improves fitness relative to useful isolated operation.
+
+what_this_does_not_establish:
+  - >
+    GitHub combines developer and agent activity in its commit and Git-event totals,
+    so the source does not quantify how much of the reported growth agents caused.
+  - >
+    The statement that leading repositories run growing fleets of agents and the
+    target of thousands of agents against one codebase do not publish a measured
+    agent count, workload trace, or named customer deployment.
+  - >
+    The reported increase in Git activity is observational and does not isolate
+    agentic development from customer growth, conventional automation, CI expansion,
+    or other changes over the same period.
+  - >
+    The up-to-35-times write-throughput result is an internal benchmark without a
+    published benchmark configuration, distribution, baseline workload, or
+    independent replication; it should not be interpreted as typical production
+    improvement.
+  - >
+    GitHub describes an architecture being built while the service remains online;
+    the source does not establish that the migration is complete or that all stated
+    reliability and scaling properties have been demonstrated in production.
+  - >
+    Commit, push, merge, request, and Actions-run volumes measure system activity,
+    not useful software outcomes, quality, developer productivity, or business value.
+  - >
+    The source does not compare cooperating agents with isolated agents and therefore
+    does not establish a Cooperation advantage under C03.
+  - >
+    The source does not establish differentiated persistent agent roles or a
+    higher-order specialized engineering object under C04.
+
+open_question: >
+  As agent-generated repository activity grows, which combinations of write
+  throughput, reference coordination, verification fan-out, governance, and human
+  review capacity become the binding constraints on useful software delivery?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: minimize-git-coordination-critical-path
+    use_case: "Accept frequent concurrent pushes from developers, automation, and agent fleets."
+    problem: "Coordinating every part of a push across durable replicas makes write latency and throughput depend on work that does not require global agreement."
+    reported_practice: "GitHub narrows synchronous coordination to the reference update while allowing object storage, connectivity validation, and secret scanning to proceed independently or in parallel."
+    selection_conditions: [execution, coordination]
+  - id: decouple-repository-storage-and-compute
+    use_case: "Scale repository reads and writes independently under bursty agent and CI workloads."
+    problem: "Using complete local repository copies for both durability and serving means that adding read replicas also adds overhead to every write."
+    reported_practice: "GitHub separates authoritative repository data in durable object storage from elastic compute workers that cache and serve requests."
+    selection_conditions: [execution, economics]
+  - id: remove-repository-maintenance-from-serving-path
+    use_case: "Maintain heavily written repositories without slowing live pushes and fetches."
+    problem: "Compaction and garbage collection compete with request handling when they execute on the same hosts."
+    reported_practice: "GitHub moves compaction and garbage collection to separate workers operating directly against durable storage."
+    selection_conditions: [execution, observability]
+  - id: preserve-human-code-governance-at-agent-scale
+    use_case: "Increase automated repository throughput while retaining organizational control."
+    problem: "Higher agent activity can outrun governance if throughput replaces review, protection, auditability, or approval mechanisms."
+    reported_practice: "GitHub treats branch protection, required review, audit logs, repository visibility, and human approval as constraints the new architecture must preserve."
+    selection_conditions: [verification, coordination, observability]
+
+assessment:
+  assisted_by_ai: true
