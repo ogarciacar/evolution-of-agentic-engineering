@@ -1,0 +1,241 @@
+source:
+  title: "Redesigning source control at Anthropic"
+  producer: "Anthropic"
+  producer_type: organization
+  date: "2026-10-13"
+  url: "https://www.anthropic.com/engineering/redesigning-source-control"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Agent throughput selected for server-centric source control and post-merge verification"
+  summary: >
+    Anthropic reports that daily merges into its monorepo increased from about
+    2,500 in May 2026 to more than 30,000 in September, making source control its
+    largest development bottleneck. A seven-person team built Scion, a
+    server-centric source-control system, and migrated the monorepo in five
+    months. Anthropic reports a 200-fold smaller CPU-and-memory footprint,
+    checkouts two orders of magnitude faster, and a 25% CI CPU-capacity gain.
+
+observed:
+  - >
+    Anthropic reports that average changes merged per day increased from around
+    2,500 in May 2026 to more than 30,000 in September, after which source
+    control became its largest development bottleneck.
+  - >
+    The main-branch history of Anthropic's monorepo is reported to be almost 100
+    GB, while a compressed working copy exceeds 25 GB.
+  - >
+    Anthropic performs approximately 25 million code checkouts per day for CI,
+    before developer environments, agent sandboxes, and research jobs. Naively
+    fetching the full compressed working copy would imply more than 600 PB of
+    daily Git traffic.
+  - >
+    Anthropic used shallow clones, sparse checkouts, promisor remotes, repository
+    snapshots, and several hundred internal Git mirrors before concluding that
+    this architecture no longer scaled with the repository and merge rate.
+  - >
+    Anthropic built Scion and fully migrated its monorepo away from Git in five
+    months. The project also required a new code-review surface, code search,
+    source-control identity and access management, and new mechanisms for
+    landing large volumes of reviewed code.
+  - >
+    Scion assumes clients are online, moves history, blame, commit, merge, and
+    rebase operations to servers, and gives clients bounded local object caches
+    rather than complete repository copies.
+  - >
+    Scion exposes source-control queries through APIs so CI jobs and internal
+    tools can inspect diffs, ancestry, blame, and related metadata without
+    maintaining a working copy or local repository.
+  - >
+    The system represents commits as server-created changesets containing the
+    files changed relative to a parent and content-addressed references to file
+    contents. Creating changesets does not require packfiles, locks, or moving a
+    shared reference.
+  - >
+    Anthropic discourages references other than main and release references
+    because global state requiring cross-server agreement becomes a scaling
+    constraint. Updating a supported reference is separated from creating the
+    changeset.
+  - >
+    Scion stores additional history, blame, search, and commit-graph structures
+    as derived data that can be computed eagerly or on demand without changing
+    clients.
+  - >
+    Immutable content-addressed objects allow any server or cache tier to answer
+    requests without checking for mutations. Anthropic reports cache hit rates
+    above 99% at each tier and independently scalable, short-lived components.
+  - >
+    Anthropic reports that Scion uses 200 times less CPU and memory than its
+    previous Git-mirroring infrastructure, while CI and research checkouts are
+    two orders of magnitude faster, moving from minutes to seconds.
+  - >
+    Anthropic reports that the faster checkout architecture freed substantial
+    fleet capacity and produced a 25% CPU-capacity gain for CI.
+  - >
+    A seven-person engineering team built Scion, its Antique code-review system,
+    and several related services and completed the migration in five months
+    while merged-change volume increased more than tenfold.
+  - >
+    Anthropic reports that an early Claude model rewrote its Git-to-Scion
+    ingestion pipeline to use 20 times less memory and run four times faster
+    while preserving implicit ordering and data-structure invariants.
+  - >
+    Engineers report continuing to review every change request, but increasingly
+    reviewing the intent rather than every generated line. They describe their
+    role as defining high-level system constraints and rejecting locally
+    plausible implementations that violate those constraints or add unnecessary
+    complexity.
+  - >
+    Anthropic assigns persistent monitoring agents, called superfans, to
+    individual Scion and Antique components. These agents inspect telemetry and
+    logs for subtle anomalies alongside conventional alerts.
+  - >
+    Anthropic reports that a conventional globally locked merge queue has not
+    been effective at its change rate. It is investing instead in post-merge and
+    pre-deployment automated testing while allowing concurrent changes and using
+    Claude to repair conflicts.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    This is production evidence from an unusually agent-intensive organization:
+    more than 30,000 daily merges, approximately 25 million CI checkouts per day,
+    and a completed monorepo migration. The performance and capacity figures are
+    first-party point estimates without published distributions, uncertainty,
+    workload definitions, or independent replication.
+
+mapping:
+  stages: [Selection, Cooperation, Specialization]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: REFINES
+  - id: C04
+    relationship: REFINES
+
+interpretation: >
+  This is strong production evidence for Selection. Agent-enabled implementation
+  increased the rate of change until source control, checkout capacity, review,
+  integration, and CI became the limiting environment. Anthropic then selected
+  an architecture whose fitness assumptions match online agents and ephemeral
+  jobs: server-side operations, sparse and optional working copies, immutable
+  cached objects, incremental lock-free changesets, minimal global references,
+  and independently scalable services. It refines Cooperation by showing that
+  agent-scale composition depends on minimizing the state that requires global
+  agreement rather than coordinating every action synchronously. It also
+  refines Specialization: engineers move toward architectural constraint and
+  intent review, while persistent monitoring agents specialize by component,
+  but the source does not quantify the superfans' independent contribution.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Supports C02 with a completed production migration and measured changes in
+    resource use, checkout latency, and CI capacity after the previous substrate
+    became a bottleneck. Refines C03 by showing that higher-throughput cooperative
+    work selects for less synchronous global coordination and more shared
+    server-side capabilities. Refines C04 with evidence of differentiated human
+    architectural judgment and component-specific operational agents, while
+    stopping short of claiming a measured higher-order fitness advantage from
+    those specialized roles.
+
+what_this_does_not_establish:
+  - >
+    The article is a first-party engineering account and does not provide an
+    independently audited dataset or reproducible performance benchmark.
+  - >
+    Anthropic reports total merged changes but does not quantify how many were
+    authored by agents, how large they were, or how much customer or research
+    value they produced.
+  - >
+    Merge count, checkout count, code volume, and infrastructure throughput are
+    activity measures rather than equivalent productivity, software quality, or
+    business outcomes.
+  - >
+    The 200-fold infrastructure reduction, two-orders-of-magnitude checkout
+    improvement, and 25% CI capacity gain are point estimates without published
+    distributions, baselines, measurement windows, uncertainty, or independent
+    replication.
+  - >
+    Scion was built for an exceptional monorepo and agent workload. Anthropic
+    explicitly states that it is not a suitable general replacement for Git and
+    that the organization can spend more tokens internally than most businesses.
+  - >
+    Migrating from Git required replacement or adaptation of code review, code
+    search, identity and access management, CI, merge, and other development-
+    lifecycle systems; the article does not provide the full migration cost.
+  - >
+    The seven-person, five-month delivery timeline does not isolate Claude's
+    causal contribution from the team's expertise, prior systems, organizational
+    investment, or unusually favorable access to Anthropic models.
+  - >
+    The reported 20-fold memory and fourfold speed improvements concern one
+    internally selected ingestion rewrite and do not establish general agent
+    superiority in infrastructure engineering.
+  - >
+    Reviewing change intent rather than every line does not establish review
+    depth, defect escape rate, security outcomes, rollback rate, or production
+    reliability at the higher merge volume.
+  - >
+    Moving verification after merge changes where integration risk is absorbed;
+    the source does not quantify conflicts, main-branch failures, recovery time,
+    or the effectiveness of pre-deployment containment.
+  - >
+    The component-specific superfan agents are described without comparative
+    detection, false-positive, incident, or reliability measurements, so they do
+    not alone establish C04's higher-order fitness advantage.
+
+open_question: >
+  As agent-produced change exceeds human-paced integration capacity, which
+  source-control, review, verification, and interface-ownership designs preserve
+  useful throughput without moving unacceptable failure risk into mainline code
+  or production deployment?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: design-source-control-for-online-agent-clients
+    use_case: "Serve ephemeral agents and CI jobs operating continuously against a very large monorepo."
+    problem: "Complete local repositories and offline-capable clients transfer and maintain data that online automated clients rarely need."
+    reported_practice: "Anthropic moves history, diff, blame, commit, merge, and rebase operations to a server while clients retain bounded caches and fetch only requested data."
+    selection_conditions: [context, execution, economics]
+  - id: make-agent-changes-incremental-and-lock-free
+    use_case: "Accept very high rates of concurrent changes without making every commit contend on global repository state."
+    problem: "Packfile processing, locking, and shared-reference movement place unrelated work on the same coordination-critical path."
+    reported_practice: "Scion creates incremental server-side changesets without packfiles or locks and separates changeset creation from the small number of supported reference updates."
+    selection_conditions: [execution, coordination, economics]
+  - id: expose-source-control-capabilities-as-services
+    use_case: "Let CI, agents, and internal tools query repository state without checking out or maintaining a repository."
+    problem: "Every consumer independently cloning and maintaining repository data multiplies compute, storage, transfer, and operational work."
+    reported_practice: "Scion exposes diff, ancestry, blame, merge-base, blob, and related operations through horizontally scalable APIs."
+    selection_conditions: [context, execution, economics]
+  - id: compute-repository-derived-data-on-demand
+    use_case: "Add and optimize history, blame, search, and graph capabilities without changing clients or materializing every index eagerly."
+    problem: "Precomputing all repository metadata increases write amplification and couples new query capabilities to client formats."
+    reported_practice: "Anthropic defines recursive derived-data types that can be computed eagerly or lazily and optimized behind a stable service interface."
+    selection_conditions: [execution, economics]
+  - id: review-agent-changes-by-intent-and-constraints
+    use_case: "Maintain human control when generated change volume makes uniform line-by-line review increasingly expensive."
+    problem: "Agents can produce locally plausible code that violates system architecture, uses brute-force access paths, or over-engineers hypothetical concerns."
+    reported_practice: "Engineers review every change request with increasing emphasis on intent, architectural invariants, system-level tradeoffs, and rejecting invalid solution patterns."
+    selection_conditions: [verification, coordination]
+  - id: specialize-operational-agents-by-component
+    use_case: "Observe subtle operational behavior across independently scalable source-control components."
+    problem: "Fixed alerts can miss novel or weak signals in component telemetry and logs."
+    reported_practice: "Anthropic assigns persistent superfan agents to individual components to inspect telemetry and logs alongside conventional alerting."
+    selection_conditions: [observability, coordination]
+  - id: shift-integration-verification-for-agent-throughput
+    use_case: "Integrate hundreds or thousands of changes while tests execute against a rapidly advancing main branch."
+    problem: "A globally locked merge queue serializes change and cannot keep pace when main advances substantially during each test run."
+    reported_practice: "Anthropic invests in post-merge and pre-deployment automated testing, accepts concurrent integration, and uses agents to repair resulting conflicts."
+    selection_conditions: [execution, verification, coordination]
+
+assessment:
+  assisted_by_ai: true
