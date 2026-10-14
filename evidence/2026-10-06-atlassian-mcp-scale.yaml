@@ -1,0 +1,180 @@
+source:
+  title: "Atlassian MCP brings more of your work within reach of any AI agent"
+  producer: "Atlassian"
+  producer_type: organization
+  date: "2026-10-06"
+  url: "https://www.atlassian.com/blog/company-news/team26-europe-atlassian-mcp"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "At 15 million calls a day, context efficiency and governed action become infrastructure"
+  summary: >
+    Atlassian reports more than 15 million daily calls through its MCP service and
+    has rebuilt it to expose more than 220 tools across a broader work lifecycle.
+    Internal Claude-model benchmarks report up to 25% lower token use than the
+    previous version on matched Jira and Confluence work, while tool scopes, action
+    risk tiers, permissions, conflict checks, and audit controls govern execution.
+
+observed:
+  - >
+    Atlassian reports that its MCP service receives more than 15 million calls per
+    day, less than one year after its initial release.
+  - >
+    The rebuilt service exposes more than 220 tools across Atlassian products and
+    external AI clients, extending beyond the earlier Jira and Confluence surface.
+  - >
+    In Atlassian internal benchmarks using Claude models, the new version used up
+    to 25% fewer tokens than the previous version for the same Jira and Confluence
+    work.
+  - >
+    The expanded service connects work across strategy and goals, Jira work state,
+    Confluence documentation, Bitbucket pull requests and branch state, semantic
+    code search, Loom transcripts, whiteboards, live databases, and forthcoming
+    Jira Service Management workflows.
+  - >
+    Atlassian describes multi-step requests that cross systems, including turning a
+    Loom recording into release notes or turning a meeting transcript into Jira
+    work items and Confluence pages.
+  - >
+    For document changes, Atlassian reports version-aware editing that can modify a
+    requested section, detect a concurrent teammate update, pause to prevent an
+    overwrite, and provide a preview before publication.
+  - >
+    Atlassian states that external models receive pre-stitched context on the first
+    turn from the Teamwork Graph rather than independently carrying all underlying
+    context in the prompt.
+  - >
+    An Atlassian customer, Kaplan North America, reports using Rovo and Atlassian
+    MCP to summarize one month of work across five platforms in ten seconds.
+  - >
+    The service uses OAuth 2.1 with PKCE and applies the invoking user's existing
+    permissions to each request rather than granting additional access through the
+    agent.
+  - >
+    Atlassian separates read, write, and destructive operations into risk tiers and
+    scopes access by toolset so clients can require explicit confirmation for
+    higher-risk actions.
+  - >
+    Administrators can manage domain allowlists, read, write, and search scopes,
+    IP allowlists, data-security and data-loss-prevention policies, and
+    organization-wide audit logging.
+  - >
+    Atlassian allows developers and partners to create custom MCP tools with Forge,
+    add MCP capabilities to Marketplace apps, and expose custom Rovo agents through
+    the same interface.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    Atlassian reports more than 15 million calls per day through a generally
+    available MCP service exposing more than 220 tools. The source provides an
+    internal token benchmark and customer examples, but not request distributions,
+    success rates, latency, failure rates, unique daily users, or independently
+    audited production measurements.
+
+mapping:
+  stages: [Selection, Cooperation]
+  transition:
+    from: Selection
+    to: Cooperation
+  conditions: [Context, Execution, Verification, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+  - id: C03
+    relationship: REFINES
+
+interpretation: >
+  This source supports Selection because the operating environment is selecting for
+  an MCP architecture that can expand its action surface without consuming a
+  correspondingly larger share of the model context. At the reported call volume,
+  context cost, permissions, action risk, concurrent edits, auditability, and
+  cross-product context become material conditions of continued operation. It
+  refines Cooperation by showing an integration substrate designed to let humans,
+  external agents, organizational knowledge, and work systems participate in one
+  governed workflow. The relevant cooperation is not merely access to many tools:
+  useful composition depends on shared context, permission-preserving execution,
+  conflict handling, confirmation boundaries, and durable updates across systems.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Supports C02 with production-scale usage and an architecture revised in response
+    to context economics and enterprise execution constraints. Refines C03 by
+    identifying conditions under which cross-system human-agent cooperation can
+    remain viable at scale. The source does not compare this cooperative arrangement
+    with a useful isolated agent under controlled conditions, so it does not by
+    itself establish a general cooperation advantage.
+
+what_this_does_not_establish:
+  - >
+    Atlassian reports total MCP calls but does not publish their distribution by
+    client, customer, user, tool, read or write operation, task, or successful
+    outcome; calls are activity rather than equivalent work completed.
+  - >
+    The more-than-15-million-daily-calls figure is first-party and is not accompanied
+    by an independently audited dataset or reproducible measurement method.
+  - >
+    The up-to-25% token reduction is an internal benchmark using Claude models. The
+    source does not disclose the benchmark tasks, sample size, model versions,
+    variance, full result distribution, or statistical significance.
+  - >
+    An up-to result does not establish the typical token saving across customers,
+    tools, models, or real production requests.
+  - >
+    Exposing more than 220 tools does not establish that agents select the correct
+    tool, complete tasks reliably, or improve business outcomes across that surface.
+  - >
+    The customer statements are selected testimonials and do not provide controlled
+    comparisons, repeated measurements, error rates, or independent replication.
+  - >
+    Permission inheritance, risk tiers, conflict checks, and previews provide
+    governance mechanisms but do not establish that unsafe, incorrect, or
+    unauthorized actions cannot occur.
+  - >
+    Cross-product workflows demonstrate integration and potential cooperation, but
+    the source does not compare them with useful isolated agent operation and does
+    not establish a durable fitness advantage under C03.
+  - >
+    The source does not establish persistent differentiated agent roles or a
+    higher-order specialized engineering object under C04.
+
+open_question: >
+  At high MCP call volumes, which combinations of context selection, permission
+  boundaries, confirmation, conflict handling, and outcome verification predict
+  whether broader cross-system action improves completed-work fitness rather than
+  only increasing tool activity?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: benchmark-mcp-context-overhead
+    use_case: "Expand an agent tool surface without allowing tool and context metadata to consume the task budget."
+    problem: "Adding products and tools can increase prompt overhead before an agent begins the requested work."
+    reported_practice: "Atlassian benchmarks matched Jira and Confluence work across MCP versions and redesigns context delivery to reduce token use while expanding the available tool surface."
+    selection_conditions: [context, observability, economics]
+  - id: preserve-caller-permissions-through-mcp
+    use_case: "Let external AI clients act on enterprise work without gaining authority beyond the invoking user."
+    problem: "A shared agent integration can become an authority-escalation path if tool access bypasses existing identity and permissions."
+    reported_practice: "Atlassian authenticates with OAuth 2.1 and PKCE and evaluates every request against the invoking user's existing permissions."
+    selection_conditions: [execution, verification]
+  - id: separate-agent-actions-by-risk-tier
+    use_case: "Govern a broad MCP surface containing read, write, and destructive operations."
+    problem: "Treating all tool calls alike prevents clients and administrators from applying stronger controls to higher-impact actions."
+    reported_practice: "Atlassian separates read, write, and destructive actions, scopes access by toolset, and enables explicit confirmation for higher-risk operations."
+    selection_conditions: [verification, coordination]
+  - id: guard-agent-edits-against-concurrent-change
+    use_case: "Allow agents and teammates to edit shared organizational documents concurrently."
+    problem: "An agent can overwrite a teammate's newer change when it acts on stale document state."
+    reported_practice: "Atlassian uses version-aware, section-level edits that pause on concurrent changes and expose a preview before publication."
+    selection_conditions: [verification, coordination, observability]
+  - id: centralize-mcp-administration-and-audit
+    use_case: "Operate agent access across many enterprise products and external AI clients."
+    problem: "Distributed integrations make it difficult to enforce data policy, constrain connectivity, and reconstruct agent actions."
+    reported_practice: "Atlassian centralizes domain, permission-scope, IP, data-protection, and data-loss-prevention controls with organization-wide audit logging."
+    selection_conditions: [verification, observability, coordination]
+
+assessment:
+  assisted_by_ai: true
