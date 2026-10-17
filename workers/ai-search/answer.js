@@ -20,7 +20,7 @@ EAE observed fields are attributed reports, not independently verified facts. EA
 Answer the question directly in summary, with citations. Separate reported observations from your interpretation in claims. Each factual statement needs a citation with source_id, passage_id and an exact contiguous quote from that passage (max 1500 characters). Observation claims must reproduce one complete observed passage verbatim as their text, retaining its attribution and qualifications, and cite the full passage as the quote. Choose a passage within the schema length limits or abstain. Do not paraphrase observations or replace a broader category (such as least automatable tasks) with a narrower one (such as human review). All other conclusions must be labelled interpretation.
 Read what_this_does_not_establish and contradictory observations before concluding. State limits, missing context, causal and generalisation uncertainty. Never infer a universal outcome from adoption or activity counts.
 Propose ONE small reversible experiment as next_step: action, measure and decision_rule. Clearly frame it as a proposal, not a proven benefit. Use the explicit decision form: If [measured condition], [action]; otherwise [alternative action]. Comparing measurements alone is not a decision. Any proposed threshold must be identified as a proposed experiment criterion, never a proven benefit. Do not invent baseline measurements or guaranteed thresholds. Cite the observation motivating it.
-If these records cannot answer the question, use outcome insufficient, explain why in summary.text, provide missing evidence in uncertainties, use claims [] and next_step null. Never answer unrelated questions from model memory.
+If these records cannot establish the requested conclusion, use outcome insufficient, explain the specific evidence gap in summary.text and uncertainties, and use claims []. For a relevant engineering question, you may still propose one small experiment to obtain the missing evidence: cite the motivating observation in next_step and cite the evidence boundary in summary. Do not treat lack of a controlled study as absence of all useful reported evidence. Limit statements about missing evidence to the supplied records, and cite each record-specific limitation you use. If the question is unrelated, or no source motivates an experiment, next_step must be null. Never answer unrelated questions from model memory.
 For answered, require at least one claim and citation in summary; require next_step and at least one uncertainty. Keep the answer concise.`;
 const bytes = value => new TextEncoder().encode(value).byteLength;
 async function hash(value) {
@@ -49,20 +49,24 @@ export async function canonicalSources(records) {
   }
   return { sources, omitted };
 }
+class AnswerValidationError extends Error {
+  constructor(reason, message) { super(message); this.reason = reason; }
+}
+const invalid = (reason, message) => { throw new AnswerValidationError(reason, message); };
 // Validate the model response even when Workers AI JSON mode succeeds.
 function assertSchema(value, schema) {
   if (schema.anyOf) {
-    if (!schema.anyOf.some(option => { try { assertSchema(value, option); return true; } catch { return false; } })) throw Error('Invalid union');
+    if (!schema.anyOf.some(option => { try { assertSchema(value, option); return true; } catch { return false; } })) invalid('schema_invalid', 'Invalid union');
     return;
   }
-  if (schema.type === 'null') { if (value !== null) throw Error('Expected null'); return; }
+  if (schema.type === 'null') { if (value !== null) invalid('schema_invalid', 'Expected null'); return; }
   if (schema.type === 'string') {
-    if (typeof value !== 'string' || !value.trim() || value.length < (schema.minLength || 0) || value.length > (schema.maxLength || Infinity) || (schema.enum && !schema.enum.includes(value))) throw Error('Invalid text');
+    if (typeof value !== 'string' || !value.trim() || value.length < (schema.minLength || 0) || value.length > (schema.maxLength || Infinity) || (schema.enum && !schema.enum.includes(value))) invalid('schema_invalid', 'Invalid text');
   } else if (schema.type === 'array') {
-    if (!Array.isArray(value) || value.length < schema.minItems || value.length > schema.maxItems) throw Error('Invalid list');
+    if (!Array.isArray(value) || value.length < schema.minItems || value.length > schema.maxItems) invalid('schema_invalid', 'Invalid list');
     value.forEach(item => assertSchema(item, schema.items));
   } else if (schema.type === 'object') {
-    if (!value || Array.isArray(value) || typeof value !== 'object' || Object.keys(value).some(key => !Object.hasOwn(schema.properties, key))) throw Error('Invalid object');
+    if (!value || Array.isArray(value) || typeof value !== 'object' || Object.keys(value).some(key => !Object.hasOwn(schema.properties, key))) invalid('schema_invalid', 'Invalid object');
     for (const key of schema.required) assertSchema(value[key], schema.properties[key]);
   }
 }
@@ -72,7 +76,7 @@ export function validateAnswer(value, sources) {
     for (const citation of citations) {
       const source = sources.find(s => s.id === citation.source_id);
       const passage = source?.passages.find(p => p.id === citation.passage_id);
-      if (!passage || !passage.text.includes(citation.quote) || (observation && !passage.field.startsWith('observed.'))) throw Error('Invalid citation');
+      if (!passage || !passage.text.includes(citation.quote) || (observation && !passage.field.startsWith('observed.'))) invalid('citation_invalid', 'Invalid citation');
     }
   };
   checkCitations(value.summary.citations);
@@ -81,14 +85,17 @@ export function validateAnswer(value, sources) {
     if (claim.kind === 'observation' && !claim.citations.some(c => {
       const passage = sources.find(s => s.id === c.source_id)?.passages.find(p => p.id === c.passage_id);
       return passage?.text === claim.text && c.quote === passage.text;
-    })) throw Error('Observation must preserve a complete attributed passage');
+    })) invalid('observation_not_verbatim', 'Observation must preserve a complete attributed passage');
   });
   if (value.outcome === 'answered') {
-    if (!value.summary.citations.length || !value.claims.length || !value.next_step) throw Error('Incomplete answer');
+    if (!value.summary.citations.length || !value.claims.length || !value.next_step) invalid('answer_incomplete', 'Incomplete answer');
+  } else if (value.claims.length) invalid('abstention_invalid', 'Invalid abstention');
+  if (value.next_step) {
+    if (!value.summary.citations.length) invalid('answer_incomplete', 'An experiment needs a cited evidence boundary');
     checkCitations(value.next_step.citations);
     // A structural guard, not a semantic judge of the proposed experiment.
-    if (!/^if\s+.+[,;]\s*.+;\s*otherwise\s+.+[.!]?$/i.test(value.next_step.decision_rule.trim())) throw Error('Decision rule requires condition and alternative actions');
-  } else if (value.claims.length || value.next_step !== null) throw Error('Invalid abstention');
+    if (!/^if\s+.+[,;]\s*.+;\s*otherwise\s+.+[.!]?$/i.test(value.next_step.decision_rule.trim())) invalid('decision_rule_invalid', 'Decision rule requires condition and alternative actions');
+  }
   return value;
 }
 function json(data, status = 200, headers = {}) {
@@ -123,8 +130,11 @@ export async function handleAnswer(request, env) {
   const started = Date.now();
   const requestId = crypto.randomUUID();
   let stage = 'request';
-  const failure = (code, message, status, headers = {}) => {
-    const diagnostic = { code, request_id: requestId, stage, latency_ms: Date.now() - started };
+  const metrics = {};
+  let modelStarted;
+  const measurements = () => ({ ...metrics, ...(modelStarted === undefined ? {} : { model_latency_ms: metrics.model_latency_ms ?? Date.now() - modelStarted }) });
+  const failure = (code, message, status, headers = {}, details = {}) => {
+    const diagnostic = { code, request_id: requestId, stage, latency_ms: Date.now() - started, ...measurements(), ...details };
     console.log(JSON.stringify({ event: 'eae_answer_error', ...diagnostic }));
     return json({ error: message, ...diagnostic }, status, { 'X-Request-ID': requestId, ...headers });
   };
@@ -150,19 +160,30 @@ export async function handleAnswer(request, env) {
       if (expired) throw Error("Answer deadline exceeded");
       request.signal.throwIfAborted();
       stage = 'model';
-      const generated = await env.AI.run(ANSWER_MODEL, { messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: JSON.stringify({ question: body.query, sources }) }], response_format: { type: 'json_schema', json_schema: ANSWER_SCHEMA }, max_tokens: ANSWER_LIMITS.outputTokens, temperature: 0.1 });
+      const input = { messages: [{ role: 'system', content: SYSTEM }, { role: 'user', content: JSON.stringify({ question: body.query, sources }) }], response_format: { type: 'json_schema', json_schema: ANSWER_SCHEMA }, max_tokens: ANSWER_LIMITS.outputTokens, temperature: 0.1 };
+      metrics.model_input_bytes = bytes(JSON.stringify(input));
+      metrics.max_output_tokens = ANSWER_LIMITS.outputTokens;
+      modelStarted = Date.now();
+      const generated = await env.AI.run(ANSWER_MODEL, input);
       if (expired) throw Error("Answer deadline exceeded");
       request.signal.throwIfAborted();
+      metrics.model_latency_ms = Date.now() - modelStarted;
+      metrics.model_output_bytes = bytes(typeof generated?.response === 'string' ? generated.response : JSON.stringify(generated?.response ?? null));
+      for (const [key, usageKey] of [['input_tokens', 'prompt_tokens'], ['output_tokens', 'completion_tokens']]) {
+        const count = generated?.usage?.[usageKey];
+        if (Number.isSafeInteger(count) && count >= 0) metrics[key] = count;
+      }
       stage = 'validation';
       let answer;
       try {
         const raw = typeof generated?.response === 'string' ? JSON.parse(generated.response) : generated?.response;
         answer = validateAnswer(raw, sources);
-      } catch {
-        return failure('invalid_model_output', 'The generated answer did not pass evidence checks', 502);
+      } catch (error) {
+        const validation_reason = error instanceof AnswerValidationError ? error.reason : error instanceof SyntaxError ? 'json_invalid' : 'validation_error';
+        return failure('invalid_model_output', 'The generated answer did not pass evidence checks', 502, {}, { validation_reason });
       }
-      console.log(JSON.stringify({ event: 'eae_answer', request_id: requestId, outcome: answer.outcome, model: ANSWER_MODEL, records: sources.length, omitted_records: omitted, latency_ms: Date.now() - started, input_tokens: generated.usage?.prompt_tokens, output_tokens: generated.usage?.completion_tokens }));
-      return json({ ...envelope, model: ANSWER_MODEL, answer }, 200, { 'X-Request-ID': requestId });
+      console.log(JSON.stringify({ event: 'eae_answer', request_id: requestId, outcome: answer.outcome, model: ANSWER_MODEL, records: sources.length, omitted_records: omitted, latency_ms: Date.now() - started, ...measurements() }));
+      return json({ ...envelope, model: ANSWER_MODEL, answer, diagnostics: measurements() }, 200, { 'X-Request-ID': requestId });
     };
     return await Promise.race([work(), new Promise((_, reject) => { timer = setTimeout(() => { expired = true; reject(Error('Answer timeout')); }, ANSWER_LIMITS.timeoutMs); })]);
   } catch {

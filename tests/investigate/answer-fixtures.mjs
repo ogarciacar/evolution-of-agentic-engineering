@@ -24,3 +24,11 @@ export function fixtureEnv(run, overrides = {}) {
     EVIDENCE_DB: { prepare: () => ({ bind: (projection, id) => ({ first: async () => id === record.id && projection === 'main' ? rowFor() : null }) }) },
     AI: { run: run || (async (_model, input) => ({ response: answerFor(JSON.parse(input.messages[1].content).sources) })) }, ...overrides };
 }
+
+export function uncertainAnswerFor(sources) {
+  const answer = answerFor(sources);
+  const boundary = sources[0].passages.find(p => p.field.startsWith('what_this_does_not_establish.'));
+  return { ...answer, outcome: 'insufficient', claims: [],
+    summary: { text: 'These records cannot establish a cycle-time improvement.', citations: [{ source_id: sources[0].id, passage_id: boundary.id, quote: boundary.text }] },
+    uncertainties: ['Need a comparable cycle-time measurement.'] };
+}

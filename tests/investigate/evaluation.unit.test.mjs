@@ -19,3 +19,21 @@ it('keeps expected abstention separate from pending human review', async () => {
   const result = await evaluateQuestion('https://eae.test', 'Weather?', true, transport);
   expect(result).toMatchObject({ contract: 'pass', abstention_pass: true, request_id: 'abstention-id', human_review: { decision: 'unreviewed', claims_supported: null } });
 });
+it('retains validation reason and generation measurements for a rejected answer', async () => {
+  const transport = vi.fn().mockResolvedValueOnce(retrieval()).mockResolvedValueOnce(Response.json({
+    code: 'invalid_model_output', stage: 'validation', validation_reason: 'observation_not_verbatim',
+    model_input_bytes: 8000, model_output_bytes: 900, model_latency_ms: 21000,
+    input_tokens: 2000, output_tokens: 225, max_output_tokens: 1800,
+    response: 'private model output',
+  }, { status: 502 }));
+  const result = await evaluateQuestion('https://eae.test', 'Q', false, transport);
+  expect(result.diagnostic).toMatchObject({ validation_reason: 'observation_not_verbatim', model_input_bytes: 8000, model_output_bytes: 900, model_latency_ms: 21000, input_tokens: 2000, output_tokens: 225, max_output_tokens: 1800 });
+  expect(JSON.stringify(result)).not.toContain('private');
+});
+it('does not count an unrelated question with an experiment as a correct abstention', async () => {
+  const { canonicalSources } = await import('../../workers/ai-search/answer.js');
+  const { record, uncertainAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const transport = vi.fn().mockResolvedValueOnce(retrieval()).mockResolvedValueOnce(Response.json({ sources, answer: uncertainAnswerFor(sources) }));
+  expect(await evaluateQuestion('https://eae.test', 'Weather?', true, transport)).toMatchObject({ contract: 'pass', abstention_pass: false });
+});

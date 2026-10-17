@@ -71,3 +71,17 @@ it('a stopped preparation cannot replace a later answer', async () => {
   await old;
   expect(investigation.state.answer.answer.marker).toBe('new');
 });
+it('renders and copies a proposed experiment while preserving the insufficient-evidence state', async () => {
+  const { canonicalSources } = await import('../../workers/ai-search/answer.js');
+  const { record, uncertainAnswerFor } = await import('./answer-fixtures.mjs');
+  const { renderAnswer, answerText, normalizeAnswer } = createRequire(import.meta.url)('../../evidence-search.js');
+  const { sources } = await canonicalSources([record]);
+  const data = normalizeAnswer({ version: 1, provenance: 'canonical_eae_records', sources, answer: uncertainAnswerFor(sources) });
+  expect(renderAnswer(data)).toContain('Not enough evidence to answer');
+  expect(renderAnswer(data)).toContain('Proposed experiment');
+  expect(renderAnswer(data)).toContain('data-answer-copy');
+  expect(answerText(data, 'Q')).toContain('Need a comparable cycle-time measurement.');
+  expect(answerText(data, 'Q')).toContain(data.answer.next_step.measure);
+  data.answer.next_step.measure = '';
+  expect(() => normalizeAnswer(data)).toThrow('Incomplete experiment');
+});
