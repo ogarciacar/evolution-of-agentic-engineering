@@ -16,3 +16,5 @@ sitemap.xml
 # Generated Worker deployment configuration and local answer evaluations.
 workers/ai-search/wrangler.deploy.json
 .artifacts/answer-evaluation*.json
+
+workers/ai-search/wrangler.evaluation.json

@@ -118,3 +118,5 @@ Acceptance-to-unit coverage:
 | Preparing → answer with next step | Existing Workerd T03/T04 and browser T03/T04 | Comparison-only decision rule rejected; fixture exercises conditional alternatives |
 
 Deployment defaults are disabled in Wrangler, the generated configuration, and the legacy GitHub deployment workflow. Keep the Cloudflare build variable `EAE_ANSWER_ENABLED=false` during review. Do not enable public synthesis merely because CI passes: run the explicit six-case evaluation on an intentionally enabled evaluation deployment and complete human claim-support, boundary and experiment-quality review first. This PR makes no live inference calls.
+
+For the separate token-protected Worker and live-case command, see [Isolated live answer evaluation](answer-evaluation-deployment.md). Production remains deployed by Cloudflare Workers Builds with synthesis disabled.

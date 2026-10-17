@@ -59,6 +59,8 @@ jobs:
         run: |
           node workers/ai-search/configure-deploy.mjs
           npx --no-install wrangler deploy --dry-run --config workers/ai-search/wrangler.deploy.json
+          node workers/ai-search/configure-evaluation.mjs
+          npx --no-install wrangler deploy --dry-run --config workers/ai-search/wrangler.evaluation.json
       - name: Upload browser diagnostics
         if: failure()
         uses: actions/upload-artifact@v7

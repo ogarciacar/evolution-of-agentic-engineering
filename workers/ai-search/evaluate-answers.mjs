@@ -1,12 +1,14 @@
 // Explicit live evaluation: costs up to six bounded Workers AI calls. Not part of CI.
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { evaluationTransport } from './evaluation-transport.mjs';
 import { evaluateQuestion } from './evaluation-case.mjs';
 const args = process.argv.slice(2);
 const option = name => args[args.indexOf(name) + 1];
 if (!args.includes('--base-url') || !args.includes('--output')) throw Error('Usage: npm run eval:answer -- --base-url https://agenticengineering.science --output .artifacts/answer-evaluation.json');
 const base = new URL(option('--base-url'));
 if (base.protocol !== 'https:' && !['127.0.0.1', 'localhost'].includes(base.hostname)) throw Error('Use HTTPS or localhost');
+const transport = args.includes('--evaluation') ? evaluationTransport(base, process.env.EAE_EVALUATION_TOKEN) : fetch;
 const questions = [
   'Are coding agents actually reducing engineering cycle time?',
   'What changes when teams go from one agent to many?',
@@ -16,7 +18,7 @@ const questions = [
   'What will the weather in Amsterdam be tomorrow?',
 ];
 const results = [];
-for (const question of questions) results.push(await evaluateQuestion(base, question, question === questions.at(-1)));
+for (const question of questions) results.push(await evaluateQuestion(base, question, question === questions.at(-1), transport));
 const output = option('--output');
 await fs.mkdir(path.dirname(output), { recursive: true });
 await fs.writeFile(output, JSON.stringify({ evaluated_at: new Date().toISOString(), endpoint: base.origin, results }, null, 2) + '\n');
