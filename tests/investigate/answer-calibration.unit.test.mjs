@@ -10,7 +10,7 @@ function example(id, field, summary, uncertainty, step) {
   return { sources: data.sources, generated: {
     outcome: 'answered', summary: { text: summary, citations },
     claims: [{ kind: 'observation', passage: citations[0] }],
-    uncertainties: [uncertainty], next_step: { ...step, citations },
+    uncertainties: [uncertainty], next_step: { scope: 'Five comparable tasks in one repository', intervention: 'Use a revised context interface', comparison: 'Current interface with the same model and tests', measurement: { metric: 'Median task duration', unit: 'seconds', window: 'Task start to passing tests', guardrail: 'No failed tests or increased reviewer minutes' }, decision: step.decision, citations },
   } };
 }
 // Hand-authored calibration examples verify contract compatibility, NOT model quality.
@@ -21,7 +21,7 @@ it('accepts a bounded comparative answer without demanding a universal causal cl
     'This first-party comparison is specific to one configuration and task family; bundled changes do not isolate each contribution or establish context as the universal limiting factor.',
     { action: 'Proposed trial: on one repository, run five comparable tasks through the current context interface and a batched variant, keeping the model and tests fixed.',
       measure: 'For each run, record seconds from task start to passing tests, tokens consumed, test results and reviewer minutes.',
-      decision: { condition: 'median task time falls with no failed tests or increase in reviewer minutes', if_true: 'continue the local trial with more tasks', if_false: 'inspect the traces before revising the interface' } });
+      decision: { threshold: 'median task time falls with no failed tests or increase in reviewer minutes', if_true: 'continue the local trial with more tasks', if_false: 'inspect the traces before revising the interface' } });
   const answer = finalizeGeneratedAnswer(generated, sources);
   expect(answer.outcome).toBe('answered');
   expect(answer.claims[0].text).toContain('352 seconds to 325 seconds');
@@ -33,6 +33,6 @@ it('accepts an attributed infrastructure description with uncertainty and a boun
     'This describes Cloudflare’s stack; it does not establish the isolated benefit of each layer or that every team needs the same stack.',
     { action: 'Proposed trial: choose one repository and compare five similar tasks using current instructions versus an updated repository guide, with the same model and verification checks.',
       measure: 'Record minutes from task start to passing checks, reviewer minutes and failed checks for each run.',
-      decision: { condition: 'median task time falls without more failed checks or reviewer minutes', if_true: 'retain the guide in this repository and extend the trial', if_false: 'revise the guide using the observed failures' } });
+      decision: { threshold: 'median task time falls without more failed checks or reviewer minutes', if_true: 'retain the guide in this repository and extend the trial', if_false: 'revise the guide using the observed failures' } });
   expect(finalizeGeneratedAnswer(generated, sources).outcome).toBe('answered');
 });

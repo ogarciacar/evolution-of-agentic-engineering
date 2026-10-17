@@ -26,7 +26,7 @@ test('T03/T04/T11/T12: read a bounded answer and inspect its current canonical c
   await expect(answer.getByRole('heading', { name: 'What the evidence suggests' })).toBeVisible();
   await expect(answer).toContainText('AI interpretation');
   await expect(answer.getByRole('heading', { name: 'One next step' })).toBeVisible();
-  await expect(answer).toContainText('Record unnecessary exploration calls');
+  await expect(answer).toContainText('Unnecessary exploration calls per task');
   const citation = answer.getByRole('button', { name: 'Inspect citation 1' }).first();
   await citation.click();
   const dialog = page.getByRole('dialog');
@@ -73,6 +73,7 @@ test('T14: copy includes sources and uncertainties', async ({ page, context }) =
   expect(text).toContain('Record snapshot:');
   expect(text).toContain('https://example.com/report');
   expect(text).toContain('not a causal comparison');
+  for (const label of ['Scope:', 'Comparison:', 'Metric:', 'Unit:', 'Window:', 'Guardrail:']) expect(text).toContain(label);
 });
 
 test('T05/T14: an inconclusive answer offers an inspectable proposed experiment and copies its uncertainty', async ({ page, context }) => {
@@ -81,7 +82,7 @@ test('T05/T14: an inconclusive answer offers an inspectable proposed experiment 
   const answer = page.locator('#ask-evidence-answer');
   await expect(answer).toContainText('Not enough evidence to answer');
   await expect(answer).toContainText('Proposed experiment');
-  await expect(answer).toContainText('Record unnecessary exploration calls');
+  await expect(answer).toContainText('Unnecessary exploration calls per task');
   await expect(answer).toContainText('otherwise revise it');
   await answer.getByRole('button', { name: 'Inspect citation 1' }).last().click();
   await expect(page.getByRole('dialog')).toContainText(record.observed[0]);
