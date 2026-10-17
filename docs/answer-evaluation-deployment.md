@@ -150,3 +150,26 @@ Output:
 `generation_input_sha256` hashes the entire model input, including messages, evidence, JSON schema, temperature and token limit; it is emitted on success and failures after the input is built. Failures before model input exists cannot confirm an identical input pair. Missing/mismatched model keys also block comparison, detecting an older deployment that ignores selection. The CLI exits 1 for any unmatched pair, contract failure or failed expected abstention and still saves reports.
 
 Both models retain the 25-second deadline and 1,800-token ceiling. Reasoning can consume the candidate's generation budget, so failure here measures suitability within the current serving budget, not its unrestricted reasoning ability. There is no forced reasoning-effort override. Review both reports against the same rubric, including claim support, causal boundaries, useful next steps and unjustified abstention. Repeat with a new output directory if a first paired run is promising; one run cannot establish reliability. Production remains disabled until a release review passes.
+
+### Diagnose one failed request
+
+After deploying provider diagnostics, use one pinned case before repeating the
+full comparison. This uses the default Llama model and makes at most one AI call:
+
+```sh
+npm run eval:answer -- --evaluation \
+  --base-url https://agentic-engineering-search-evaluation.orlando-garcia.workers.dev \
+  --snapshot-report .artifacts/answer-evaluation-six-pass.json \
+  --case cycle-time \
+  --output .artifacts/answer-provider-diagnostic.json
+```
+
+A single-case report is diagnostic only; it cannot pass the six-case semantic
+review gate or serve as a complete pinned baseline. Provider failures retain the
+existing HTTP 503 contract. Their diagnostics may include `provider_error_code`,
+`provider_http_status`, and `provider_error_category`. Categories follow
+[Cloudflare's error codes](https://developers.cloudflare.com/workers-ai/platform/errors/).
+Unknown errors remain `unknown`; raw exception messages, stacks, and causes are
+never logged or returned. Numeric codes are read from structured properties or
+an anchored Workers AI message prefix. These diagnostics identify a reported
+failure, not proof that all other integration concerns are resolved.

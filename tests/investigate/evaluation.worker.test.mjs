@@ -81,3 +81,16 @@ it('E08: model selection is limited to answer requests and preserves rate admiss
   expect(response.status).toBe(429);
   expect(run).not.toHaveBeenCalled();
 });
+it('E09: provider failure diagnostics survive the evaluation report without leaking exception content', async () => {
+  const { evaluateQuestion } = await import('../../workers/ai-search/evaluation-case.mjs');
+  const error = Object.assign(new Error('3036: secret prompt and token'), { status: 429 });
+  const env = fixtureEnv(vi.fn().mockRejectedValue(error), { EVALUATION_TOKEN: token });
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    const transport = (url, init) => handleEvaluation(new Request(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } }), env);
+    const result = await evaluateQuestion('https://evaluation.test', 'Where should we focus?', false, transport, { record_ids: ['context'] });
+    expect(result.status).toBe(503);
+    expect(result.diagnostic).toMatchObject({ code: 'provider_error', provider_error_category: 'quota_exceeded', provider_error_code: 3036, provider_http_status: 429 });
+    expect(JSON.stringify([result, log.mock.calls])).not.toContain('secret prompt');
+  } finally { log.mockRestore(); }
+});
