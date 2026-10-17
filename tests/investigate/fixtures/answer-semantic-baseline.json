@@ -1,0 +1,549 @@
+{
+  "fixture_kind": "curated_live_semantic_baseline",
+  "evaluated_at": "2026-10-17T08:52:17.409Z",
+  "original_file_sha256": "6888bf3358e52743486de4c9a6e613251fbec41eb4cbe16bbf5b66fb643d857e",
+  "review_origin": "assistant assessment; not human release approval",
+  "scope": "Answers are verbatim. Evidence contains cited passages plus selected counterevidence, not the full retrieval set. Expectations must be reconsidered if later retrieval differs.",
+  "cases": [
+    {
+      "id": "cycle-time",
+      "question": "Are coding agents actually reducing engineering cycle time?",
+      "answer_contract": "structured_decision_v1",
+      "answer": {
+        "outcome": "insufficient",
+        "summary": {
+          "text": "The provided sources do not establish that coding agents are reducing engineering cycle time. While Cloudflare reports a high adoption rate of AI coding tools and a significant number of AI requests, the source does not provide a controlled comparison to establish the causal effect of coding agents on engineering cycle time.",
+          "citations": [
+            {
+              "source_id": "source:8d6c636da55bdffc77650d875e0576d302ad051ed77c4c0f38681b53659f9858",
+              "passage_id": "passage:9d10f7b0f17d5bba772cce47045ab97e32be6519013155acf3ddaeccba12737c",
+              "quote": "Cloudflare says a single proxy Worker became the control point for AI access, allowing per-user attribution, model-catalog management and permission enforcement without changing client configurations."
+            }
+          ]
+        },
+        "claims": [],
+        "uncertainties": [
+          "The sources do not provide a controlled comparison to establish the causal effect of coding agents on engineering cycle time.",
+          "The sources do not report on the economic fitness of coding agents.",
+          "The sources do not establish sustained production operation, organizational adoption, fleet concurrency, or unattended deployment of agent-generated changes."
+        ],
+        "next_step": {
+          "action": "conduct a controlled experiment",
+          "measure": "engineering cycle time",
+          "citations": [
+            {
+              "source_id": "source:8d6c636da55bdffc77650d875e0576d302ad051ed77c4c0f38681b53659f9858",
+              "passage_id": "passage:71f6c3a7ce21e5c0541a1f1a3e1f8ca2eb7d9d146eb52f75981a79550ea77384",
+              "quote": "Cloudflare states that the individual pieces are not especially novel; the difference is their wiring. When agents can combine Backstage context, repository instructions and Codex-based review in the same toolchain, Cloudflare says the first draft is usually close enough to ship, unlike six months earlier."
+            }
+          ],
+          "decision_rule": "If significant reduction in engineering cycle time, adopt coding agents; otherwise reject coding agents"
+        }
+      },
+      "sources": [
+        {
+          "id": "source:8d6c636da55bdffc77650d875e0576d302ad051ed77c4c0f38681b53659f9858",
+          "record_id": "2026-04-20-cloudflare-internal-ai-engineering-stack",
+          "url": "https://agenticengineering.science/signals/2026-04-20-cloudflare-internal-ai-engineering-stack/",
+          "title": "The engineering environment becomes an integrated agentic system",
+          "original": {
+            "title": "The AI engineering stack we built internally \u2014 on the platform we ship",
+            "date": "2026-04-20",
+            "producer": "Cloudflare",
+            "producer_type": "organization",
+            "type": "engineering-blog",
+            "provenance": "primary",
+            "url": "https://blog.cloudflare.com/internal-ai-engineering-stack/"
+          },
+          "snapshot_id": "21b09513eec3418dec14f24526a8f7f505d1f404b9b9c5cbc2a2ce08cc6e094f",
+          "passages": [
+            {
+              "id": "passage:121d9363261b25daf3cbc07b7695e921f7755bca53b576fcebad63800d0051aa",
+              "field": "observed.0",
+              "text": "Cloudflare reports 3,683 internal users actively using AI coding tools, equal to 60% of the company and 93% of R&D, across 295 teams. In the reported 30-day period it records 47.95 million AI requests, 20.18 million AI Gateway requests, 241.37 billion tokens routed through AI Gateway, and 51.83 billion tokens processed on Workers AI.\n"
+            },
+            {
+              "id": "passage:9d10f7b0f17d5bba772cce47045ab97e32be6519013155acf3ddaeccba12737c",
+              "field": "observed.2",
+              "text": "Cloudflare says a single proxy Worker became the control point for AI access, allowing per-user attribution, model-catalog management and permission enforcement without changing client configurations.\n"
+            },
+            {
+              "id": "passage:71f6c3a7ce21e5c0541a1f1a3e1f8ca2eb7d9d146eb52f75981a79550ea77384",
+              "field": "observed.7",
+              "text": "Cloudflare states that the individual pieces are not especially novel; the difference is their wiring. When agents can combine Backstage context, repository instructions and Codex-based review in the same toolchain, Cloudflare says the first draft is usually close enough to ship, unlike six months earlier.\n"
+            },
+            {
+              "id": "passage:9f80b6045483f305e1a984b089659430a9ba811ccc834f0ae7e8a98748d50007",
+              "field": "what_this_does_not_establish.0",
+              "text": "Cloudflare's adoption, usage, cost and productivity claims are first-party and are not independently replicated measurements of the system's effectiveness.\n"
+            },
+            {
+              "id": "passage:6a53b9a12c0aa641c72ad903cf4642f2ea2dffdb9200b5219e6bd738aa69141f",
+              "field": "what_this_does_not_establish.1",
+              "text": "The reported increase in merge-request volume occurred alongside rising AI adoption, but the source does not isolate the internal AI stack as the causal driver of that increase or establish the quality of all additional merge requests.\n"
+            }
+          ]
+        }
+      ],
+      "assessment": {
+        "decision": "fail",
+        "ratings": {
+          "support": {
+            "pass": false,
+            "rationale": "The cycle-time summary cites observed.2 about proxy access controls, not adoption or cycle-time effects."
+          },
+          "boundaries": {
+            "pass": false,
+            "rationale": "The corpus-wide claim of no organizational adoption conflicts with the supplied Cloudflare observed.0 report of adoption across 295 teams."
+          },
+          "responsiveness": {
+            "pass": true,
+            "rationale": "Insufficiency about causal cycle-time improvement is defensible, but the missing evidence must be described accurately."
+          },
+          "next_step": {
+            "pass": false,
+            "rationale": "Conduct a controlled experiment and measure engineering cycle time specify no cohort, comparison or measurement interval; adopt/reject coding agents is too broad."
+          }
+        }
+      }
+    },
+    {
+      "id": "many-agents",
+      "question": "What changes when teams go from one agent to many?",
+      "answer_contract": "structured_decision_v1",
+      "answer": {
+        "outcome": "insufficient",
+        "summary": {
+          "text": "The transition from one agent to many involves changes in interface organization, task decomposition, and orchestration. However, the evidence does not establish the specific changes or their effects on agent performance, scalability, or fleet-wide operation.",
+          "citations": [
+            {
+              "source_id": "source:a4c2e2e415a76db607f60afc025c5df30b8dea3d8cc0989c9dadad7bc2b97100",
+              "passage_id": "passage:b6e3d28a52441d712cc9d902a48a56a3ad9301de2a1b5d8729bc70a2d7be5be4",
+              "quote": "Cursor's Agents Window runs many agents across repositories and environments."
+            },
+            {
+              "source_id": "source:2a2a421d3d85914d73e4e32dd30d654861fb412e919a0c2a8f52b8c64a12d1f3",
+              "passage_id": "passage:9f89d068f04ede3f82a84fb891281d3df89e65f655950d63db8088647c58e5bd",
+              "quote": "Spotify reports operating Honk coding-agent sessions in Kubernetes with trusted tools and CI verification, integrated with fleet orchestration."
+            }
+          ]
+        },
+        "claims": [],
+        "uncertainties": [
+          "The evidence does not establish the specific changes or their effects on agent performance, scalability, or fleet-wide operation.",
+          "The studies do not provide a comprehensive evaluation of the effects of multiple agents on agent performance, scalability, or fleet-wide operation."
+        ],
+        "next_step": {
+          "action": "Conduct a controlled study to evaluate the effects of multiple agents on agent performance, scalability, and fleet-wide operation.",
+          "measure": "Agent performance, scalability, and fleet-wide operation metrics.",
+          "citations": [
+            {
+              "source_id": "source:a4c2e2e415a76db607f60afc025c5df30b8dea3d8cc0989c9dadad7bc2b97100",
+              "passage_id": "passage:7ca550f7069c21cb96ea61f3ca4ceceff756c5b0c5aee9eb8e45d0a98462a638",
+              "quote": "At what concurrency does isolation and task dependency management become insufficient without stronger orchestration, shared state, and verification mechanisms?"
+            }
+          ],
+          "decision_rule": "If Significant improvement in agent performance or scalability, Implement multiple agents in production environment; otherwise Re-evaluate agent configuration and orchestration"
+        }
+      },
+      "sources": [
+        {
+          "id": "source:a4c2e2e415a76db607f60afc025c5df30b8dea3d8cc0989c9dadad7bc2b97100",
+          "record_id": "2026-04-24-cursor-agents-window",
+          "url": "https://agenticengineering.science/signals/2026-04-24-cursor-agents-window/",
+          "title": "The interface reorganizes around many agents",
+          "original": {
+            "title": "Agents Window",
+            "date": "2026-04-24",
+            "producer": "Cursor",
+            "producer_type": "organization",
+            "type": "changelog",
+            "provenance": "primary",
+            "url": "https://cursor.com/changelog/04-24-26"
+          },
+          "snapshot_id": "633533b2d5a69da6c81acdf1462f2246baa7c5847269d87cc25efe65e4f606d0",
+          "passages": [
+            {
+              "id": "passage:b6e3d28a52441d712cc9d902a48a56a3ad9301de2a1b5d8729bc70a2d7be5be4",
+              "field": "observed.0",
+              "text": "Cursor's Agents Window runs many agents across repositories and environments."
+            },
+            {
+              "id": "passage:7ca550f7069c21cb96ea61f3ca4ceceff756c5b0c5aee9eb8e45d0a98462a638",
+              "field": "open_question",
+              "text": "At what concurrency does isolation and task dependency management become insufficient without stronger orchestration, shared state, and verification mechanisms?"
+            }
+          ]
+        },
+        {
+          "id": "source:2a2a421d3d85914d73e4e32dd30d654861fb412e919a0c2a8f52b8c64a12d1f3",
+          "record_id": "2026-06-03-spotify-code-with-claude",
+          "url": "https://agenticengineering.science/signals/2026-06-03-spotify-code-with-claude/",
+          "title": "Coding stops being the constraint",
+          "original": {
+            "title": "Coding Is No Longer the Constraint: Scaling Developer Experience to Teams and Agents at Spotify",
+            "date": "2026-06-03",
+            "producer": "Spotify",
+            "producer_type": "organization",
+            "type": "engineering-blog",
+            "provenance": "primary",
+            "url": "https://engineering.atspotify.com/2026/6/code-with-claude-coding-is-no-longer-the-constraint"
+          },
+          "snapshot_id": "57c3ffde14305489371d5d1cf4fe09eaf6351400cb04fe2bf6cd7ea07b2c747d",
+          "passages": [
+            {
+              "id": "passage:9f89d068f04ede3f82a84fb891281d3df89e65f655950d63db8088647c58e5bd",
+              "field": "observed.0",
+              "text": "Spotify reports operating Honk coding-agent sessions in Kubernetes with trusted tools and CI verification, integrated with fleet orchestration."
+            }
+          ]
+        }
+      ],
+      "assessment": {
+        "decision": "fail",
+        "ratings": {
+          "support": {
+            "pass": false,
+            "rationale": "The two citations establish a multi-agent interface and fleet orchestration but do not support every claimed change in task decomposition."
+          },
+          "boundaries": {
+            "pass": false,
+            "rationale": "The answer describes changes and then says specific changes are not established."
+          },
+          "responsiveness": {
+            "pass": false,
+            "rationale": "A descriptive question can be answered from attributed reports without proof of performance benefit."
+          },
+          "next_step": {
+            "pass": false,
+            "rationale": "Performance, scalability and fleet-wide metrics are undefined; production rollout is not a bounded reversible next step."
+          }
+        }
+      }
+    },
+    {
+      "id": "human-review",
+      "question": "Where does human review become the bottleneck?",
+      "answer_contract": "structured_decision_v1",
+      "answer": {
+        "outcome": "insufficient",
+        "summary": {
+          "text": "Human review becomes the bottleneck when automated activity increases and repository architecture encounters new constraints such as push latency, durable write throughput, shared-reference contention, read fan-out, maintenance work, failure recovery, governance, and observability. However, the provided sources do not establish where human review becomes the bottleneck.",
+          "citations": [
+            {
+              "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+              "passage_id": "passage:6fe3194dc3c27474dd05d3112d08ab4750c2616c5ac4ac9e72e39eb40439bb63",
+              "quote": "GitHub provides direct infrastructure-level evidence for Selection. Repository architecture that was viable for predominantly human-paced development encounters new constraints when automated actors commit, push, fetch, validate, and merge at much higher frequency and concurrency. Push latency, durable write throughput, shared-reference contention, read fan-out, maintenance work, failure recovery, governance, and observability become environmental conditions that determine whether agent fleets can operate reliably at scale."
+            }
+          ]
+        },
+        "claims": [],
+        "uncertainties": [
+          "The sources do not provide sufficient information to determine where human review becomes the bottleneck.",
+          "The relationship between automated activity and human review bottleneck is not established."
+        ],
+        "next_step": {
+          "action": "Conduct an experiment to measure the impact of automated activity on human review bottleneck",
+          "measure": "Measure the time spent on human review and the number of automated activities",
+          "citations": [
+            {
+              "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+              "passage_id": "passage:6fe3194dc3c27474dd05d3112d08ab4750c2616c5ac4ac9e72e39eb40439bb63",
+              "quote": "GitHub provides direct infrastructure-level evidence for Selection. Repository architecture that was viable for predominantly human-paced development encounters new constraints when automated actors commit, push, fetch, validate, and merge at much higher frequency and concurrency. Push latency, durable write throughput, shared-reference contention, read fan-out, maintenance work, failure recovery, governance, and observability become environmental conditions that determine whether agent fleets can operate reliably at scale."
+            }
+          ],
+          "decision_rule": "If Human review time increases significantly with automated activity, Optimize repository architecture to reduce push latency and shared-reference contention; otherwise Investigate other factors contributing to human review bottleneck"
+        }
+      },
+      "sources": [
+        {
+          "id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+          "record_id": "2026-10-06-github-agent-scale-git-infrastructure",
+          "url": "https://agenticengineering.science/signals/2026-10-06-github-agent-scale-git-infrastructure/",
+          "title": "Agent concurrency turns repository writes into infrastructure selection pressure",
+          "original": {
+            "title": "Building Git infrastructure for agent-scale development",
+            "date": "2026-10-06",
+            "producer": "GitHub",
+            "producer_type": "organization",
+            "type": "engineering-blog",
+            "provenance": "primary",
+            "url": "https://github.blog/engineering/architecture-optimization/building-git-infrastructure-for-agent-scale-development/"
+          },
+          "snapshot_id": "ff061a1f31d1b53dcef2bfc9b7d2c49cf8d8e6e0c29c1d702123d9a2e0d4beb4",
+          "passages": [
+            {
+              "id": "passage:6fe3194dc3c27474dd05d3112d08ab4750c2616c5ac4ac9e72e39eb40439bb63",
+              "field": "interpretation",
+              "text": "GitHub provides direct infrastructure-level evidence for Selection. Repository architecture that was viable for predominantly human-paced development encounters new constraints when automated actors commit, push, fetch, validate, and merge at much higher frequency and concurrency. Push latency, durable write throughput, shared-reference contention, read fan-out, maintenance work, failure recovery, governance, and observability become environmental conditions that determine whether agent fleets can operate reliably at scale. GitHub's response also shows that scaling is not only a matter of adding compute: the substrate must reduce unnecessary coordination while preserving the narrow agreement points and human controls required for correctness.\n"
+            }
+          ]
+        }
+      ],
+      "assessment": {
+        "decision": "fail",
+        "ratings": {
+          "support": {
+            "pass": false,
+            "rationale": "The cited GitHub interpretation concerns repository infrastructure, not a measured human-review bottleneck."
+          },
+          "boundaries": {
+            "pass": false,
+            "rationale": "The summary asserts where human review becomes the bottleneck then says the sources do not establish where."
+          },
+          "responsiveness": {
+            "pass": false,
+            "rationale": "The answer substitutes Git infrastructure constraints for the requested human-review constraints."
+          },
+          "next_step": {
+            "pass": false,
+            "rationale": "Increasing review time does not establish that push latency or reference contention should be optimized."
+          }
+        }
+      }
+    },
+    {
+      "id": "context",
+      "question": "What evidence supports the claim that context is becoming the limiting factor?",
+      "answer_contract": "structured_decision_v1",
+      "answer": {
+        "outcome": "insufficient",
+        "summary": {
+          "text": "The sources do not provide sufficient evidence to support the claim that context is becoming the limiting factor. While they describe various efforts to improve context management and efficiency, such as Atlassian's MCP service and Stripe's Projects, they do not establish a clear causal link between context and limiting factors.",
+          "citations": [
+            {
+              "source_id": "source:df4130a1f6d3b08efd13ab41ad9b83a4588ea67dfa9929b422d53bce7148ab2f",
+              "passage_id": "passage:d368ffc4bc612862b568f9b0c6e9b4447cd35ae9b90cb205c98a65a3e2f854ea",
+              "quote": "Although each configuration exposes the same underlying design-system knowledge, invocation latency, batching, output shape, and agent instructions alter the end-to-end time and token cost of completing a task."
+            }
+          ]
+        },
+        "claims": [],
+        "uncertainties": [
+          "The sources do not provide sufficient data to establish a clear causal link between context and limiting factors.",
+          "The sources do not compare the performance of different context management approaches.",
+          "The sources do not provide sufficient information to determine the impact of context on agent performance."
+        ],
+        "next_step": {
+          "action": "conduct a controlled experiment",
+          "measure": "agent performance",
+          "citations": [
+            {
+              "source_id": "source:df4130a1f6d3b08efd13ab41ad9b83a4588ea67dfa9929b422d53bce7148ab2f",
+              "passage_id": "passage:bd2bc01545088aa64e2ea4db8eac33c58e97a96d99f9adc8521c6308d6cdf487",
+              "quote": "Across organizations and task types, which properties of a context interface most strongly determine end-to-end agent quality, latency, and token cost once the underlying knowledge is held constant?"
+            }
+          ],
+          "decision_rule": "If improvement in agent performance, implement context management approach; otherwise re-evaluate context management approach"
+        }
+      },
+      "sources": [
+        {
+          "id": "source:df4130a1f6d3b08efd13ab41ad9b83a4588ea67dfa9929b422d53bce7148ab2f",
+          "record_id": "2026-09-16-atlassian-design-system-cli",
+          "url": "https://agenticengineering.science/signals/2026-09-16-atlassian-design-system-cli/",
+          "title": "The context interface itself is selected by agent economics",
+          "original": {
+            "title": "Giving AI agents design system context from the terminal: what we learned building a CLI",
+            "date": "2026-09-16",
+            "producer": "Atlassian",
+            "producer_type": "organization",
+            "type": "engineering-blog",
+            "provenance": "primary",
+            "url": "https://www.atlassian.com/blog/ai-at-work/giving-ai-agents-design-system-context-from-the-terminal-what-we-learned-building-a-cli"
+          },
+          "snapshot_id": "83c80083100a4a5250f0894e0e8d7737cd194bc8b989a79d6e2abb5fd028c003",
+          "passages": [
+            {
+              "id": "passage:c873e37efc95bd85edbee818764d20a0a7d12eeda5aee25d88e7f34b6388bc32",
+              "field": "observed.1",
+              "text": "Atlassian evaluated real front-end tasks using the same agent and model on the same questions. The changed variable was whether the skill delivered context through MCP, the CLI, CLI wrapper scripts, or bundled reference files.\n"
+            },
+            {
+              "id": "passage:f1f1e62a287cbf931c73a82b94d8dad49e49e2b6078f2aa4a29035abe08e9ae1",
+              "field": "observed.2",
+              "text": "Each run recorded pass rate, task time, agent-reported tokens, and tool calls; Atlassian also retained transcripts to inspect whether agents followed the intended context path.\n"
+            },
+            {
+              "id": "passage:a33487afb4da4b6a57c3cd984186c30f270ffc959c5b60d8e281fb1acbeb4c35",
+              "field": "observed.5",
+              "text": "Against the MCP baseline, Atlassian reports that the iterated CLI configuration maintained quality while mean task time fell from 352 seconds to 325 seconds and mean tokens per task fell from 218,000 to 201,000, both reported as 8% improvements.\n"
+            },
+            {
+              "id": "passage:d368ffc4bc612862b568f9b0c6e9b4447cd35ae9b90cb205c98a65a3e2f854ea",
+              "field": "interpretation",
+              "text": "The experiment makes the context-delivery interface a selectable part of the agent environment. Although each configuration exposes the same underlying design-system knowledge, invocation latency, batching, output shape, and agent instructions alter the end-to-end time and token cost of completing a task. Atlassian's decision to make the measured CLI configuration the default is direct evidence of Selection acting on infrastructure around the model, while retaining MCP as a fallback shows that accessibility constraints vary across execution environments.\n"
+            },
+            {
+              "id": "passage:40bf3795495e055a5b10421aea5e79b3ff69bf95f23154b317df2af0d23ff2c4",
+              "field": "what_this_does_not_establish.0",
+              "text": "The source does not disclose the benchmark size, number of repeated runs, score distributions, uncertainty, or statistical significance.\n"
+            },
+            {
+              "id": "passage:3b7ce6085a4aac3b5c16393628b3789d98a30173145c8c69c5f0c88bf36b45d1",
+              "field": "what_this_does_not_establish.1",
+              "text": "The 8% results compare Atlassian's iterated CLI configuration with its MCP baseline; they do not establish that CLIs are generally faster or cheaper than MCP servers in other systems.\n"
+            },
+            {
+              "id": "passage:2daa21441d56ca122e7fe9f8294cccc09d7f2ba6051b658484be34946b190e3c",
+              "field": "what_this_does_not_establish.2",
+              "text": "Several changes were introduced during iteration, including pre-installed invocation, batching, compact output, search improvements, and revised skill instructions, so the source does not isolate each change's contribution.\n"
+            },
+            {
+              "id": "passage:b54ce21454e26ffaf8c130533342d98e2fc682d199972f46be53247ad79d9a97",
+              "field": "what_this_does_not_establish.5",
+              "text": "The results are first-party and specific to Atlassian's design-system context, monorepo, internal CLI, benchmark tasks, and agent configuration.\n"
+            },
+            {
+              "id": "passage:bd2bc01545088aa64e2ea4db8eac33c58e97a96d99f9adc8521c6308d6cdf487",
+              "field": "open_question",
+              "text": "Across organizations and task types, which properties of a context interface most strongly determine end-to-end agent quality, latency, and token cost once the underlying knowledge is held constant?\n"
+            }
+          ]
+        }
+      ],
+      "assessment": {
+        "decision": "fail",
+        "ratings": {
+          "support": {
+            "pass": false,
+            "rationale": "The summary cites an interpretation about effects of context interfaces while denying the presence of a comparison."
+          },
+          "boundaries": {
+            "pass": false,
+            "rationale": "Atlassian observed.1 and observed.5 describe a same-agent/model comparison and task-time/token results; the claim that no approaches are compared is false."
+          },
+          "responsiveness": {
+            "pass": false,
+            "rationale": "The answer omits relevant comparative evidence instead of describing it with first-party and task-specific limits."
+          },
+          "next_step": {
+            "pass": false,
+            "rationale": "Agent performance is not an operational metric, and no specific intervention, task sample or comparison is defined."
+          }
+        }
+      }
+    },
+    {
+      "id": "infrastructure",
+      "question": "What new infrastructure appears once agents become part of the engineering system?",
+      "answer_contract": "structured_decision_v1",
+      "answer": {
+        "outcome": "insufficient",
+        "summary": {
+          "text": "New infrastructure that appears once agents become part of the engineering system includes a platform layer for authentication, routing, and inference, a knowledge layer built around Backstage and AGENTS.md, and an enforcement layer built around the AI Code Reviewer and Engineering Codex, as reported by Cloudflare.",
+          "citations": [
+            {
+              "source_id": "source:8d6c636da55bdffc77650d875e0576d302ad051ed77c4c0f38681b53659f9858",
+              "passage_id": "passage:241156ce378059c7c482de1d4434d989c695d001ecd3617178335f36b4b56f54",
+              "quote": "Cloudflare organizes the internal stack into a platform layer for authentication, routing and inference; a knowledge layer built around Backstage and AGENTS.md; and an enforcement layer built around the AI Code Reviewer and Engineering Codex."
+            }
+          ]
+        },
+        "claims": [],
+        "uncertainties": [
+          "The evidence does not establish the causal contribution of individual mechanisms to the reported cooperation advantage.",
+          "The source does not isolate the internal AI stack as the causal driver of the increase in merge requests.",
+          "The source does not establish that specialization itself outperforms an equivalent non-specialized reviewer architecture."
+        ],
+        "next_step": {
+          "action": "Conduct a controlled experiment to measure the impact of the internal AI stack on merge request volume and quality.",
+          "measure": "Merge request volume and quality",
+          "citations": [
+            {
+              "source_id": "source:8d6c636da55bdffc77650d875e0576d302ad051ed77c4c0f38681b53659f9858",
+              "passage_id": "passage:241156ce378059c7c482de1d4434d989c695d001ecd3617178335f36b4b56f54",
+              "quote": "Cloudflare organizes the internal stack into a platform layer for authentication, routing and inference; a knowledge layer built around Backstage and AGENTS.md; and an enforcement layer built around the AI Code Reviewer and Engineering Codex."
+            }
+          ],
+          "decision_rule": "If Merge request volume and quality increase significantly, Implement the internal AI stack across the organization; otherwise Refine the internal AI stack and conduct further experiments"
+        }
+      },
+      "sources": [
+        {
+          "id": "source:8d6c636da55bdffc77650d875e0576d302ad051ed77c4c0f38681b53659f9858",
+          "record_id": "2026-04-20-cloudflare-internal-ai-engineering-stack",
+          "url": "https://agenticengineering.science/signals/2026-04-20-cloudflare-internal-ai-engineering-stack/",
+          "title": "The engineering environment becomes an integrated agentic system",
+          "original": {
+            "title": "The AI engineering stack we built internally \u2014 on the platform we ship",
+            "date": "2026-04-20",
+            "producer": "Cloudflare",
+            "producer_type": "organization",
+            "type": "engineering-blog",
+            "provenance": "primary",
+            "url": "https://blog.cloudflare.com/internal-ai-engineering-stack/"
+          },
+          "snapshot_id": "21b09513eec3418dec14f24526a8f7f505d1f404b9b9c5cbc2a2ce08cc6e094f",
+          "passages": [
+            {
+              "id": "passage:241156ce378059c7c482de1d4434d989c695d001ecd3617178335f36b4b56f54",
+              "field": "observed.1",
+              "text": "Cloudflare organizes the internal stack into a platform layer for authentication, routing and inference; a knowledge layer built around Backstage and AGENTS.md; and an enforcement layer built around the AI Code Reviewer and Engineering Codex.\n"
+            }
+          ]
+        }
+      ],
+      "assessment": {
+        "decision": "fail",
+        "ratings": {
+          "support": {
+            "pass": true,
+            "rationale": "Cloudflare observed.1 directly supports the attributed platform, knowledge and enforcement layers."
+          },
+          "boundaries": {
+            "pass": true,
+            "rationale": "The response retains Cloudflare attribution and notes causal limitations."
+          },
+          "responsiveness": {
+            "pass": false,
+            "rationale": "The supported descriptive answer is incorrectly marked insufficient; the question does not request causal proof."
+          },
+          "next_step": {
+            "pass": false,
+            "rationale": "Test the internal AI stack lacks a bounded local intervention; organization-wide adoption is disproportionate."
+          }
+        }
+      }
+    },
+    {
+      "id": "weather",
+      "question": "What will the weather in Amsterdam be tomorrow?",
+      "answer_contract": "structured_decision_v1",
+      "answer": {
+        "outcome": "insufficient",
+        "summary": {
+          "text": "The provided sources do not contain information about the weather in Amsterdam tomorrow.",
+          "citations": []
+        },
+        "claims": [],
+        "uncertainties": [
+          "Lack of relevant data"
+        ],
+        "next_step": null
+      },
+      "sources": [],
+      "assessment": {
+        "decision": "pass",
+        "ratings": {
+          "support": {
+            "pass": true,
+            "rationale": "The response makes no weather forecast or unsupported engineering claim."
+          },
+          "boundaries": {
+            "pass": true,
+            "rationale": "It correctly states that the supplied records do not contain weather information."
+          },
+          "responsiveness": {
+            "pass": true,
+            "rationale": "Abstention is justified for this unrelated question."
+          },
+          "next_step": {
+            "pass": true,
+            "rationale": "No experiment is appropriate for this unrelated question and next_step is null."
+          }
+        }
+      }
+    }
+  ]
+}
