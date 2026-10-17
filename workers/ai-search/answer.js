@@ -16,17 +16,22 @@ export const ANSWER_SCHEMA = object({
   next_step: { anyOf: [{ type: 'null' }, object({ action: text(700), measure: text(500), decision_rule: text(600), citations: list(citationSchema, 1, 3) })] },
 });
 // Generation uses structured decisions; the public v1 envelope retains its rendered sentence.
-export const ANSWER_CONTRACT = 'structured_decision_v1';
+export const ANSWER_CONTRACT = 'passage_refs_v2';
 const decisionSchema = object({ condition: text(180), if_true: text(180), if_false: text(180) });
+const refs = min => list(text(16), min, 3);
+const generatedClaim = { anyOf: [
+  object({ kind: { type: 'string', enum: ['observation'] }, passage: text(16) }),
+  object({ kind: { type: 'string', enum: ['interpretation'] }, text: text(1000), citations: refs(1) }),
+] };
 const generatedNextStep = object({
   action: text(700), measure: text(500), decision: decisionSchema,
-  citations: list(citationSchema, 1, 3),
+  citations: refs(1),
 });
 const generatedBranches = ['answered', 'insufficient'].map(outcome => object({
   ...ANSWER_SCHEMA.properties,
   outcome: { type: 'string', enum: [outcome] },
-  summary: outcome === 'answered' ? object({ text: text(1200), citations: list(citationSchema, 1, 3) }) : statementSchema,
-  claims: { ...ANSWER_SCHEMA.properties.claims, minItems: outcome === 'answered' ? 1 : 0, maxItems: outcome === 'answered' ? 4 : 0 },
+  summary: object({ text: text(1200), citations: refs(outcome === 'answered' ? 1 : 0) }),
+  claims: list(generatedClaim, outcome === 'answered' ? 1 : 0, outcome === 'answered' ? 4 : 0),
   next_step: outcome === 'answered' ? generatedNextStep : { anyOf: [{ type: 'null' }, generatedNextStep] },
 }));
 export const GENERATION_SCHEMA = { anyOf: generatedBranches };
@@ -56,6 +61,12 @@ export async function canonicalSources(records) {
     });
   }
   return { sources, omitted };
+}
+// Request-local references never replace canonical identities in the public response.
+export function generationSources(sources) {
+  return sources.map((source, i) => ({ title: source.title, original: source.original,
+    passages: source.passages.map((p, j) => ({ ref: `s${i + 1}p${j + 1}`, field: p.field, text: p.text })),
+  }));
 }
 class AnswerValidationError extends Error {
   constructor(reason, message) { super(message); this.reason = reason; }
@@ -108,16 +119,34 @@ export function validateAnswer(value, sources) {
 }
 export function finalizeGeneratedAnswer(value, sources) {
   if (value?.outcome === 'insufficient' && Array.isArray(value.claims) && value.claims.length) invalid('abstention_invalid', 'Invalid abstention');
-  if (value?.outcome === 'answered' && (!value.summary?.citations?.length || !value.claims?.length || !value.next_step)) invalid('answer_incomplete', 'Incomplete answer');
+  if (value?.outcome === 'answered') {
+    if (!value.summary?.citations?.length) invalid('summary_citations_missing', 'Missing summary citations');
+    if (!value.claims?.length) invalid('claims_missing', 'Missing claims');
+    if (!value.next_step) invalid('next_step_missing', 'Missing next step');
+  }
+  if (value?.next_step && !value.summary?.citations?.length) invalid('summary_citations_missing', 'Missing evidence boundary');
   if (value?.next_step) {
     try { assertSchema(value.next_step.decision, decisionSchema); }
     catch { invalid('decision_rule_invalid', 'Decision requires a condition and both actions'); }
   }
   assertSchema(value, GENERATION_SCHEMA);
+  const passages = new Map();
+  sources.forEach((s, i) => s.passages.forEach((p, j) => passages.set(`s${i + 1}p${j + 1}`, { source: s, passage: p })));
+  const citation = ref => {
+    const found = passages.get(ref);
+    if (!found) invalid('citation_invalid', 'Unknown passage reference');
+    return { source_id: found.source.id, passage_id: found.passage.id, quote: found.passage.text };
+  };
+  const claims = value.claims.map(claim => {
+    if (claim.kind === 'interpretation') return { ...claim, citations: claim.citations.map(citation) };
+    const cited = citation(claim.passage);
+    if (!passages.get(claim.passage).passage.field.startsWith('observed.')) invalid('citation_invalid', 'Observation requires observed evidence');
+    return { kind: 'observation', text: cited.quote, citations: [cited] };
+  });
   const step = value.next_step;
   const inline = text => text.trim().replace(/\s+/g, ' ');
-  const answer = { ...value, next_step: step ? {
-    action: step.action, measure: step.measure, citations: step.citations,
+  const answer = { ...value, claims, summary: { ...value.summary, citations: value.summary.citations.map(citation) }, next_step: step ? {
+    action: step.action, measure: step.measure, citations: step.citations.map(citation),
     decision_rule: `If ${inline(step.decision.condition)}, ${inline(step.decision.if_true)}; otherwise ${inline(step.decision.if_false)}`,
   } : null };
   return validateAnswer(answer, sources);
@@ -145,9 +174,10 @@ async function readBody(request) {
   const joined = new Uint8Array(size); let offset = 0;
   for (const part of parts) { joined.set(part, offset); offset += part.length; }
   const body = JSON.parse(new TextDecoder().decode(joined));
-  if (!body || Object.keys(body).some(key => !['query', 'record_ids'].includes(key)) || typeof body.query !== 'string' || !body.query.trim() || body.query.trim().length > 500
+  if (!body || Object.keys(body).some(key => !['query', 'record_ids', 'snapshot_ids'].includes(key)) || typeof body.query !== 'string' || !body.query.trim() || body.query.trim().length > 500
     || !Array.isArray(body.record_ids) || body.record_ids.length > ANSWER_LIMITS.records || body.record_ids.some(id => typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,180}$/.test(id))) throw Error('Invalid request');
-  return { query: body.query.trim(), ids: [...new Set(body.record_ids)] };
+  if (body.snapshot_ids !== undefined && (!Array.isArray(body.snapshot_ids) || body.snapshot_ids.length !== body.record_ids.length || new Set(body.record_ids).size !== body.record_ids.length || body.snapshot_ids.some(id => typeof id !== 'string' || !/^[a-f0-9]{64}$/.test(id)))) throw Error('Invalid snapshots');
+  return { query: body.query.trim(), ids: [...new Set(body.record_ids)], snapshots: body.snapshot_ids };
 }
 export function answerAvailable(env) { return env.ANSWER_ENABLED === 'true' && Boolean(env.AI?.run && env.EVIDENCE_DB?.prepare && env.ANSWER_RATE_LIMITER?.limit); }
 export async function handleAnswer(request, env) {
@@ -179,12 +209,13 @@ export async function handleAnswer(request, env) {
       if (expired) throw Error("Answer deadline exceeded");
       request.signal.throwIfAborted();
       const { sources, omitted } = await canonicalSources(records);
+      if (body.snapshots && (sources.length !== body.ids.length || sources.some((s, i) => s.record_id !== body.ids[i] || s.snapshot_id !== body.snapshots[i]))) return failure('evidence_snapshot_changed', 'Pinned evidence is no longer available unchanged', 409);
       const envelope = { version: 1, provenance: 'canonical_eae_records', projection: 'main', loaded_at: new Date().toISOString(), sources, omitted_records: omitted };
       if (!sources.length) return json({ ...envelope, answer: limited('The retrieved results do not contain usable current EAE records for an answer.') }, 200, { 'X-Request-ID': requestId });
       if (expired) throw Error("Answer deadline exceeded");
       request.signal.throwIfAborted();
       stage = 'model';
-      const input = { messages: [{ role: 'system', content: ANSWER_SYSTEM }, { role: 'user', content: JSON.stringify({ question: body.query, sources }) }], response_format: { type: 'json_schema', json_schema: GENERATION_SCHEMA }, max_tokens: ANSWER_LIMITS.outputTokens, temperature: 0.1 };
+      const input = { messages: [{ role: 'system', content: ANSWER_SYSTEM }, { role: 'user', content: JSON.stringify({ question: body.query, sources: generationSources(sources) }) }], response_format: { type: 'json_schema', json_schema: GENERATION_SCHEMA }, max_tokens: ANSWER_LIMITS.outputTokens, temperature: 0.1 };
       metrics.model_input_bytes = bytes(JSON.stringify(input));
       metrics.max_output_tokens = ANSWER_LIMITS.outputTokens;
       modelStarted = Date.now();

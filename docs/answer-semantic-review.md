@@ -123,3 +123,5 @@ answers: changes in retrieved evidence or model variability can affect results.
 Success means supported bounded answers, accurate limits and useful local
 proposals, not merely more answers labelled answered. Retain correct weather
 abstention. Do not enable production from contract results alone.
+
+The next generation iteration uses `passage_refs_v2` / `compact_evidence_v2`. Canonical observation text and citations are assembled in code from model-selected passage references. This removes copying work, not the need to judge relevance or entailment. Compare live runs with `--snapshot-report` as documented in the evaluation deployment guide. The previous bounded prompt run passed only the weather case; no semantic improvement has yet been demonstrated. Historical baseline fixtures remain unchanged as regression review material.

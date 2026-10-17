@@ -90,3 +90,20 @@ it('encodes mutually exclusive outcome requirements in the generation schema', a
   const invalid = { ...generatedAnswerFor(sources), outcome: 'insufficient' };
   expect(() => finalizeGeneratedAnswer(invalid, sources)).toThrow('Invalid abstention');
 });
+it('resolves compact references across sources without trusting generated observation text', async () => {
+  const { generationSources, finalizeGeneratedAnswer } = await import('../../workers/ai-search/answer.js');
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record, { ...record, id: 'second', observed: ['Second report finding.'] }]);
+  const compact = generationSources(sources);
+  expect(JSON.stringify(compact)).not.toContain('passage:');
+  expect(JSON.stringify(compact)).not.toContain('snapshot_id');
+  expect(compact[1].passages).toContainEqual({ ref: 's2p1', field: 'observed.0', text: 'Second report finding.' });
+  expect(compact[0].passages.some(p => p.field.startsWith('what_this_does_not_establish.'))).toBe(true);
+  const generated = generatedAnswerFor(compact);
+  generated.claims = [{ kind: 'observation', passage: 's2p1' }, { kind: 'interpretation', text: 'A hypothesis to test.', citations: ['s1p1', 's2p1'] }];
+  const answer = finalizeGeneratedAnswer(generated, sources);
+  expect(answer.claims[0]).toEqual({ kind: 'observation', text: 'Second report finding.', citations: [{ source_id: sources[1].id, passage_id: sources[1].passages[0].id, quote: 'Second report finding.' }] });
+  expect(answer.claims[1].citations).toHaveLength(2);
+  generated.claims[0].text = 'Injected replacement';
+  expect(() => finalizeGeneratedAnswer(generated, sources)).toThrow();
+});

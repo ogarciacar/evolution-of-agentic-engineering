@@ -1,7 +1,7 @@
 import { validateAnswer } from './answer.js';
 
 // Inject transport for deterministic tests. Never copy arbitrary upstream error bodies.
-export async function evaluateQuestion(base, question, expectedAbstention = false, transport = fetch) {
+export async function evaluateQuestion(base, question, expectedAbstention = false, transport = fetch, snapshot = null) {
   const started = Date.now();
   let stage = 'retrieval';
   let status = null;
@@ -21,11 +21,15 @@ export async function evaluateQuestion(base, question, expectedAbstention = fals
     return response.json();
   };
   try {
-    const retrieval = await read(await transport(new URL(`/api/search?q=${encodeURIComponent(question)}&passages=1`, base), { signal: AbortSignal.timeout(30000) }));
-    if (!retrieval.answer_available) throw Error('Answer capability is not enabled at this endpoint');
-    const record_ids = [...new Set(retrieval.evidence.sources.map(s => s.record_id).filter(Boolean))];
+    let record_ids;
+    if (snapshot) record_ids = snapshot.record_ids;
+    else {
+      const retrieval = await read(await transport(new URL(`/api/search?q=${encodeURIComponent(question)}&passages=1`, base), { signal: AbortSignal.timeout(30000) }));
+      if (!retrieval.answer_available) throw Error('Answer capability is not enabled at this endpoint');
+      record_ids = [...new Set(retrieval.evidence.sources.map(s => s.record_id).filter(Boolean))];
+    }
     stage = 'answer'; status = null; requestId = null;
-    const data = await read(await transport(new URL('/api/search/answer', base), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: question, record_ids }), signal: AbortSignal.timeout(30000) }));
+    const data = await read(await transport(new URL('/api/search/answer', base), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: question, record_ids, ...(snapshot ? { snapshot_ids: snapshot.snapshot_ids } : {}) }), signal: AbortSignal.timeout(30000) }));
     stage = 'contract';
     validateAnswer(data.answer, data.sources);
     return { question, latency_ms: Date.now() - started, request_id: requestId, contract: 'pass', expected_abstention: expectedAbstention, abstention_pass: !expectedAbstention || (data.answer.outcome === 'insufficient' && data.answer.next_step === null), data,
