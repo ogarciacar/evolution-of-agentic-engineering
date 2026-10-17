@@ -85,3 +85,9 @@ For the structured-decision rollout, confirm
 A model-backed result without this marker may be from an earlier deployment;
 wait for the evaluation build to finish and rerun the full set. This marker
 identifies the contract revision, not a unique deployment.
+
+A green evaluation exit code is only a contract result. Follow
+[Semantic answer review](answer-semantic-review.md) to generate a separate review
+checklist with npm run review:answer, assess all six cases against their exact
+source snapshots, and check that review. The review command does not deploy or
+enable production answers.

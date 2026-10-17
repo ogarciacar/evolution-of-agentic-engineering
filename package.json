@@ -7,7 +7,8 @@
     "test:acceptance": "playwright test --config tests/investigate/playwright.config.mjs",
     "test:contracts": "node workers/ai-search/check-search-endpoint.mjs && node workers/ai-search/check-preview-bridge.mjs && node workers/ai-search/check-search-ui.mjs",
     "check": "npm run test:unit && npm run test:worker && npm run test:contracts && npm run test:acceptance",
-    "eval:answer": "node workers/ai-search/evaluate-answers.mjs"
+    "eval:answer": "node workers/ai-search/evaluate-answers.mjs",
+    "review:answer": "node workers/ai-search/review-answers.mjs"
   },
   "engines": {
     "node": ">=22"
