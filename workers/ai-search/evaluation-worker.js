@@ -1,3 +1,5 @@
+import { handleAnswer } from './answer.js';
+import { EVALUATION_MODELS, normalizeCandidateOutput } from './evaluation-models.mjs';
 import { handleRequest } from './index.js';
 
 // Evaluation-only entry point. Production continues to use index.js directly.
@@ -12,6 +14,15 @@ export async function handleEvaluation(request, env) {
   let mismatch = 0;
   for (let i = 0; i < expected.length; i++) mismatch |= expected[i] ^ received[i];
   if (mismatch) return reject(401, 'unauthorized');
+  const key = request.headers.get('X-EAE-Evaluation-Model');
+  if (key !== null) {
+    if (!Object.hasOwn(EVALUATION_MODELS, key)) return reject(400, 'evaluation_model_invalid');
+    if (new URL(request.url).pathname !== '/api/search/answer' || request.method !== 'POST') return reject(400, 'evaluation_model_route_invalid');
+    const model = EVALUATION_MODELS[key];
+    const ai = env.AI;
+    const scopedEnv = key === 'llama' || !ai?.run ? env : { ...env, AI: { run: async (id, input) => normalizeCandidateOutput(await ai.run(id, input)) } };
+    return handleAnswer(request, scopedEnv, model);
+  }
   return handleRequest(request, env);
 }
 export default { fetch: handleEvaluation };

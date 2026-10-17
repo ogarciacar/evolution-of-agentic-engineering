@@ -194,11 +194,11 @@ async function readBody(request) {
   return { query: body.query.trim(), ids: [...new Set(body.record_ids)], snapshots: body.snapshot_ids };
 }
 export function answerAvailable(env) { return env.ANSWER_ENABLED === 'true' && Boolean(env.AI?.run && env.EVIDENCE_DB?.prepare && env.ANSWER_RATE_LIMITER?.limit); }
-export async function handleAnswer(request, env) {
+export async function handleAnswer(request, env, model = ANSWER_MODEL) {
   const started = Date.now();
   const requestId = crypto.randomUUID();
   let stage = 'request';
-  const metrics = { answer_contract: ANSWER_CONTRACT, prompt_revision: ANSWER_PROMPT_REVISION };
+  const metrics = { model_key: model === ANSWER_MODEL ? 'llama' : 'gpt-oss', answer_contract: ANSWER_CONTRACT, prompt_revision: ANSWER_PROMPT_REVISION };
   let modelStarted;
   const measurements = () => ({ ...metrics, ...(modelStarted === undefined ? {} : { model_latency_ms: metrics.model_latency_ms ?? Date.now() - modelStarted }) });
   const failure = (code, message, status, headers = {}, details = {}) => {
@@ -230,10 +230,13 @@ export async function handleAnswer(request, env) {
       request.signal.throwIfAborted();
       stage = 'model';
       const input = { messages: [{ role: 'system', content: ANSWER_SYSTEM }, { role: 'user', content: JSON.stringify({ question: body.query, sources: generationSources(sources) }) }], response_format: { type: 'json_schema', json_schema: GENERATION_SCHEMA }, max_tokens: ANSWER_LIMITS.outputTokens, temperature: 0.1 };
+      metrics.generation_input_sha256 = await hash(JSON.stringify(input));
       metrics.model_input_bytes = bytes(JSON.stringify(input));
       metrics.max_output_tokens = ANSWER_LIMITS.outputTokens;
+      if (expired) throw Error("Answer deadline exceeded");
+      request.signal.throwIfAborted();
       modelStarted = Date.now();
-      const generated = await env.AI.run(ANSWER_MODEL, input);
+      const generated = await env.AI.run(model, input);
       if (expired) throw Error("Answer deadline exceeded");
       request.signal.throwIfAborted();
       metrics.model_latency_ms = Date.now() - modelStarted;
@@ -251,8 +254,8 @@ export async function handleAnswer(request, env) {
         const validation_reason = error instanceof AnswerValidationError ? error.reason : error instanceof SyntaxError ? 'json_invalid' : 'validation_error';
         return failure('invalid_model_output', 'The generated answer did not pass evidence checks', 502, {}, { validation_reason });
       }
-      console.log(JSON.stringify({ event: 'eae_answer', request_id: requestId, outcome: answer.outcome, model: ANSWER_MODEL, records: sources.length, omitted_records: omitted, latency_ms: Date.now() - started, ...measurements() }));
-      return json({ ...envelope, model: ANSWER_MODEL, answer, diagnostics: measurements() }, 200, { 'X-Request-ID': requestId });
+      console.log(JSON.stringify({ event: 'eae_answer', request_id: requestId, outcome: answer.outcome, model, records: sources.length, omitted_records: omitted, latency_ms: Date.now() - started, ...measurements() }));
+      return json({ ...envelope, model, answer, diagnostics: measurements() }, 200, { 'X-Request-ID': requestId });
     };
     return await Promise.race([work(), new Promise((_, reject) => { timer = setTimeout(() => { expired = true; reject(Error('Answer timeout')); }, ANSWER_LIMITS.timeoutMs); })]);
   } catch {

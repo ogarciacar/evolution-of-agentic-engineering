@@ -125,3 +125,28 @@ Generated prose containing internal passage references is rejected with `referen
 Citation diagnostics now distinguish `citation_reference_unknown`, `observation_field_invalid`, `citation_passage_too_long` and `observation_passage_too_long`. They expose only a reason, never rejected text. The existing `citation_invalid` reason remains for public citation validation. Unknown references are never guessed or repaired. Complete evidence passages are never truncated to make validation pass.
 
 After the evaluation build succeeds, use the pinned evaluation command above with the earlier complete six-case snapshot report and a new output filename. The 2026-10-17 09:47 UTC report used live retrieval and had no answer snapshot for its failed context case, so it cannot serve as that six-case baseline. A pinned run returning HTTP 409 requires a fresh complete baseline; it must not silently fall back to live retrieval.
+
+### Compare models on identical evidence
+
+The authenticated evaluation entry point now accepts `X-EAE-Evaluation-Model: llama` or `gpt-oss` on POST `/api/search/answer` only. These map to `@cf/meta/llama-3.3-70b-instruct-fp8-fast` and `@cf/openai/gpt-oss-120b`. Production ignores the header and retains its existing model. No new credentials or Cloudflare bindings are required; the evaluation token, kill switch, D1 canonical loading and rate limiter still apply.
+
+Cloudflare's current [GPT-OSS-120B model reference](https://developers.cloudflare.com/workers-ai/models/gpt-oss-120b/) documents messages, response_format, max_tokens and temperature for the Workers binding. This candidate uses the identical input object as Llama. The adapter reads final answer content from the native response, Chat Completions or Responses envelope; it never uses reasoning text as an answer. Explicit incomplete responses, truncated chat choices, refusals and reasoning-only output fail validation. Provider compatibility must still be verified in the live run; mocked adapter tests are not live inference evidence.
+
+After merging and waiting for the evaluation Worker build, update local main and run:
+
+```sh
+npm run eval:compare -- \
+  --base-url https://agentic-engineering-search-evaluation.orlando-garcia.workers.dev \
+  --snapshot-report .artifacts/answer-evaluation-six-pass.json \
+  --output-dir .artifacts/model-comparison-v1
+```
+
+The snapshot file must exist: use the complete six-case report previously saved as that filename. Keep `EAE_EVALUATION_TOKEN` exported. This runs up to twelve paid inference calls, sequentially, alternating which model goes first per question. It requires an unused output directory and validates all pins before any network request. No retries, fallback models, prompt edits or live retrieval are used. Snapshot mismatch produces HTTP 409 before inference.
+
+Output:
+- `llama.json` and `gpt-oss.json`: ordinary six-case reports compatible with `review:answer`.
+- `comparison.json`: per-case contract results, confirmed selected model keys and matching generation-input hashes. It does not score semantic quality or choose a winner.
+
+`generation_input_sha256` hashes the entire model input, including messages, evidence, JSON schema, temperature and token limit; it is emitted on success and failures after the input is built. Failures before model input exists cannot confirm an identical input pair. Missing/mismatched model keys also block comparison, detecting an older deployment that ignores selection. The CLI exits 1 for any unmatched pair, contract failure or failed expected abstention and still saves reports.
+
+Both models retain the 25-second deadline and 1,800-token ceiling. Reasoning can consume the candidate's generation budget, so failure here measures suitability within the current serving budget, not its unrestricted reasoning ability. There is no forced reasoning-effort override. Review both reports against the same rubric, including claim support, causal boundaries, useful next steps and unjustified abstention. Repeat with a new output directory if a first paired run is promising; one run cannot establish reliability. Production remains disabled until a release review passes.
