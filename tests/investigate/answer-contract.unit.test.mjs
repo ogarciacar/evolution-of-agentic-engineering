@@ -63,12 +63,12 @@ it('assembles a decision from required fields without requiring model punctuatio
   const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
   const { sources } = await canonicalSources([record]);
   const generated = generatedAnswerFor(sources);
-  generated.next_step.decision = { condition: 'review time\nfalls', if_true: 'continue the trial', if_false: 'stop and investigate' };
+  generated.next_step.decision = { threshold: 'review time\nfalls', if_true: 'continue the trial', if_false: 'stop and investigate' };
   const answer = finalizeGeneratedAnswer(generated, sources);
   expect(answer.next_step.decision_rule).toBe('If review time falls, continue the trial; otherwise stop and investigate');
   expect(answer.next_step).not.toHaveProperty('decision');
   expect(generated.next_step).not.toHaveProperty('decision_rule');
-  for (const field of ['condition', 'if_true', 'if_false']) {
+  for (const field of ['threshold', 'if_true', 'if_false']) {
     const incomplete = structuredClone(generated);
     delete incomplete.next_step.decision[field];
     expect(() => finalizeGeneratedAnswer(incomplete, sources)).toThrow('both actions');
@@ -106,4 +106,44 @@ it('resolves compact references across sources without trusting generated observ
   expect(answer.claims[1].citations).toHaveLength(2);
   generated.claims[0].text = 'Injected replacement';
   expect(() => finalizeGeneratedAnswer(generated, sources)).toThrow();
+});
+it('renders required experiment fields within the existing public limits', async () => {
+  const { finalizeGeneratedAnswer, GENERATION_SCHEMA } = await import('../../workers/ai-search/answer.js');
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const generated = generatedAnswerFor(sources);
+  const schema = GENERATION_SCHEMA.anyOf[0].properties.next_step;
+  for (const field of ['scope', 'intervention', 'comparison']) generated.next_step[field] = 'x'.repeat(schema.properties[field].maxLength);
+  for (const [field, spec] of Object.entries(schema.properties.measurement.properties)) generated.next_step.measurement[field] = 'x'.repeat(spec.maxLength);
+  const answer = finalizeGeneratedAnswer(generated, sources);
+  expect(answer.next_step.action.length).toBeLessThanOrEqual(700);
+  expect(answer.next_step.measure.length).toBeLessThanOrEqual(500);
+  for (const field of ['scope', 'intervention', 'comparison', 'measurement']) {
+    const broken = structuredClone(generated); delete broken.next_step[field];
+    expect(() => finalizeGeneratedAnswer(broken, sources)).toThrow();
+  }
+  for (const field of ['metric', 'unit', 'window', 'guardrail']) {
+    const broken = structuredClone(generated); broken.next_step.measurement[field] = '';
+    expect(() => finalizeGeneratedAnswer(broken, sources)).toThrow();
+  }
+});
+it('normalizes a leading If but rejects a whole decision inside the threshold', async () => {
+  const { finalizeGeneratedAnswer } = await import('../../workers/ai-search/answer.js');
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const generated = generatedAnswerFor(sources);
+  generated.next_step.decision.threshold = 'If review time falls.';
+  generated.next_step.decision.if_true = 'keep the guide.';
+  expect(finalizeGeneratedAnswer(generated, sources).next_step.decision_rule).toBe('If review time falls, keep the guide; otherwise revise it.');
+  generated.next_step.decision.threshold = 'If the trial shows improvement, then continue the trial';
+  expect(() => finalizeGeneratedAnswer(generated, sources)).toThrow('Threshold must not contain decision branches');
+});
+it('distinguishes oversized citation and observation passages without truncating evidence', async () => {
+  const { finalizeGeneratedAnswer } = await import('../../workers/ai-search/answer.js');
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  for (const [length, reason] of [[1001, 'observation_passage_too_long'], [1501, 'citation_passage_too_long']]) {
+    const { sources } = await canonicalSources([{ ...record, observed: ['x'.repeat(length)] }]);
+    try { finalizeGeneratedAnswer(generatedAnswerFor(sources), sources); throw Error('Should reject'); }
+    catch (error) { expect(error.reason).toBe(reason); }
+  }
 });

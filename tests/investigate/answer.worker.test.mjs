@@ -12,8 +12,8 @@ it('T03/T04: answers using canonical records and returns inspectable citations a
   expect(data.answer.next_step.measure).toBeTruthy();
   expect(data.answer.next_step.decision_rule).toBe('If exploration decreases without reducing quality, keep the guide; otherwise revise it.');
   expect(data.answer.next_step).not.toHaveProperty('decision');
-  expect(data.diagnostics.answer_contract).toBe('passage_refs_v2');
-  expect(data.diagnostics.prompt_revision).toBe('compact_evidence_v2');
+  expect(data.diagnostics.answer_contract).toBe('experiment_fields_v3');
+  expect(data.diagnostics.prompt_revision).toBe('experiment_fields_v3');
   expect(run.mock.calls[0][1].response_format.json_schema.anyOf[1].properties.claims.maxItems).toBe(0);
   expect(data.sources[0].passages.map(p => p.field)).toContain('what_this_does_not_establish.0');
   expect(run).toHaveBeenCalledTimes(1);
@@ -51,7 +51,7 @@ it.each(['unknown citation', 'invented quote', 'interpretation as observation', 
       const p = sources[0].passages.find(p => p.field === 'interpretation');
       answer.claims[0].passage = p.ref;
     }
-    if (failure === 'comparison without decision') answer.next_step.decision = { condition: 'Compare review times.' };
+    if (failure === 'comparison without decision') answer.next_step.decision = { threshold: 'Compare review times.' };
     if (failure === 'empty measure') answer.next_step.measure = '';
     return { response: failure === 'malformed' ? 'not json' : answer };
   });
@@ -167,9 +167,9 @@ it('T04: rejects unsupported observation paraphrase at the Worker boundary', asy
 it.each([
   ['json_invalid', () => '{"private":'],
   ['schema_invalid', a => ({ ...a, private_extra_field: 'private value' })],
-  ['citation_invalid', a => { a.summary.citations[0] = 'unknown'; return a; }],
+  ['citation_reference_unknown', a => { a.summary.citations[0] = 'unknown'; return a; }],
   ['schema_invalid', a => { a.claims[0].text = 'private paraphrase'; return a; }],
-  ['decision_rule_invalid', a => { a.next_step.decision = { condition: 'private comparison' }; return a; }],
+  ['decision_rule_invalid', a => { a.next_step.decision = { threshold: 'private comparison' }; return a; }],
   ['next_step_missing', a => { a.next_step = null; return a; }],
   ['abstention_invalid', a => ({ ...a, outcome: 'insufficient' })],
 ])('T06: reports %s with measurements, never rejected model content', async (reason, mutate) => {
@@ -234,4 +234,34 @@ it('pinned evidence is checked before inference and never substituted with clien
     expect((await handleRequest(request({ ...body, snapshot_ids }), fixtureEnv(run))).status).toBe(400);
   }
   expect(run).not.toHaveBeenCalled();
+});
+it.each([
+  ['uncertainties', a => { a.uncertainties = ['s1p14', 's1p16', 's1p19']; }],
+  ['summary', a => { a.summary.text = 'See s1p1 for the finding'; }],
+  ['interpretation', a => { a.claims = [{ kind: 'interpretation', text: 's1p1 supports this', citations: ['s1p1'] }]; }],
+  ['experiment', a => { a.next_step.comparison = 'Compare with s1p1'; }],
+])('T06: rejects internal references in generated %s before display', async (_field, mutate) => {
+  const response = await handleRequest(request(), fixtureEnv(async (_model, input) => {
+    const a = answerFor(JSON.parse(input.messages[1].content).sources); mutate(a); return { response: a };
+  }));
+  expect(response.status).toBe(502);
+  expect(await response.json()).toMatchObject({ validation_reason: 'reference_in_prose' });
+});
+it('T04: distinguishes an unknown reference from an invalid observation field', async () => {
+  for (const [ref, reason] of [['s9p99', 'citation_reference_unknown'], ['s1p2', 'observation_field_invalid']]) {
+    const response = await handleRequest(request(), fixtureEnv(async (_model, input) => {
+      const a = answerFor(JSON.parse(input.messages[1].content).sources); a.claims[0].passage = ref; return { response: a };
+    }));
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ validation_reason: reason });
+  }
+});
+it.each(['scope', 'intervention', 'comparison', 'measurement', 'threshold'])('T06: rejects incomplete experiment %s', async field => {
+  const response = await handleRequest(request(), fixtureEnv(async (_model, input) => {
+    const a = answerFor(JSON.parse(input.messages[1].content).sources);
+    if (field === 'threshold') delete a.next_step.decision.threshold;
+    else delete a.next_step[field];
+    return { response: a };
+  }));
+  expect(response.status).toBe(502);
 });

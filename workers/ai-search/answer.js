@@ -16,15 +16,17 @@ export const ANSWER_SCHEMA = object({
   next_step: { anyOf: [{ type: 'null' }, object({ action: text(700), measure: text(500), decision_rule: text(600), citations: list(citationSchema, 1, 3) })] },
 });
 // Generation uses structured decisions; the public v1 envelope retains its rendered sentence.
-export const ANSWER_CONTRACT = 'passage_refs_v2';
-const decisionSchema = object({ condition: text(180), if_true: text(180), if_false: text(180) });
+export const ANSWER_CONTRACT = 'experiment_fields_v3';
+const decisionSchema = object({ threshold: text(180), if_true: text(180), if_false: text(180) });
 const refs = min => list(text(16), min, 3);
 const generatedClaim = { anyOf: [
   object({ kind: { type: 'string', enum: ['observation'] }, passage: text(16) }),
   object({ kind: { type: 'string', enum: ['interpretation'] }, text: text(1000), citations: refs(1) }),
 ] };
 const generatedNextStep = object({
-  action: text(700), measure: text(500), decision: decisionSchema,
+  scope: text(120), intervention: text(260), comparison: text(220),
+  measurement: object({ metric: text(100), unit: text(40), window: text(120), guardrail: text(140) }),
+  decision: decisionSchema,
   citations: refs(1),
 });
 const generatedBranches = ['answered', 'insufficient'].map(outcome => object({
@@ -127,27 +129,39 @@ export function finalizeGeneratedAnswer(value, sources) {
   if (value?.next_step && !value.summary?.citations?.length) invalid('summary_citations_missing', 'Missing evidence boundary');
   if (value?.next_step) {
     try { assertSchema(value.next_step.decision, decisionSchema); }
-    catch { invalid('decision_rule_invalid', 'Decision requires a condition and both actions'); }
+    catch { invalid('decision_rule_invalid', 'Decision requires a threshold and both actions'); }
   }
   assertSchema(value, GENERATION_SCHEMA);
   const passages = new Map();
   sources.forEach((s, i) => s.passages.forEach((p, j) => passages.set(`s${i + 1}p${j + 1}`, { source: s, passage: p })));
   const citation = ref => {
     const found = passages.get(ref);
-    if (!found) invalid('citation_invalid', 'Unknown passage reference');
+    if (!found) invalid('citation_reference_unknown', 'Unknown passage reference');
+    if (found.passage.text.length > 1500) invalid('citation_passage_too_long', 'Citation exceeds public quote limit');
     return { source_id: found.source.id, passage_id: found.passage.id, quote: found.passage.text };
   };
   const claims = value.claims.map(claim => {
     if (claim.kind === 'interpretation') return { ...claim, citations: claim.citations.map(citation) };
     const cited = citation(claim.passage);
-    if (!passages.get(claim.passage).passage.field.startsWith('observed.')) invalid('citation_invalid', 'Observation requires observed evidence');
+    if (!passages.get(claim.passage).passage.field.startsWith('observed.')) invalid('observation_field_invalid', 'Observation requires observed evidence');
+    if (cited.quote.length > 1000) invalid('observation_passage_too_long', 'Observation exceeds public claim limit');
     return { kind: 'observation', text: cited.quote, citations: [cited] };
   });
   const step = value.next_step;
   const inline = text => text.trim().replace(/\s+/g, ' ');
+  const fragment = text => inline(text).replace(/\.+$/, '');
+  // Check generated prose only: canonical quotes must remain untouched.
+  const prose = [value.summary.text, ...value.uncertainties,
+    ...value.claims.filter(c => c.kind === 'interpretation').map(c => c.text),
+    ...(step ? [step.scope, step.intervention, step.comparison, ...Object.values(step.measurement), ...Object.values(step.decision)] : [])];
+  if (prose.some(t => /\bs\d+p\d+\b/i.test(t))) invalid('reference_in_prose', 'Internal reference in generated prose');
+  const threshold = step ? fragment(step.decision.threshold).replace(/^if\s+/i, '') : '';
+  if (step && (!threshold || /\b(if|then|otherwise)\b|;/i.test(threshold))) invalid('decision_threshold_invalid', 'Threshold must not contain decision branches');
   const answer = { ...value, claims, summary: { ...value.summary, citations: value.summary.citations.map(citation) }, next_step: step ? {
-    action: step.action, measure: step.measure, citations: step.citations.map(citation),
-    decision_rule: `If ${inline(step.decision.condition)}, ${inline(step.decision.if_true)}; otherwise ${inline(step.decision.if_false)}`,
+    action: `Proposed trial — Scope: ${fragment(step.scope)}. Intervention: ${fragment(step.intervention)}. Comparison: ${fragment(step.comparison)}.`,
+    measure: `Metric: ${fragment(step.measurement.metric)}. Unit: ${fragment(step.measurement.unit)}. Window: ${fragment(step.measurement.window)}. Guardrail: ${fragment(step.measurement.guardrail)}.`,
+    citations: step.citations.map(citation),
+    decision_rule: `If ${threshold}, ${fragment(step.decision.if_true)}; otherwise ${inline(step.decision.if_false)}`,
   } : null };
   return validateAnswer(answer, sources);
 }

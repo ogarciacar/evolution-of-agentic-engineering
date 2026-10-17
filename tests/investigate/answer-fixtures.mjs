@@ -41,8 +41,8 @@ export function generatedAnswerFor(sources, insufficient = false) {
     summary: { text: insufficient ? 'These records cannot establish a cycle-time improvement.' : 'Investigate repository context within the reported limits.', citations: [insufficient ? boundary : observed] },
     claims: insufficient ? [] : [{ kind: 'observation', passage: observed }],
     uncertainties: ['This is one report, not a causal comparison.'],
-    next_step: { action: 'Compare five similar tasks with and without a repository guide.', measure: 'Record unnecessary exploration calls and task completion quality.', citations: [observed], decision: {
-      condition: 'exploration decreases without reducing quality', if_true: 'keep the guide', if_false: 'revise it.',
+    next_step: { scope: 'Five comparable tasks in one repository', intervention: 'Use a repository guide', comparison: 'The same task class without a guide', measurement: { metric: 'Unnecessary exploration calls per task', unit: 'calls', window: 'Task start to passing tests', guardrail: 'All existing tests pass and reviewer minutes do not increase' }, citations: [observed], decision: {
+      threshold: 'exploration decreases without reducing quality', if_true: 'keep the guide', if_false: 'revise it.',
     } } };
 }
 export const generatedUncertainAnswerFor = sources => generatedAnswerFor(sources, true);

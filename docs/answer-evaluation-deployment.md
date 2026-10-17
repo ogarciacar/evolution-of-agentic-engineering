@@ -115,3 +115,13 @@ npm run eval:answer -- --evaluation \
 Replace the snapshot-report path with your saved six-pass report. The CLI validates all cases before making requests, skips retrieval, and sends ordered record IDs and snapshot hashes. The Worker still loads canonical records from D1. It returns HTTP 409 `evidence_snapshot_changed` before inference if any record changed, disappeared or is omitted. It never uses evidence text from the report as model input. This pins evidence while that revision remains available; it cannot replay historical records after D1 changes. Use the same baseline report for comparisons. Each successful request still incurs a live model call; repeated runs can vary.
 
 Without `--snapshot-report`, evaluation continues to use live retrieval. Reports identify `evidence_mode` and include the pinned identities when applicable. Human semantic review remains required. Keep production answers disabled until the release quality gate passes.
+
+### Required experiment fields (experiment_fields_v3)
+
+The generation contract and prompt revision now both report `experiment_fields_v3`. A proposed next step requires scope, intervention, comparison, measurement (metric, unit, window, guardrail), and decision (threshold, if_true, if_false). The Worker renders these into the existing public action, measure and decision_rule strings. All choices remain proposals; field presence does not prove a useful experiment or correct reasoning. The model and runtime budgets are unchanged.
+
+Generated prose containing internal passage references is rejected with `reference_in_prose`; canonical quoted evidence is not rewritten. A leading `If` in a threshold is normalized. A threshold containing decision branches (`then`, `otherwise`, another `if`, or a semicolon) fails with `decision_threshold_invalid` rather than displaying duplicated actions. Missing or malformed decision fields retain `decision_rule_invalid`.
+
+Citation diagnostics now distinguish `citation_reference_unknown`, `observation_field_invalid`, `citation_passage_too_long` and `observation_passage_too_long`. They expose only a reason, never rejected text. The existing `citation_invalid` reason remains for public citation validation. Unknown references are never guessed or repaired. Complete evidence passages are never truncated to make validation pass.
+
+After the evaluation build succeeds, use the pinned evaluation command above with the earlier complete six-case snapshot report and a new output filename. The 2026-10-17 09:47 UTC report used live retrieval and had no answer snapshot for its failed context case, so it cannot serve as that six-case baseline. A pinned run returning HTTP 409 requires a fresh complete baseline; it must not silently fall back to live retrieval.
