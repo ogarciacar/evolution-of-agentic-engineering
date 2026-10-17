@@ -58,14 +58,14 @@ The current answer schema lives in `workers/ai-search/answer.js`. An answered re
 ## Bounds and operations
 
 - Question ≤500 UTF-16 code units; body ≤4,096 bytes; ≤5 records of ≤10,000 UTF-8 bytes each.
-- One call, ≤1,800 output tokens; 25-second deadline for database loading and inference after rate-limit admission. No automatic retries.
+- One call, ≤1,800 output tokens; 25-second deadline covering rate-limit admission, database loading and inference. No automatic retries.
 - Six answer attempts per client IP per minute per Cloudflare location. Shared/unknown IPs share a bucket. The platform limiter is approximate and per location; it is not a global spend cap. Namespace `2026100501` is reserved for this feature in this repository; confirm it is unused by other Workers in this account before rollout.
 - Stop cancels the browser request and suppresses late results. Neither Stop nor the deadline guarantees cancellation/refund of inference already started. No persistence of questions/answers is added.
 - Logs contain model, outcome, record count, omissions, duration and token usage when supplied. They exclude questions, passages, answers and client IPs. Invalid outputs return 502; provider/database/deadline failures 503; rate limit 429 with Retry-After.
 
 Production deployment uses the existing production environment variables `EVIDENCE_DB_NAME` and `EVIDENCE_DB_ID` already used by evidence synchronization. `configure-deploy.mjs` creates an ignored Wrangler configuration with that binding. The checked-in config adds Workers AI and a rate limiter; no new API secret is required by the code. The deploy token/account must permit those bindings. Never create a replacement database to satisfy deployment.
 
-`EAE_ANSWER_ENABLED` is an optional production environment variable (`true` by default). Set it to `false` and redeploy to disable generation and hide the answer capability while preserving search. This is an initial experimental release; review the live evaluation before promoting it as reliable advice. New Worker capabilities become available only after the Worker deploy, independently of Pages.
+`EAE_ANSWER_ENABLED` is an optional production environment variable (`false` by default; enabling requires an explicit `true`). Set it to `false` and redeploy to disable generation and hide the answer capability while preserving search. This is an initial experimental release; review the live evaluation before promoting it as reliable advice. New Worker capabilities become available only after the Worker deploy, independently of Pages.
 
 ## Local and CI verification
 
@@ -97,3 +97,24 @@ Run only after that endpoint has answer bindings deployed and enabled; this make
 Any unsupported consequential claim or lost epistemic boundary blocks a reliability claim. One reviewed run remains a small sample, not a reliability estimate. Before widening use, repeat the corpus across model/prompt changes and gather whether engineers changed what they investigated or chose a concrete experiment. No real-model evaluation or outcome improvement is asserted by the fixture tests.
 
 Official API references: [Workers AI JSON mode](https://developers.cloudflare.com/workers-ai/features/json-mode/), [model](https://developers.cloudflare.com/workers-ai/models/llama-3.3-70b-instruct-fp8-fast/), [rate-limit binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/).
+
+
+## Diagnostics and quality regression gates
+
+The October 5 live evaluation failed: four of six requests returned 503, and a mechanically valid answer substituted “human review” for a source's broader “least automatable tasks.” This change does not establish the root cause of those historical 503s or model reliability.
+
+Each failed answer now returns `code`, `stage`, `request_id`, and `latency_ms`; `X-Request-ID` matches the structured log. Codes distinguish disabled capability, missing configuration, rate rejection, rate-limiter failure, evidence failure, provider failure, deadline expiry, client abort and invalid model output. No upstream exception text, prompts, source text or client IPs are logged by this handler. The evaluation report retains failure timing, HTTP status and safe diagnostics, including non-JSON gateway and transport failures. Its latency is total retrieval-plus-answer elapsed time; server diagnostic latency covers the answer handler.
+
+Reported observation claim text must equal a complete cited observed passage, with a full matching quote. This preserves the canonical record's attribution and qualifications; it does not independently verify that record. If a passage exceeds the claim/quote limits, the model must choose another passage or abstain. Interpretations and summaries can still be semantically unsupported despite valid citations. Do not treat this extractive guard as an entailment checker.
+
+Decision rules must use `If [measured condition], [action]; otherwise [alternative action]`. This checks structure only. Human review must still assess whether the condition is measurable, the alternatives are meaningful, and any proposed thresholds are justified as experiment criteria.
+
+Acceptance-to-unit coverage:
+
+| Transition / behavior | Acceptance coverage | Supporting unit coverage |
+| --- | --- | --- |
+| Preparing → technical failure | Workerd handler cases distinguish configuration, provider, D1, limiter and deadline; browser T06/T08 retains evidence and permits retry | Evaluation cases retain diagnostics without private upstream bodies |
+| Preparing → rejected answer | Workerd T04 rejects unsupported observation paraphrases with 502 | Exact live human-review paraphrase rejected despite an authentic quote; full original observation accepted |
+| Preparing → answer with next step | Existing Workerd T03/T04 and browser T03/T04 | Comparison-only decision rule rejected; fixture exercises conditional alternatives |
+
+Deployment defaults are disabled in Wrangler, the generated configuration, and the legacy GitHub deployment workflow. Keep the Cloudflare build variable `EAE_ANSWER_ENABLED=false` during review. Do not enable public synthesis merely because CI passes: run the explicit six-case evaluation on an intentionally enabled evaluation deployment and complete human claim-support, boundary and experiment-quality review first. This PR makes no live inference calls.

@@ -20,7 +20,7 @@
     "binding": "AI"
   },
   "vars": {
-    "ANSWER_ENABLED": "true"
+    "ANSWER_ENABLED": "false"
   },
   "ratelimits": [
     {
