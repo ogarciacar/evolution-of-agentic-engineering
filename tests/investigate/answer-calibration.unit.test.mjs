@@ -6,10 +6,10 @@ const baseline = JSON.parse(readFileSync(new URL('./fixtures/answer-semantic-bas
 function example(id, field, summary, uncertainty, step) {
   const data = baseline.cases.find(c => c.id === id);
   const source = data.sources[0], passage = source.passages.find(p => p.field === field);
-  const citations = [{ source_id: source.id, passage_id: passage.id, quote: passage.text }];
+  const citations = [`s1p${source.passages.indexOf(passage) + 1}`];
   return { sources: data.sources, generated: {
     outcome: 'answered', summary: { text: summary, citations },
-    claims: [{ kind: 'observation', text: passage.text, citations }],
+    claims: [{ kind: 'observation', passage: citations[0] }],
     uncertainties: [uncertainty], next_step: { ...step, citations },
   } };
 }

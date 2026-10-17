@@ -96,3 +96,22 @@ For the reasoning prompt iteration, additionally verify
 prompt_revision: bounded_evidence_v1 in success/failure diagnostics. The generation
 contract stays structured_decision_v1. Re-run the six live cases only after the
 evaluation Worker build succeeds, then apply the semantic review rubric.
+
+### Compact generation and pinned evidence (passage_refs_v2)
+
+The Worker now sends request-local passage references (`s1p1`, `s2p1`, etc.) to the model. Generated citations contain those references; observation claims contain only a passage reference. Code restores canonical source IDs, passage IDs, complete quotes and observation text, then applies the existing public answer validation. Unknown references, non-observed observation references, and extra observation text are rejected. The public v1 response and inspection/copy UI are unchanged. This reduces generated duplication; it does not prove citation entailment or improve measured latency until evaluated live.
+
+Diagnostics identify missing components as `summary_citations_missing`, `claims_missing`, or `next_step_missing` (first failing requirement). The model contract is `passage_refs_v2`, prompt revision `compact_evidence_v2`. No rejected model text is logged. The model, 1,800-token ceiling and 25-second deadline are unchanged.
+
+To isolate generation from retrieval, reuse a saved report containing all six complete canonical source snapshots (the earlier six-pass report qualifies; failed-case-only reports do not):
+
+```sh
+npm run eval:answer -- --evaluation \
+  --base-url https://agentic-engineering-search-evaluation.orlando-garcia.workers.dev \
+  --snapshot-report .artifacts/answer-evaluation-six-pass.json \
+  --output .artifacts/answer-evaluation-compact-v2.json
+```
+
+Replace the snapshot-report path with your saved six-pass report. The CLI validates all cases before making requests, skips retrieval, and sends ordered record IDs and snapshot hashes. The Worker still loads canonical records from D1. It returns HTTP 409 `evidence_snapshot_changed` before inference if any record changed, disappeared or is omitted. It never uses evidence text from the report as model input. This pins evidence while that revision remains available; it cannot replay historical records after D1 changes. Use the same baseline report for comparisons. Each successful request still incurs a live model call; repeated runs can vary.
+
+Without `--snapshot-report`, evaluation continues to use live retrieval. Reports identify `evidence_mode` and include the pinned identities when applicable. Human semantic review remains required. Keep production answers disabled until the release quality gate passes.

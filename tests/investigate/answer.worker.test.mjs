@@ -12,8 +12,8 @@ it('T03/T04: answers using canonical records and returns inspectable citations a
   expect(data.answer.next_step.measure).toBeTruthy();
   expect(data.answer.next_step.decision_rule).toBe('If exploration decreases without reducing quality, keep the guide; otherwise revise it.');
   expect(data.answer.next_step).not.toHaveProperty('decision');
-  expect(data.diagnostics.answer_contract).toBe('structured_decision_v1');
-  expect(data.diagnostics.prompt_revision).toBe('bounded_evidence_v1');
+  expect(data.diagnostics.answer_contract).toBe('passage_refs_v2');
+  expect(data.diagnostics.prompt_revision).toBe('compact_evidence_v2');
   expect(run.mock.calls[0][1].response_format.json_schema.anyOf[1].properties.claims.maxItems).toBe(0);
   expect(data.sources[0].passages.map(p => p.field)).toContain('what_this_does_not_establish.0');
   expect(run).toHaveBeenCalledTimes(1);
@@ -45,11 +45,11 @@ it.each(['unknown citation', 'invented quote', 'interpretation as observation', 
   const env = fixtureEnv(async (_model, input) => {
     const sources = JSON.parse(input.messages[1].content).sources;
     const answer = answerFor(sources);
-    if (failure === 'unknown citation') answer.claims[0].citations[0].passage_id = 'invented';
-    if (failure === 'invented quote') answer.claims[0].citations[0].quote = 'A measured 90% improvement.';
+    if (failure === 'unknown citation') answer.claims[0].passage = 'invented';
+    if (failure === 'invented quote') answer.claims[0].quote = 'A measured 90% improvement.';
     if (failure === 'interpretation as observation') {
       const p = sources[0].passages.find(p => p.field === 'interpretation');
-      answer.claims[0].citations = [{ source_id: sources[0].id, passage_id: p.id, quote: p.text }];
+      answer.claims[0].passage = p.ref;
     }
     if (failure === 'comparison without decision') answer.next_step.decision = { condition: 'Compare review times.' };
     if (failure === 'empty measure') answer.next_step.measure = '';
@@ -167,10 +167,10 @@ it('T04: rejects unsupported observation paraphrase at the Worker boundary', asy
 it.each([
   ['json_invalid', () => '{"private":'],
   ['schema_invalid', a => ({ ...a, private_extra_field: 'private value' })],
-  ['citation_invalid', a => { a.summary.citations[0].quote = 'private invented quote'; return a; }],
-  ['observation_not_verbatim', a => { a.claims[0].text = 'private paraphrase'; return a; }],
+  ['citation_invalid', a => { a.summary.citations[0] = 'unknown'; return a; }],
+  ['schema_invalid', a => { a.claims[0].text = 'private paraphrase'; return a; }],
   ['decision_rule_invalid', a => { a.next_step.decision = { condition: 'private comparison' }; return a; }],
-  ['answer_incomplete', a => { a.next_step = null; return a; }],
+  ['next_step_missing', a => { a.next_step = null; return a; }],
   ['abstention_invalid', a => ({ ...a, outcome: 'insufficient' })],
 ])('T06: reports %s with measurements, never rejected model content', async (reason, mutate) => {
   const logs = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -202,4 +202,36 @@ it('T05: returns a cited proposed experiment without claiming the question is se
   expect(data.diagnostics.model_input_bytes).toBeGreaterThan(0);
   expect(data.diagnostics.model_output_bytes).toBeGreaterThan(0);
   expect(data.diagnostics).not.toHaveProperty('input_tokens');
+});
+it.each([
+  ['summary_citations_missing', a => { a.summary.citations = []; }],
+  ['claims_missing', a => { a.claims = []; }],
+  ['next_step_missing', a => { delete a.next_step; }],
+])('T06: identifies the missing answer component: %s', async (reason, mutate) => {
+  const response = await handleRequest(request(), fixtureEnv(async (_model, input) => {
+    const answer = answerFor(JSON.parse(input.messages[1].content).sources);
+    mutate(answer);
+    return { response: answer };
+  }));
+  expect(response.status).toBe(502);
+  expect(await response.json()).toMatchObject({ validation_reason: reason });
+});
+it('pinned evidence is checked before inference and never substituted with client content', async () => {
+  const { sources } = await (await handleRequest(request(), fixtureEnv())).json();
+  const run = vi.fn(async (_model, input) => ({ response: answerFor(JSON.parse(input.messages[1].content).sources) }));
+  const body = { query: 'Q', record_ids: ['context'], snapshot_ids: [sources[0].snapshot_id] };
+  expect((await handleRequest(request(body), fixtureEnv(run))).status).toBe(200);
+  run.mockClear();
+  for (const changed of [
+    { ...body, snapshot_ids: ['0'.repeat(64)] },
+    { ...body, record_ids: ['missing'] },
+  ]) {
+    const response = await handleRequest(request(changed), fixtureEnv(run));
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ code: 'evidence_snapshot_changed', stage: 'evidence' });
+  }
+  for (const snapshot_ids of [[], ['bad'], null]) {
+    expect((await handleRequest(request({ ...body, snapshot_ids }), fixtureEnv(run))).status).toBe(400);
+  }
+  expect(run).not.toHaveBeenCalled();
 });

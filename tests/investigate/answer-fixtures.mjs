@@ -34,11 +34,15 @@ export function uncertainAnswerFor(sources) {
 }
 
 export function generatedAnswerFor(sources, insufficient = false) {
-  const answer = insufficient ? uncertainAnswerFor(sources) : answerFor(sources);
-  const { decision_rule, ...step } = answer.next_step;
-  return { ...answer, next_step: { ...step, decision: {
-    condition: 'exploration decreases without reducing quality',
-    if_true: 'keep the guide', if_false: 'revise it.',
-  } } };
+  const compact = sources[0].passages[0].ref ? sources : sources.map((s, i) => ({ ...s, passages: s.passages.map((p, j) => ({ ...p, ref: `s${i + 1}p${j + 1}` })) }));
+  const observed = compact[0].passages.find(p => p.field.startsWith('observed.')).ref;
+  const boundary = compact[0].passages.find(p => p.field.startsWith('what_this_does_not_establish.')).ref;
+  return { outcome: insufficient ? 'insufficient' : 'answered',
+    summary: { text: 'Investigate repository context within the reported limits.', citations: [insufficient ? boundary : observed] },
+    claims: insufficient ? [] : [{ kind: 'observation', passage: observed }],
+    uncertainties: ['This is one report, not a causal comparison.'],
+    next_step: { action: 'Compare five similar tasks with and without a repository guide.', measure: 'Record unnecessary exploration calls and task completion quality.', citations: [observed], decision: {
+      condition: 'exploration decreases without reducing quality', if_true: 'keep the guide', if_false: 'revise it.',
+    } } };
 }
 export const generatedUncertainAnswerFor = sources => generatedAnswerFor(sources, true);

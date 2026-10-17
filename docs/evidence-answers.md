@@ -182,3 +182,9 @@ successes and failures, retained by the evaluation runner. This identifies the
 generation contract, not the deployed Git SHA. Model, token cap, deadline and
 production disablement remain unchanged. Citation validity and decision structure
 do not prove semantic support, usefulness or improved live reliability.
+
+### Compact evidence generation
+
+`passage_refs_v2` separates the model's short passage references from public canonical citations. Code supplies complete observed text and quotes; the model supplies interpretations and the proposed learning step. Neither authentic reference resolution nor schema conformance establishes semantic support. Optional `snapshot_ids`, paired with `record_ids`, constrain canonical evidence loading and fail with HTTP 409 before inference on mismatch. No client evidence text is accepted.
+
+Acceptance coverage in the Cloudflare Vitest Worker pool checks successful expansion into the existing public envelope, rejected invented references/text, individual missing-answer diagnostics, and pinned evidence mismatch before model invocation. Unit coverage checks cross-record reference mapping, calibration compatibility and evaluation pin validation. Existing browser acceptance tests cover inspect/copy and answer/abstention/error interactions against the unchanged public contract.
