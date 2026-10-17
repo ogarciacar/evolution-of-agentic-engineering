@@ -58,3 +58,35 @@ it('permits a cited experiment under uncertainty but rejects unsupported or inco
     expect(() => validateAnswer(broken, sources)).toThrow();
   }
 });
+it('assembles a decision from required fields without requiring model punctuation', async () => {
+  const { finalizeGeneratedAnswer } = await import('../../workers/ai-search/answer.js');
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const generated = generatedAnswerFor(sources);
+  generated.next_step.decision = { condition: 'review time\nfalls', if_true: 'continue the trial', if_false: 'stop and investigate' };
+  const answer = finalizeGeneratedAnswer(generated, sources);
+  expect(answer.next_step.decision_rule).toBe('If review time falls, continue the trial; otherwise stop and investigate');
+  expect(answer.next_step).not.toHaveProperty('decision');
+  expect(generated.next_step).not.toHaveProperty('decision_rule');
+  for (const field of ['condition', 'if_true', 'if_false']) {
+    const incomplete = structuredClone(generated);
+    delete incomplete.next_step.decision[field];
+    expect(() => finalizeGeneratedAnswer(incomplete, sources)).toThrow('both actions');
+    incomplete.next_step.decision[field] = ' ';
+    expect(() => finalizeGeneratedAnswer(incomplete, sources)).toThrow('both actions');
+  }
+});
+it('encodes mutually exclusive outcome requirements in the generation schema', async () => {
+  const { GENERATION_SCHEMA, finalizeGeneratedAnswer } = await import('../../workers/ai-search/answer.js');
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const [answered, insufficient] = GENERATION_SCHEMA.anyOf.map(s => s.properties);
+  expect(answered.outcome.enum).toEqual(['answered']);
+  expect(answered.claims.minItems).toBe(1);
+  expect(answered.summary.properties.citations.minItems).toBe(1);
+  expect(answered.next_step.required).toContain('decision');
+  expect(insufficient.outcome.enum).toEqual(['insufficient']);
+  expect(insufficient.claims.maxItems).toBe(0);
+  const { sources } = await canonicalSources([record]);
+  const invalid = { ...generatedAnswerFor(sources), outcome: 'insufficient' };
+  expect(() => finalizeGeneratedAnswer(invalid, sources)).toThrow('Invalid abstention');
+});

@@ -155,3 +155,30 @@ Success responses carry these in `diagnostics`; failures carry available
 measurements alongside the reason code. Timeouts cannot report unseen output
 or token usage. The model and 25-second deadline remain unchanged so the next
 live run can inform a targeted change.
+
+### Structured generation decisions
+
+The model now receives `GENERATION_SCHEMA`, with separate `answered` and
+`insufficient` branches. Answered requires cited summary, claims and a next step;
+insufficient requires an empty claims list and permits a cited experiment or null.
+The Worker still validates responses: Workers AI JSON mode does not guarantee
+schema adherence.
+
+The model produces `next_step.decision` with three required, nonblank fields:
+`condition`, `if_true`, and `if_false` (at most 180 characters each).
+`finalizeGeneratedAnswer` validates this structure and renders the existing
+public `decision_rule` string. Whitespace is normalized for display; no missing
+condition or action is invented. The public envelope remains version 1, so
+independent frontend/Worker deployments retain the existing API shape.
+
+Acceptance: a complete structured decision reaches the existing read/inspect/copy
+flow without requiring the model to produce specific punctuation. Missing or blank
+decision fields and insufficient answers containing claims remain failures.
+The Worker T03/T04 and desktop/mobile T05/T14 exercise generation through rendering;
+contract unit tests cover each missing field, whitespace and the outcome schemas.
+
+Diagnostics include `answer_contract: structured_decision_v1` on model-backed
+successes and failures, retained by the evaluation runner. This identifies the
+generation contract, not the deployed Git SHA. Model, token cap, deadline and
+production disablement remain unchanged. Citation validity and decision structure
+do not prove semantic support, usefulness or improved live reliability.
