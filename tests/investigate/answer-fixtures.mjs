@@ -38,7 +38,7 @@ export function generatedAnswerFor(sources, insufficient = false) {
   const observed = compact[0].passages.find(p => p.field.startsWith('observed.')).ref;
   const boundary = compact[0].passages.find(p => p.field.startsWith('what_this_does_not_establish.')).ref;
   return { outcome: insufficient ? 'insufficient' : 'answered',
-    summary: { text: 'Investigate repository context within the reported limits.', citations: [insufficient ? boundary : observed] },
+    summary: { text: insufficient ? 'These records cannot establish a cycle-time improvement.' : 'Investigate repository context within the reported limits.', citations: [insufficient ? boundary : observed] },
     claims: insufficient ? [] : [{ kind: 'observation', passage: observed }],
     uncertainties: ['This is one report, not a causal comparison.'],
     next_step: { action: 'Compare five similar tasks with and without a repository guide.', measure: 'Record unnecessary exploration calls and task completion quality.', citations: [observed], decision: {
