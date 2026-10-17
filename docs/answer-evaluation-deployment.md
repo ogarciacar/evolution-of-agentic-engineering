@@ -60,3 +60,21 @@ Complete human review for every successful case: claim support (including summar
 - CI runs Cloudflare workerd tests and deployment dry runs for both configurations. No CI step deploys this evaluation Worker or calls a live model.
 
 Cloudflare references: [Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/), [Workers secrets](https://developers.cloudflare.com/workers/configuration/secrets/), [Workers Builds configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/).
+
+The runner prints progress for each case. For failed answers, inspect
+`diagnostic.validation_reason` and generation measurements; for successful
+responses, inspect `data.diagnostics`. A correct unrelated-question abstention
+must also have `next_step: null`. An in-domain insufficient answer can propose
+a cited experiment without being counted as an established conclusion.
+
+For zsh (the default macOS shell), enter the token without echoing it:
+
+```zsh
+read -r -s "EAE_EVALUATION_TOKEN?Evaluation token: "
+echo
+export EAE_EVALUATION_TOKEN
+npm run eval:answer -- --evaluation \
+  --base-url https://agentic-engineering-search-evaluation.orlando-garcia.workers.dev \
+  --output .artifacts/answer-evaluation.json
+unset EAE_EVALUATION_TOKEN
+```

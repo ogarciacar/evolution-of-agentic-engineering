@@ -40,3 +40,21 @@ it('rejects a comparison without a decision and accepts conditional alternative 
   answer.next_step.decision_rule = 'Compare the time spent on human review for tasks with high and low automatability';
   expect(() => validateAnswer(answer, sources)).toThrow('alternative actions');
 });
+it('permits a cited experiment under uncertainty but rejects unsupported or incomplete proposals', async () => {
+  const { uncertainAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const answer = uncertainAnswerFor(sources);
+  expect(validateAnswer(answer, sources)).toBe(answer);
+  for (const mutate of [
+    a => { a.next_step.citations = []; },
+    a => { a.summary.citations = []; },
+    a => { a.next_step.measure = ''; },
+    a => { a.next_step.decision_rule = 'Compare the results'; },
+    a => { a.next_step.citations[0].quote = 'Invented finding'; },
+    a => { a.claims = answerFor(sources).claims; },
+  ]) {
+    const broken = structuredClone(answer);
+    mutate(broken);
+    expect(() => validateAnswer(broken, sources)).toThrow();
+  }
+});

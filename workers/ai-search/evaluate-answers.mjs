@@ -18,7 +18,12 @@ const questions = [
   'What will the weather in Amsterdam be tomorrow?',
 ];
 const results = [];
-for (const question of questions) results.push(await evaluateQuestion(base, question, question === questions.at(-1), transport));
+for (const [index, question] of questions.entries()) {
+  console.log(`[${index + 1}/${questions.length}] Evaluating: ${question}`);
+  const result = await evaluateQuestion(base, question, question === questions.at(-1), transport);
+  results.push(result);
+  console.log(`  ${result.contract}: ${result.diagnostic?.validation_reason || result.diagnostic?.code || result.data?.answer.outcome || result.error} (${result.latency_ms} ms)`);
+}
 const output = option('--output');
 await fs.mkdir(path.dirname(output), { recursive: true });
 await fs.writeFile(output, JSON.stringify({ evaluated_at: new Date().toISOString(), endpoint: base.origin, results }, null, 2) + '\n');

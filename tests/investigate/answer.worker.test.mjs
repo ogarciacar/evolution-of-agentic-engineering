@@ -84,7 +84,7 @@ it('times out a stalled model without retrying it', async () => {
     await vi.advanceTimersByTimeAsync(25001);
     const response = await pending;
     expect(response.status).toBe(503);
-    expect(await response.json()).toMatchObject({ code: 'deadline_exceeded', stage: 'model' });
+    expect(await response.json()).toMatchObject({ code: 'deadline_exceeded', stage: 'model', model_latency_ms: expect.any(Number), model_input_bytes: expect.any(Number), max_output_tokens: 1800 });
     expect(run).toHaveBeenCalledOnce();
   } finally { vi.useRealTimers(); }
 });
@@ -158,4 +158,43 @@ it('T04: rejects unsupported observation paraphrase at the Worker boundary', asy
   }));
   expect(response.status).toBe(502);
   expect(await response.json()).toMatchObject({ code: 'invalid_model_output', stage: 'validation' });
+});
+it.each([
+  ['json_invalid', () => '{"private":'],
+  ['schema_invalid', a => ({ ...a, private_extra_field: 'private value' })],
+  ['citation_invalid', a => { a.summary.citations[0].quote = 'private invented quote'; return a; }],
+  ['observation_not_verbatim', a => { a.claims[0].text = 'private paraphrase'; return a; }],
+  ['decision_rule_invalid', a => { a.next_step.decision_rule = 'private comparison'; return a; }],
+  ['answer_incomplete', a => { a.next_step = null; return a; }],
+  ['abstention_invalid', a => ({ ...a, outcome: 'insufficient' })],
+])('T06: reports %s with measurements, never rejected model content', async (reason, mutate) => {
+  const logs = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    const response = await handleRequest(request(), fixtureEnv(async (_model, input) => ({
+      response: mutate(answerFor(JSON.parse(input.messages[1].content).sources)),
+      usage: { prompt_tokens: 100, completion_tokens: 20 },
+    })));
+    expect(response.status).toBe(502);
+    const data = await response.json();
+    expect(data).toMatchObject({
+      validation_reason: reason, stage: 'validation', model_latency_ms: expect.any(Number),
+      model_input_bytes: expect.any(Number), model_output_bytes: expect.any(Number),
+      input_tokens: 100, output_tokens: 20, max_output_tokens: 1800,
+    });
+    expect(data.model_input_bytes).toBeGreaterThan(0);
+    expect(data.model_output_bytes).toBeGreaterThan(0);
+    expect(JSON.stringify([data, logs.mock.calls])).not.toContain('private');
+  } finally { logs.mockRestore(); }
+});
+it('T05: returns a cited proposed experiment without claiming the question is settled', async () => {
+  const { uncertainAnswerFor } = await import('./answer-fixtures.mjs');
+  const response = await handleRequest(request(), fixtureEnv(async (_model, input) => ({
+    response: uncertainAnswerFor(JSON.parse(input.messages[1].content).sources),
+  })));
+  expect(response.status).toBe(200);
+  const data = await response.json();
+  expect(data.answer).toMatchObject({ outcome: 'insufficient', claims: [], next_step: { measure: expect.any(String) } });
+  expect(data.diagnostics.model_input_bytes).toBeGreaterThan(0);
+  expect(data.diagnostics.model_output_bytes).toBeGreaterThan(0);
+  expect(data.diagnostics).not.toHaveProperty('input_tokens');
 });

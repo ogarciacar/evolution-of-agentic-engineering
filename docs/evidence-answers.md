@@ -51,7 +51,7 @@ Existing retrieval and indexed-passage inspection contracts remain available, in
 
 No new database, queue, durable object, workflow, vector index or agent loop. The existing Worker gets Workers AI, the existing evidence D1 binding, and a rate-limit binding. The Pages `/api/search/answer` bridge reuses `SEARCH_API`. Preview Pages use the deployed production Worker and main evidence, not candidate Worker code or preview evidence. Candidate integration is tested locally and in CI with actual handlers and deterministic bindings.
 
-The current answer schema lives in `workers/ai-search/answer.js`. An answered result requires cited summary, 1–4 cited claims, 1–4 uncertainties, and one proposed next step (`action`, `measure`, `decision_rule`, citations). A limited result has no claims or next step and explains what is missing. Unknown fields, invalid references, quotes not occurring exactly in the cited passage, observation claims citing interpretation fields, and missing required fields are rejected.
+The current answer schema lives in `workers/ai-search/answer.js`. An answered result requires cited summary, 1–4 cited claims, 1–4 uncertainties, and one proposed next step (`action`, `measure`, `decision_rule`, citations). A limited result has no claims and explains what is missing. It may include a cited proposed experiment when relevant evidence motivates one; unrelated questions and unsupported proposals retain a null next step. Unknown fields, invalid references, quotes not occurring exactly in the cited passage, observation claims citing interpretation fields, and missing required fields are rejected.
 
 **Mechanical validation establishes traceability, not entailment.** A genuine quote can still be misinterpreted. Neither primary provenance nor multiple EAE records establishes independent corroboration. Those boundaries are in the prompt and interface; their semantic preservation must be evaluated using real model outputs. The model does not browse or verify the original source.
 
@@ -120,3 +120,38 @@ Acceptance-to-unit coverage:
 Deployment defaults are disabled in Wrangler, the generated configuration, and the legacy GitHub deployment workflow. Keep the Cloudflare build variable `EAE_ANSWER_ENABLED=false` during review. Do not enable public synthesis merely because CI passes: run the explicit six-case evaluation on an intentionally enabled evaluation deployment and complete human claim-support, boundary and experiment-quality review first. This PR makes no live inference calls.
 
 For the separate token-protected Worker and live-case command, see [Isolated live answer evaluation](answer-evaluation-deployment.md). Production remains deployed by Cloudflare Workers Builds with synthesis disabled.
+
+### Follow-up to the 17 October live evaluation
+
+The isolated run returned two model deadlines, two validation rejections and two
+abstentions. It did not demonstrate a useful generated insight with next steps.
+Production synthesis remains disabled.
+
+Acceptance criteria for this iteration:
+
+| Transition | Acceptance | Supporting tests |
+| --- | --- | --- |
+| Preparing → failed | Rejected output reports a stable validation reason and generation measurements without model content | Worker reason-code cases; evaluation report unit test |
+| Preparing → failed | A model deadline includes elapsed model time and input size; unknown output/usage is omitted | Worker stalled-model test |
+| Preparing → limited | Relevant but inconclusive evidence may support one cited, explicitly proposed experiment; the answer retains its evidence boundary | Worker T05, contract negative cases, UI unit test, desktop/mobile T05/T14 |
+| Limited → inspect/copy | Engineers can inspect the motivating citation and copy the experiment with uncertainty and source lineage | Desktop/mobile T05/T14 |
+| Preparing → limited (unrelated) | Plain abstention has no proposed experiment | Evaluation abstention tests |
+
+An insufficient answer still requires empty claims. An optional experiment must
+have citations, a measure, a conditional decision rule and a cited summary.
+These structural checks cannot establish relevance or semantic claim support;
+reviewers must judge whether the experiment would resolve the stated gap.
+
+Validation reasons are `json_invalid`, `schema_invalid`, `citation_invalid`,
+`observation_not_verbatim`, `decision_rule_invalid`, `answer_incomplete`,
+`abstention_invalid`, and the fallback `validation_error`.
+No rejected model text or arbitrary exception message is returned or logged.
+
+Measurements are `model_input_bytes` (serialized inference arguments, including
+messages and schema), `model_output_bytes` (returned response, not the HTTP
+envelope), `model_latency_ms`, `max_output_tokens`, and provider-reported
+`input_tokens`/`output_tokens` when present. Byte counts are not token estimates.
+Success responses carry these in `diagnostics`; failures carry available
+measurements alongside the reason code. Timeouts cannot report unseen output
+or token usage. The model and 25-second deadline remain unchanged so the next
+live run can inform a targeted change.

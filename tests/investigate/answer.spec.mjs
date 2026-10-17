@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { handleRequest } from '../../workers/ai-search/index.js';
-import { fixtureEnv, answerFor, record } from './answer-fixtures.mjs';
+import { fixtureEnv, answerFor, uncertainAnswerFor, record } from './answer-fixtures.mjs';
 async function setup(page, mode = 'answer') {
   let calls = 0;
   await page.route('**/api/search?*', async route => {
@@ -12,7 +12,7 @@ async function setup(page, mode = 'answer') {
     calls++;
     if (mode === 'retry' && calls === 1) return route.fulfill({ status: 503 });
     if (mode === 'wait') return;
-    const env = fixtureEnv(mode === 'limited' ? async () => ({ response: { outcome: 'insufficient', summary: { text: 'These records cannot establish a cycle-time improvement.', citations: [] }, claims: [], uncertainties: ['Need a comparable cycle-time measurement.'], next_step: null } }) : undefined);
+    const env = fixtureEnv(mode === 'experiment' ? async (_model, input) => ({ response: uncertainAnswerFor(JSON.parse(input.messages[1].content).sources) }) : mode === 'limited' ? async () => ({ response: { outcome: 'insufficient', summary: { text: 'These records cannot establish a cycle-time improvement.', citations: [] }, claims: [], uncertainties: ['Need a comparable cycle-time measurement.'], next_step: null } }) : undefined);
     const response = await handleRequest(new Request(route.request().url(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: route.request().postData() }), env);
     await route.fulfill({ status: response.status, json: await response.json() });
   });
@@ -73,4 +73,23 @@ test('T14: copy includes sources and uncertainties', async ({ page, context }) =
   expect(text).toContain('Record snapshot:');
   expect(text).toContain('https://example.com/report');
   expect(text).toContain('not a causal comparison');
+});
+
+test('T05/T14: an inconclusive answer offers an inspectable proposed experiment and copies its uncertainty', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await setup(page, 'experiment');
+  const answer = page.locator('#ask-evidence-answer');
+  await expect(answer).toContainText('Not enough evidence to answer');
+  await expect(answer).toContainText('Proposed experiment');
+  await expect(answer).toContainText('Record unnecessary exploration calls');
+  await expect(answer).toContainText('otherwise revise it');
+  await answer.getByRole('button', { name: 'Inspect citation 1' }).last().click();
+  await expect(page.getByRole('dialog')).toContainText(record.observed[0]);
+  await page.keyboard.press('Escape');
+  await answer.getByRole('button', { name: 'Copy answer with sources' }).click();
+  await expect(page.locator('[data-copy-status]')).toContainText('Copied with sources and uncertainties.');
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain('cannot establish a cycle-time improvement');
+  expect(copied).toContain('Proposed experiment:');
+  expect(copied).toContain('Record snapshot:');
 });
