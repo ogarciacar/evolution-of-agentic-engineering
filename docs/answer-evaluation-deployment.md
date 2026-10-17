@@ -91,3 +91,8 @@ A green evaluation exit code is only a contract result. Follow
 checklist with npm run review:answer, assess all six cases against their exact
 source snapshots, and check that review. The review command does not deploy or
 enable production answers.
+
+For the reasoning prompt iteration, additionally verify
+prompt_revision: bounded_evidence_v1 in success/failure diagnostics. The generation
+contract stays structured_decision_v1. Re-run the six live cases only after the
+evaluation Worker build succeeds, then apply the semantic review rubric.

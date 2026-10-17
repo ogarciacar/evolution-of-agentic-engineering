@@ -13,6 +13,7 @@ it('T03/T04: answers using canonical records and returns inspectable citations a
   expect(data.answer.next_step.decision_rule).toBe('If exploration decreases without reducing quality, keep the guide; otherwise revise it.');
   expect(data.answer.next_step).not.toHaveProperty('decision');
   expect(data.diagnostics.answer_contract).toBe('structured_decision_v1');
+  expect(data.diagnostics.prompt_revision).toBe('bounded_evidence_v1');
   expect(run.mock.calls[0][1].response_format.json_schema.anyOf[1].properties.claims.maxItems).toBe(0);
   expect(data.sources[0].passages.map(p => p.field)).toContain('what_this_does_not_establish.0');
   expect(run).toHaveBeenCalledTimes(1);
