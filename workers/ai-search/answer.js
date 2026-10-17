@@ -1,3 +1,4 @@
+import { providerDiagnostics } from './provider-diagnostics.mjs';
 import { ANSWER_SYSTEM, ANSWER_PROMPT_REVISION } from './answer-prompt.js';
 import { getEvidenceById } from '../../functions/_lib/evidence-read-model.js';
 
@@ -236,7 +237,9 @@ export async function handleAnswer(request, env, model = ANSWER_MODEL) {
       if (expired) throw Error("Answer deadline exceeded");
       request.signal.throwIfAborted();
       modelStarted = Date.now();
-      const generated = await env.AI.run(model, input);
+      let generated;
+      try { generated = await env.AI.run(model, input); }
+      catch (error) { Object.assign(metrics, providerDiagnostics(error)); throw error; }
       if (expired) throw Error("Answer deadline exceeded");
       request.signal.throwIfAborted();
       metrics.model_latency_ms = Date.now() - modelStarted;

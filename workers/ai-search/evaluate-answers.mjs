@@ -12,10 +12,12 @@ const base = new URL(option('--base-url'));
 if (base.protocol !== 'https:' && !['127.0.0.1', 'localhost'].includes(base.hostname)) throw Error('Use HTTPS or localhost');
 const transport = args.includes('--evaluation') ? evaluationTransport(base, process.env.EAE_EVALUATION_TOKEN) : fetch;
 const snapshots = args.includes('--snapshot-report') ? pinnedCases(JSON.parse(await fs.readFile(option('--snapshot-report'), 'utf8'))) : null;
+const selectedCases = args.includes('--case') ? ANSWER_CASES.filter(c => c.id === option('--case')) : ANSWER_CASES;
+if (!selectedCases.length) throw Error('Unknown --case; use one of: ' + ANSWER_CASES.map(c => c.id).join(', '));
 const results = [];
-for (const [index, testCase] of ANSWER_CASES.entries()) {
+for (const [index, testCase] of selectedCases.entries()) {
   const { question, expected_abstention } = testCase;
-  console.log(`[${index + 1}/${ANSWER_CASES.length}] Evaluating: ${question}`);
+  console.log(`[${index + 1}/${selectedCases.length}] Evaluating: ${question}`);
   const result = await evaluateQuestion(base, question, expected_abstention, transport, snapshots?.[testCase.id]);
   results.push({ case_id: testCase.id, ...result });
   console.log(`  ${result.contract}: ${result.diagnostic?.validation_reason || result.diagnostic?.code || result.data?.answer.outcome || result.error} (${result.latency_ms} ms)`);
