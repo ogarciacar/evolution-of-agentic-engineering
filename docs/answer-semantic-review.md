@@ -98,3 +98,28 @@ It writes semantic_status: unreviewed. CI tests the review mechanism and
 calibration fixtures without calling a live model or rubber-stamping answers.
 Before public release, retain both the report and completed human review;
 production enablement remains a separate explicit decision.
+
+## First generation iteration against this baseline
+
+Prompt revision bounded_evidence_v1 moves generation guidance into
+workers/ai-search/answer-prompt.js. It explicitly distinguishes descriptive,
+evidence-seeking and causal questions; requires checking all supplied records
+before declaring evidence absent; separates nearby concepts; and asks for a
+bounded proposal with operational measurements and local decision branches.
+
+The model, generation schema, evidence selection, timeout and public API remain
+unchanged. This isolates a prompt iteration rather than combining it with a model
+or retrieval change. No case-specific expected answer, organization name or
+benchmark result from the rubric is injected into the prompt.
+
+Hand-authored context and infrastructure calibration examples verify that a
+bounded answered response is compatible with the existing contract. These tests
+do not establish that the model will generate such an answer. Re-run all six live
+cases after deployment and review them with the same rubric. Check
+data.diagnostics.prompt_revision on success or diagnostic.prompt_revision on
+failure for bounded_evidence_v1. Compare retrieval/source snapshots as well as
+answers: changes in retrieved evidence or model variability can affect results.
+
+Success means supported bounded answers, accurate limits and useful local
+proposals, not merely more answers labelled answered. Retain correct weather
+abstention. Do not enable production from contract results alone.
