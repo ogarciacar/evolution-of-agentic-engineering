@@ -37,3 +37,47 @@ it('E05: the evaluation runner retrieves evidence then generates through the pro
   const result = await evaluateQuestion(base, 'Where should we focus?', false, transport);
   expect(result, JSON.stringify(result)).toMatchObject({ contract: 'pass', data: { answer: { outcome: 'answered' } }, human_review: { decision: 'unreviewed' } });
 });
+it('E06: authenticated model selection changes inference only and reports the actual model', async () => {
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { ANSWER_MODEL } = await import('../../workers/ai-search/answer.js');
+  const { handleRequest } = await import('../../workers/ai-search/index.js');
+  const inputs = [];
+  const run = vi.fn(async (model, input) => {
+    inputs.push(input);
+    const response = generatedAnswerFor(JSON.parse(input.messages[1].content).sources);
+    return model === ANSWER_MODEL ? { response } : { choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(response) } }], usage: { prompt_tokens: 100, completion_tokens: 80 } };
+  });
+  const env = fixtureEnv(run, { EVALUATION_TOKEN: token });
+  const candidateRequest = () => { const req = request(); req.headers.set('X-EAE-Evaluation-Model', 'gpt-oss'); return req; };
+  const candidate = await (await handleEvaluation(candidateRequest(), env)).json();
+  const baseline = await (await handleEvaluation(request(), env)).json();
+  expect(candidate.model).toBe('@cf/openai/gpt-oss-120b');
+  expect(baseline.model).toBe(ANSWER_MODEL);
+  expect(candidate.answer).toEqual(baseline.answer);
+  expect(candidate.diagnostics).toMatchObject({ model_key: 'gpt-oss', input_tokens: 100, output_tokens: 80 });
+  expect(candidate.diagnostics.generation_input_sha256).toBe(baseline.diagnostics.generation_input_sha256);
+  expect(inputs[0]).toEqual(inputs[1]);
+  // Production never reads the selection header, even with evaluation credentials.
+  await handleRequest(candidateRequest(), env);
+  expect(run.mock.calls.at(-1)[0]).toBe(ANSWER_MODEL);
+});
+it('E07: unknown models and unauthorized selection cannot invoke inference', async () => {
+  const run = vi.fn(); const env = fixtureEnv(run, { EVALUATION_TOKEN: token });
+  const invalid = request(); invalid.headers.set('X-EAE-Evaluation-Model', 'arbitrary-model');
+  expect((await handleEvaluation(invalid, env)).status).toBe(400);
+  const unauthorized = request('Bearer wrong'); unauthorized.headers.set('X-EAE-Evaluation-Model', 'gpt-oss');
+  expect((await handleEvaluation(unauthorized, env)).status).toBe(401);
+  const disabled = request(); disabled.headers.set('X-EAE-Evaluation-Model', 'gpt-oss');
+  expect((await handleEvaluation(disabled, { ...env, ANSWER_ENABLED: 'false' })).status).toBe(503);
+  expect(run).not.toHaveBeenCalled();
+});
+it('E08: model selection is limited to answer requests and preserves rate admission', async () => {
+  const run = vi.fn();
+  const env = fixtureEnv(run, { EVALUATION_TOKEN: token });
+  const wrongRoute = new Request('https://evaluation.test/api/search?q=test', { headers: { Authorization: `Bearer ${token}`, 'X-EAE-Evaluation-Model': 'gpt-oss' } });
+  expect((await handleEvaluation(wrongRoute, env)).status).toBe(400);
+  const req = request(); req.headers.set('X-EAE-Evaluation-Model', 'gpt-oss');
+  const response = await handleEvaluation(req, { ...env, ANSWER_RATE_LIMITER: { limit: async () => ({ success: false }) } });
+  expect(response.status).toBe(429);
+  expect(run).not.toHaveBeenCalled();
+});
