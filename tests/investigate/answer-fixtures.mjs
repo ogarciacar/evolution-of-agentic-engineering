@@ -22,7 +22,7 @@ export function rowFor(r = record) {
 export function fixtureEnv(run, overrides = {}) {
   return { ANSWER_ENABLED: 'true', ANSWER_RATE_LIMITER: { limit: async () => ({ success: true }) },
     EVIDENCE_DB: { prepare: () => ({ bind: (projection, id) => ({ first: async () => id === record.id && projection === 'main' ? rowFor() : null }) }) },
-    AI: { run: run || (async (_model, input) => ({ response: answerFor(JSON.parse(input.messages[1].content).sources) })) }, ...overrides };
+    AI: { run: run || (async (_model, input) => ({ response: generatedAnswerFor(JSON.parse(input.messages[1].content).sources) })) }, ...overrides };
 }
 
 export function uncertainAnswerFor(sources) {
@@ -32,3 +32,13 @@ export function uncertainAnswerFor(sources) {
     summary: { text: 'These records cannot establish a cycle-time improvement.', citations: [{ source_id: sources[0].id, passage_id: boundary.id, quote: boundary.text }] },
     uncertainties: ['Need a comparable cycle-time measurement.'] };
 }
+
+export function generatedAnswerFor(sources, insufficient = false) {
+  const answer = insufficient ? uncertainAnswerFor(sources) : answerFor(sources);
+  const { decision_rule, ...step } = answer.next_step;
+  return { ...answer, next_step: { ...step, decision: {
+    condition: 'exploration decreases without reducing quality',
+    if_true: 'keep the guide', if_false: 'revise it.',
+  } } };
+}
+export const generatedUncertainAnswerFor = sources => generatedAnswerFor(sources, true);

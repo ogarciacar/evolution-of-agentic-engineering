@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { handleRequest } from '../../workers/ai-search/index.js';
-import { fixtureEnv, answerFor, uncertainAnswerFor, record } from './answer-fixtures.mjs';
+import { fixtureEnv, generatedUncertainAnswerFor as uncertainAnswerFor, record } from './answer-fixtures.mjs';
 async function setup(page, mode = 'answer') {
   let calls = 0;
   await page.route('**/api/search?*', async route => {

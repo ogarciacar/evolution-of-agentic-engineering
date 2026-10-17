@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest';
 import { handleRequest } from '../../workers/ai-search/index.js';
-import { answerFor, fixtureEnv, record } from './answer-fixtures.mjs';
+import { generatedAnswerFor as answerFor, fixtureEnv, record } from './answer-fixtures.mjs';
 const request = (body = { query: 'Where should we focus?', record_ids: ['context'] }) => new Request('https://agenticengineering.science/api/search/answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 it('T03/T04: answers using canonical records and returns inspectable citations and a measurable next step', async () => {
   const run = vi.fn(async (_model, input) => ({ response: answerFor(JSON.parse(input.messages[1].content).sources) }));
@@ -10,6 +10,10 @@ it('T03/T04: answers using canonical records and returns inspectable citations a
   expect(data).toMatchObject({ version: 1, provenance: 'canonical_eae_records', answer: { outcome: 'answered' } });
   expect(data.sources[0].original).toEqual(record.source);
   expect(data.answer.next_step.measure).toBeTruthy();
+  expect(data.answer.next_step.decision_rule).toBe('If exploration decreases without reducing quality, keep the guide; otherwise revise it.');
+  expect(data.answer.next_step).not.toHaveProperty('decision');
+  expect(data.diagnostics.answer_contract).toBe('structured_decision_v1');
+  expect(run.mock.calls[0][1].response_format.json_schema.anyOf[1].properties.claims.maxItems).toBe(0);
   expect(data.sources[0].passages.map(p => p.field)).toContain('what_this_does_not_establish.0');
   expect(run).toHaveBeenCalledTimes(1);
   expect(run.mock.calls[0][1].max_tokens).toBeLessThanOrEqual(2000);
@@ -46,7 +50,7 @@ it.each(['unknown citation', 'invented quote', 'interpretation as observation', 
       const p = sources[0].passages.find(p => p.field === 'interpretation');
       answer.claims[0].citations = [{ source_id: sources[0].id, passage_id: p.id, quote: p.text }];
     }
-    if (failure === 'comparison without decision') answer.next_step.decision_rule = 'Compare review times.';
+    if (failure === 'comparison without decision') answer.next_step.decision = { condition: 'Compare review times.' };
     if (failure === 'empty measure') answer.next_step.measure = '';
     return { response: failure === 'malformed' ? 'not json' : answer };
   });
@@ -164,7 +168,7 @@ it.each([
   ['schema_invalid', a => ({ ...a, private_extra_field: 'private value' })],
   ['citation_invalid', a => { a.summary.citations[0].quote = 'private invented quote'; return a; }],
   ['observation_not_verbatim', a => { a.claims[0].text = 'private paraphrase'; return a; }],
-  ['decision_rule_invalid', a => { a.next_step.decision_rule = 'private comparison'; return a; }],
+  ['decision_rule_invalid', a => { a.next_step.decision = { condition: 'private comparison' }; return a; }],
   ['answer_incomplete', a => { a.next_step = null; return a; }],
   ['abstention_invalid', a => ({ ...a, outcome: 'insufficient' })],
 ])('T06: reports %s with measurements, never rejected model content', async (reason, mutate) => {
@@ -187,7 +191,7 @@ it.each([
   } finally { logs.mockRestore(); }
 });
 it('T05: returns a cited proposed experiment without claiming the question is settled', async () => {
-  const { uncertainAnswerFor } = await import('./answer-fixtures.mjs');
+  const { generatedUncertainAnswerFor: uncertainAnswerFor } = await import('./answer-fixtures.mjs');
   const response = await handleRequest(request(), fixtureEnv(async (_model, input) => ({
     response: uncertainAnswerFor(JSON.parse(input.messages[1].content).sources),
   })));

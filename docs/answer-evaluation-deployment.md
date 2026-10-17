@@ -78,3 +78,10 @@ npm run eval:answer -- --evaluation \
   --output .artifacts/answer-evaluation.json
 unset EAE_EVALUATION_TOKEN
 ```
+
+For the structured-decision rollout, confirm
+`data.diagnostics.answer_contract` (success) or
+`diagnostic.answer_contract` (failure) equals `structured_decision_v1`.
+A model-backed result without this marker may be from an earlier deployment;
+wait for the evaluation build to finish and rerun the full set. This marker
+identifies the contract revision, not a unique deployment.
