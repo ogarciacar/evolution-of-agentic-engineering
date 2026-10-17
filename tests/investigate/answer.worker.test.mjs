@@ -36,7 +36,7 @@ it('D1 failure is unavailable, never insufficient', async () => {
   expect(response.status).toBe(503);
   expect(run).not.toHaveBeenCalled();
 });
-it.each(['unknown citation', 'invented quote', 'interpretation as observation', 'empty measure', 'malformed'])('rejects unsafe model output: %s', async failure => {
+it.each(['unknown citation', 'invented quote', 'interpretation as observation', 'empty measure', 'comparison without decision', 'malformed'])('rejects unsafe model output: %s', async failure => {
   const env = fixtureEnv(async (_model, input) => {
     const sources = JSON.parse(input.messages[1].content).sources;
     const answer = answerFor(sources);
@@ -46,6 +46,7 @@ it.each(['unknown citation', 'invented quote', 'interpretation as observation', 
       const p = sources[0].passages.find(p => p.field === 'interpretation');
       answer.claims[0].citations = [{ source_id: sources[0].id, passage_id: p.id, quote: p.text }];
     }
+    if (failure === 'comparison without decision') answer.next_step.decision_rule = 'Compare review times.';
     if (failure === 'empty measure') answer.next_step.measure = '';
     return { response: failure === 'malformed' ? 'not json' : answer };
   });
@@ -81,7 +82,9 @@ it('times out a stalled model without retrying it', async () => {
     const pending = handleRequest(request(), fixtureEnv(run));
     await vi.waitFor(() => expect(run).toHaveBeenCalledOnce());
     await vi.advanceTimersByTimeAsync(25001);
-    expect((await pending).status).toBe(503);
+    const response = await pending;
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ code: 'deadline_exceeded', stage: 'model' });
     expect(run).toHaveBeenCalledOnce();
   } finally { vi.useRealTimers(); }
 });
@@ -99,7 +102,9 @@ it('does not start inference if a D1 read completes after the deadline', async (
     const pendingRead = new Promise(resolve => { release = resolve; });
     const response = handleRequest(request(), fixtureEnv(run, { EVIDENCE_DB: { prepare: () => ({ bind: () => ({ first: () => pendingRead }) }) } }));
     await vi.advanceTimersByTimeAsync(25001);
-    expect((await response).status).toBe(503);
+    const timedOut = await response;
+    expect(timedOut.status).toBe(503);
+    expect(await timedOut.json()).toMatchObject({ code: 'deadline_exceeded', stage: 'evidence' });
     release(null);
     await vi.advanceTimersByTimeAsync(1);
     expect(run).not.toHaveBeenCalled();
@@ -115,4 +120,42 @@ it('Pages answer bridge forwards POST body and preserves response status', async
   });
   expect((await onRequest({ request: req, env: { SEARCH_API: { fetch: forwarded } } })).status).toBe(429);
   expect(forwarded).toHaveBeenCalledOnce();
+});
+it.each([
+  ['provider_error', { AI: { run: async () => { throw Error('private provider detail'); } } }, 'model'],
+  ['evidence_error', { EVIDENCE_DB: { prepare() { throw Error('private database detail'); } } }, 'evidence'],
+  ['rate_limiter_error', { ANSWER_RATE_LIMITER: { limit: async () => { throw Error('private limiter detail'); } } }, 'rate_limit'],
+  ['answer_disabled', { ANSWER_ENABLED: 'false' }, 'request'],
+  ['configuration_error', { AI: null }, 'request'],
+])('T06: exposes safe correlated diagnostics for %s', async (code, overrides, stage) => {
+  const logs = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    const response = await handleRequest(request(), fixtureEnv(undefined, overrides));
+    expect(response.status).toBe(503);
+    const data = await response.json();
+    expect(data).toMatchObject({ code, stage, request_id: response.headers.get('X-Request-ID'), latency_ms: expect.any(Number) });
+    expect(data.request_id).toBeTruthy();
+    expect(JSON.stringify(data)).not.toContain('private');
+    expect(logs).toHaveBeenCalledWith(expect.stringContaining(data.request_id));
+    expect(JSON.stringify(logs.mock.calls)).not.toContain('private');
+  } finally { logs.mockRestore(); }
+});
+it('T06: deadline includes stalled rate admission and reports its stage', async () => {
+  vi.useFakeTimers();
+  try {
+    const run = vi.fn();
+    const pending = handleRequest(request(), fixtureEnv(run, { ANSWER_RATE_LIMITER: { limit: () => new Promise(() => {}) } }));
+    await vi.advanceTimersByTimeAsync(25001);
+    expect(await (await pending).json()).toMatchObject({ code: 'deadline_exceeded', stage: 'rate_limit' });
+    expect(run).not.toHaveBeenCalled();
+  } finally { vi.useRealTimers(); }
+});
+it('T04: rejects unsupported observation paraphrase at the Worker boundary', async () => {
+  const response = await handleRequest(request(), fixtureEnv(async (_model, input) => {
+    const answer = answerFor(JSON.parse(input.messages[1].content).sources);
+    answer.claims[0].text = 'Context guides improve engineering cycle time.';
+    return { response: answer };
+  }));
+  expect(response.status).toBe(502);
+  expect(await response.json()).toMatchObject({ code: 'invalid_model_output', stage: 'validation' });
 });

@@ -1,7 +1,7 @@
 // Explicit live evaluation: costs up to six bounded Workers AI calls. Not part of CI.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { validateAnswer } from './answer.js';
+import { evaluateQuestion } from './evaluation-case.mjs';
 const args = process.argv.slice(2);
 const option = name => args[args.indexOf(name) + 1];
 if (!args.includes('--base-url') || !args.includes('--output')) throw Error('Usage: npm run eval:answer -- --base-url https://agenticengineering.science --output .artifacts/answer-evaluation.json');
@@ -16,23 +16,7 @@ const questions = [
   'What will the weather in Amsterdam be tomorrow?',
 ];
 const results = [];
-for (const question of questions) {
-  try {
-    const search = await fetch(new URL(`/api/search?q=${encodeURIComponent(question)}&passages=1`, base), { signal: AbortSignal.timeout(30000) });
-    if (!search.ok) throw Error(`Retrieval HTTP ${search.status}`);
-    const retrieval = await search.json();
-    if (!retrieval.answer_available) throw Error('Answer capability is not enabled at this endpoint');
-    const record_ids = [...new Set(retrieval.evidence.sources.map(s => s.record_id).filter(Boolean))];
-    const started = Date.now();
-    const response = await fetch(new URL('/api/search/answer', base), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query: question, record_ids }), signal: AbortSignal.timeout(30000) });
-    if (!response.ok) throw Error(`Answer HTTP ${response.status}`);
-    const data = await response.json();
-    validateAnswer(data.answer, data.sources);
-    const expectedAbstention = question === questions.at(-1);
-    results.push({ question, latency_ms: Date.now() - started, contract: 'pass', expected_abstention: expectedAbstention, abstention_pass: !expectedAbstention || data.answer.outcome === 'insufficient', data,
-      human_review: { claims_supported: null, boundaries_preserved: null, question_answered_or_justified_abstention: null, next_step_useful_and_measurable: null, decision: 'unreviewed', notes: '' } });
-  } catch (error) { results.push({ question, contract: 'fail', error: error.message }); }
-}
+for (const question of questions) results.push(await evaluateQuestion(base, question, question === questions.at(-1)));
 const output = option('--output');
 await fs.mkdir(path.dirname(output), { recursive: true });
 await fs.writeFile(output, JSON.stringify({ evaluated_at: new Date().toISOString(), endpoint: base.origin, results }, null, 2) + '\n');

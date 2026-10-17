@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const { EVIDENCE_DB_NAME, EVIDENCE_DB_ID, EAE_ANSWER_ENABLED = 'true' } = process.env;
+const { EVIDENCE_DB_NAME, EVIDENCE_DB_ID, EAE_ANSWER_ENABLED = 'false' } = process.env;
 if (!EVIDENCE_DB_NAME || !/^[a-f0-9-]{36}$/i.test(EVIDENCE_DB_ID || '')) throw Error('Existing production EVIDENCE_DB_NAME and EVIDENCE_DB_ID are required');
 if (!['true', 'false'].includes(EAE_ANSWER_ENABLED)) throw Error('EAE_ANSWER_ENABLED must be true or false');
 const dir = new URL('./', import.meta.url);
