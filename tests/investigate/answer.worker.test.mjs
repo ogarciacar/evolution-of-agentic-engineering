@@ -12,8 +12,8 @@ it('T03/T04: answers using canonical records and returns inspectable citations a
   expect(data.answer.next_step.measure).toBeTruthy();
   expect(data.answer.next_step.decision_rule).toBe('If exploration decreases without reducing quality, keep the guide; otherwise revise it.');
   expect(data.answer.next_step).not.toHaveProperty('decision');
-  expect(data.diagnostics.answer_contract).toBe('experiment_fields_v3');
-  expect(data.diagnostics.prompt_revision).toBe('experiment_fields_v3');
+  expect(data.diagnostics.answer_contract).toBe('question_aligned_v4');
+  expect(data.diagnostics.prompt_revision).toBe('question_aligned_v4');
   expect(run.mock.calls[0][1].response_format.json_schema.anyOf[1].properties.claims.maxItems).toBe(0);
   expect(data.sources[0].passages.map(p => p.field)).toContain('what_this_does_not_establish.0');
   expect(run).toHaveBeenCalledTimes(1);
@@ -264,4 +264,20 @@ it.each(['scope', 'intervention', 'comparison', 'measurement', 'threshold'])('T0
     return { response: a };
   }));
   expect(response.status).toBe(502);
+});
+
+it.each([
+  ['experiment_comparison_undefined', a => { a.next_step.comparison = 'baseline or comparison group'; }],
+  ['experiment_guardrail_undefined', a => { a.next_step.measurement.guardrail = 'review quality'; }],
+])('A-v4: rejects an undefined experiment with %s before exposing an answer', async (reason, mutate) => {
+  const env = fixtureEnv(async (_model, input) => {
+    const answer = answerFor(JSON.parse(input.messages[1].content).sources);
+    mutate(answer);
+    return { response: answer };
+  });
+  const response = await handleRequest(request({ query: 'What changes?', record_ids: ['context'] }), env);
+  expect(response.status).toBe(502);
+  const body = await response.json();
+  expect(body.validation_reason).toBe(reason);
+  expect(body).not.toHaveProperty('answer');
 });

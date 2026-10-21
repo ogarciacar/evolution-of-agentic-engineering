@@ -1,10 +1,10 @@
 // Review criteria, not a semantic classifier. Do not send these case expectations to generation.
-export const RUBRIC_VERSION = 'eae_semantic_v1';
+export const RUBRIC_VERSION = 'eae_semantic_v2';
 export const CRITERIA = {
   support: 'Each factual statement is supported by its cited passage, including summary and proposed rationale. An authentic quote alone is not support.',
   boundaries: 'Preserve attribution, scope and limitations. Do not turn infrastructure constraints into human-review constraints, or one record’s limitation into a corpus-wide absence.',
   responsiveness: 'Answer the question at its requested level. Descriptive questions do not require causal proof; acknowledge relevant comparative evidence without generalizing it.',
-  next_step: 'When appropriate, propose one small reversible experiment with a defined task/cohort, operational measurement, comparison and decision. No vague significant improvement or organization-wide adoption. For unrelated questions, pass only with no experiment.',
+  next_step: 'When appropriate, propose one small reversible experiment with a defined task/cohort, operational measurement, comparison and decision. The experiment must test the question’s uncertainty, name the current comparison condition and measurable quality guardrail, and include that guardrail in the decision. Do not substitute a documentation trial for a concurrency question, conflate different products, or use an absolute latency threshold as evidence of dominance. No vague significant improvement or organization-wide adoption. For unrelated questions, pass only with no experiment.',
 };
 export const ANSWER_CASES = [
   { id: 'cycle-time', question: 'Are coding agents actually reducing engineering cycle time?', expected_abstention: false,

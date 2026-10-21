@@ -17,7 +17,7 @@ export const ANSWER_SCHEMA = object({
   next_step: { anyOf: [{ type: 'null' }, object({ action: text(700), measure: text(500), decision_rule: text(600), citations: list(citationSchema, 1, 3) })] },
 });
 // Generation uses structured decisions; the public v1 envelope retains its rendered sentence.
-export const ANSWER_CONTRACT = 'experiment_fields_v3';
+export const ANSWER_CONTRACT = 'question_aligned_v4';
 const decisionSchema = object({ threshold: text(180), if_true: text(180), if_false: text(180) });
 const refs = min => list(text(16), min, 3);
 const generatedClaim = { anyOf: [
@@ -30,12 +30,16 @@ const generatedNextStep = object({
   decision: decisionSchema,
   citations: refs(1),
 });
-const generatedBranches = ['answered', 'insufficient'].map(outcome => object({
+// A relevant abstention with an experiment needs a cited boundary; an unrelated
+// abstention may have no citations but cannot propose an experiment.
+const generatedBranches = [
+  ['answered', true], ['insufficient', true], ['insufficient', false],
+].map(([outcome, hasStep]) => object({
   ...ANSWER_SCHEMA.properties,
   outcome: { type: 'string', enum: [outcome] },
-  summary: object({ text: text(1200), citations: refs(outcome === 'answered' ? 1 : 0) }),
+  summary: object({ text: text(1200), citations: refs(hasStep ? 1 : 0) }),
   claims: list(generatedClaim, outcome === 'answered' ? 1 : 0, outcome === 'answered' ? 4 : 0),
-  next_step: outcome === 'answered' ? generatedNextStep : { anyOf: [{ type: 'null' }, generatedNextStep] },
+  next_step: hasStep ? generatedNextStep : { type: 'null' },
 }));
 export const GENERATION_SCHEMA = { anyOf: generatedBranches };
 const bytes = value => new TextEncoder().encode(value).byteLength;
@@ -149,6 +153,14 @@ export function finalizeGeneratedAnswer(value, sources) {
     return { kind: 'observation', text: cited.quote, citations: [cited] };
   });
   const step = value.next_step;
+  if (step) {
+    // Reject known empty placeholders, not arbitrary natural-language semantics.
+    const bare = value => value.trim().toLowerCase().replace(/[.!]+$/, '').trim();
+    if (['baseline', 'comparison group', 'baseline or comparison group', 'control', 'control group'].includes(bare(step.comparison)))
+      invalid('experiment_comparison_undefined', 'Experiment comparison must identify the current condition');
+    if (['quality', 'output quality', 'code quality', 'review quality', 'reviewer capacity', 'code quality and review effort', 'performance', 'accuracy'].includes(bare(step.measurement.guardrail)))
+      invalid('experiment_guardrail_undefined', 'Experiment guardrail must specify an observable check');
+  }
   const inline = text => text.trim().replace(/\s+/g, ' ');
   const fragment = text => inline(text).replace(/\.+$/, '');
   // Check generated prose only: canonical quotes must remain untouched.
