@@ -1,3 +1,4 @@
+import { finalizeGeneratedAnswer } from '../../workers/ai-search/answer.js';
 import { expect, it } from 'vitest';
 import { canonicalSources, validateAnswer, ANSWER_LIMITS } from '../../workers/ai-search/answer.js';
 import { record, answerFor } from './answer-fixtures.mjs';
@@ -146,4 +147,37 @@ it('distinguishes oversized citation and observation passages without truncating
     try { finalizeGeneratedAnswer(generatedAnswerFor(sources), sources); throw Error('Should reject'); }
     catch (error) { expect(error.reason).toBe(reason); }
   }
+});
+
+it('v4 encodes cited experiments in both outcomes while preserving unrelated abstention', async () => {
+  const { GENERATION_SCHEMA } = await import('../../workers/ai-search/answer.js');
+  const [answered, investigation, unrelated] = GENERATION_SCHEMA.anyOf.map(s => s.properties);
+  expect(answered.summary.properties.citations.minItems).toBe(1);
+  expect(investigation.outcome.enum).toEqual(['insufficient']);
+  expect(investigation.summary.properties.citations.minItems).toBe(1);
+  expect(investigation.next_step.required).toContain('comparison');
+  expect(unrelated.next_step.type).toBe('null');
+  expect(unrelated.summary.properties.citations.minItems).toBe(0);
+  const { sources } = await canonicalSources([record]);
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const value = generatedAnswerFor(sources, true);
+  expect(finalizeGeneratedAnswer(value, sources).next_step).not.toBeNull();
+  value.summary.citations = [];
+  expect(() => finalizeGeneratedAnswer(value, sources)).toThrow('Missing evidence boundary');
+  value.next_step = null;
+  expect(finalizeGeneratedAnswer(value, sources).next_step).toBeNull();
+});
+it.each(['baseline', 'baseline or comparison group', ' Control group. '])('v4 rejects comparison placeholder %s', async comparison => {
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const value = generatedAnswerFor(sources);
+  value.next_step.comparison = comparison;
+  expect(() => finalizeGeneratedAnswer(value, sources)).toThrow('comparison must identify');
+});
+it.each(['output quality', 'reviewer capacity', 'Review quality.'])('v4 rejects guardrail placeholder %s', async guardrail => {
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const value = generatedAnswerFor(sources);
+  value.next_step.measurement.guardrail = guardrail;
+  expect(() => finalizeGeneratedAnswer(value, sources)).toThrow('guardrail must specify');
 });

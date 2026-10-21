@@ -135,3 +135,41 @@ The 2026-10-17 09:47 UTC compact-generation evaluation passed 5/6 contracts with
 The 2026-10-17 10:20 UTC pinned run passed 5/6 contracts, with human review rejected for missing summary citations. Its cycle-time conclusion changed to an unsupported positive association despite identical evidence and prompt version; other responses still proposed irrelevant or undefined experiments. These findings motivate a model comparison rather than further schema expansion.
 
 Use `npm run eval:compare` as documented in the evaluation deployment guide. Review `llama.json` and `gpt-oss.json` separately with this rubric. Confirm `same_input` and `models_confirmed` for each pair before comparing responses; count technical failures as failures, not absent observations. Authentic citations and filled experiment fields still do not establish semantic quality. The candidate is a hypothesis, not a proven upgrade. The serving deadline and generation ceiling remain fixed, so budget exhaustion must be considered when interpreting results. Do not promote either model solely because it passes more contracts.
+
+## Question-aligned v4 acceptance review
+
+The 2026-10-21 pinned model comparison confirmed identical generation inputs for
+all six pairs. Llama passed 5/6 contracts (human-review lacked summary citations);
+GPT-OSS passed 2/6 and hit the 25-second deadline four times. Neither passed the
+semantic release gate. Keep the Llama evaluation baseline and production disabled.
+
+`question_aligned_v4` keeps the public v1 answer shape, model, 1,800-token budget,
+and 25-second deadline. It separates an insufficient answer with an experiment
+(cited summary required) from abstention without one. This closes a permissive
+schema branch; it does not prove why the live model omitted citations. Unknown
+model text from rejected responses was not retained. No automatic citation repair
+or inference retry is introduced.
+
+Before promoting, evaluate these cases using the same pinned sources. Review the
+actual cited passages, not just schema success. Rubric `eae_semantic_v2` adds the
+following explicit next-step criteria; older reviews require a fresh assessment.
+
+| Case | Reject | Accept |
+| --- | --- | --- |
+| Context | Context is dominant because an interface saved time; deny all comparisons despite the Atlassian comparison | Attribute the local task-time/token result, preserve bundled-change limits, state that dominance needs comparable stage timing |
+| Many agents | Recommend AGENTS.md instead of investigating concurrency | Compare a bounded sample at one versus several agents, keep model/task class/checks fixed, measure accepted work and coordination/review cost |
+| Human review | An investigation with an uncited summary; equate Git write contention with review work | Cite the missing review evidence or relevant observation; measure queue wait and reviewer effort per accepted change before selecting an intervention |
+| Infrastructure | Prescribe a multi-agent coordinator with an unnamed baseline and vague review quality | Identify a local need, name the existing workflow, define observable quality checks, make continuation depend on those checks |
+| Cycle time | Six-month generic rollout with speed-only expansion threshold | Bounded comparable task sample, explicit start/end events and quality/review checks; distinguish task time from delivery cycle time |
+| Weather | Forecast or engineering experiment | Explain corpus mismatch, no claims and no next step |
+
+Automated tests enforce schema branch constraints, reject exact known comparison
+and guardrail placeholders, and verify the endpoint fails closed with diagnostic
+reasons. They do **not** classify entailment, detect every vague paraphrase, prove
+question relevance, or establish that a suggested threshold is appropriate.
+Prompt guidance and manual acceptance review handle those semantic obligations.
+
+First run `eval:answer -- --evaluation ... --case human-review` with the existing
+six-case snapshot report and a fresh output filename. Then evaluate the six Llama
+cases with the same snapshot report (omit `--case`). Do not spend another twelve
+calls comparing models until this focused reasoning increment has been reviewed.
