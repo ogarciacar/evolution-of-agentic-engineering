@@ -2,6 +2,36 @@ import { expect, it, vi } from 'vitest';
 import { handleRequest } from '../../workers/ai-search/index.js';
 import { generatedAnswerFor as answerFor, fixtureEnv, record } from './answer-fixtures.mjs';
 const request = (body = { query: 'Where should we focus?', record_ids: ['context'] }) => new Request('https://agenticengineering.science/api/search/answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+it.each(['summary', 'claim', 'step'])('A-v5: withholds findings or experiments supported by an open question (%s)', async target => {
+  const run = vi.fn(async (_model, input) => {
+    const sources = JSON.parse(input.messages[1].content).sources;
+    const answer = answerFor(sources);
+    const question = sources[0].passages.find(p => p.field === 'open_question').ref;
+    if (target === 'summary') answer.summary.citations.push(question);
+    else if (target === 'claim') answer.claims = [{ kind: 'interpretation', text: 'Review is the constraint.', citations: [answer.summary.citations[0], question] }];
+    else answer.next_step.citations = [question];
+    return { response: answer };
+  });
+  const response = await handleRequest(request(), fixtureEnv(run));
+  expect(response.status).toBe(502);
+  const body = await response.json();
+  expect(body).toMatchObject({ code: 'invalid_model_output', stage: 'validation', validation_reason: target === 'step' ? 'observed_evidence_missing' : 'finding_cites_open_question' });
+  expect(body).not.toHaveProperty('answer');
+  expect(run).toHaveBeenCalledOnce();
+});
+it('A-v5: permits an explicit evidence gap with an observation-backed investigation', async () => {
+  const response = await handleRequest(request(), fixtureEnv(async (_model, input) => {
+    const sources = JSON.parse(input.messages[1].content).sources;
+    const answer = answerFor(sources, true);
+    answer.summary = { text: 'The record leaves the benefit of a context guide as an open question.', citations: [sources[0].passages.find(p => p.field === 'open_question').ref] };
+    return { response: answer };
+  }));
+  expect(response.status).toBe(200);
+  const body = await response.json();
+  expect(body.answer).toMatchObject({ outcome: 'insufficient', claims: [], next_step: { action: expect.stringContaining('Proposed trial') } });
+  expect(body.answer.summary.citations[0].quote).toBe(record.open_question);
+  expect(body.answer.next_step.citations[0].quote).toBe(record.observed[0]);
+});
 it('T03/T04: answers using canonical records and returns inspectable citations and a measurable next step', async () => {
   const run = vi.fn(async (_model, input) => ({ response: answerFor(JSON.parse(input.messages[1].content).sources) }));
   const response = await handleRequest(request(), fixtureEnv(run));
@@ -12,8 +42,8 @@ it('T03/T04: answers using canonical records and returns inspectable citations a
   expect(data.answer.next_step.measure).toBeTruthy();
   expect(data.answer.next_step.decision_rule).toBe('If exploration decreases without reducing quality, keep the guide; otherwise revise it.');
   expect(data.answer.next_step).not.toHaveProperty('decision');
-  expect(data.diagnostics.answer_contract).toBe('question_aligned_v4');
-  expect(data.diagnostics.prompt_revision).toBe('question_aligned_v4');
+  expect(data.diagnostics.answer_contract).toBe('evidence_roles_v5');
+  expect(data.diagnostics.prompt_revision).toBe('evidence_roles_v5');
   expect(run.mock.calls[0][1].response_format.json_schema.anyOf[1].properties.claims.maxItems).toBe(0);
   expect(data.sources[0].passages.map(p => p.field)).toContain('what_this_does_not_establish.0');
   expect(run).toHaveBeenCalledTimes(1);

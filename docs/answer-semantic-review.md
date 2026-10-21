@@ -58,7 +58,7 @@ The curated fixture tests/investigate/fixtures/answer-semantic-baseline.json
 preserves verbatim answers, cited passages and selected counterevidence from the
 uploaded run. It includes the original file hash and assistant assessments. It
 is not a full retrieval snapshot or human release approval. Its regression test
-demonstrates that the known poor answers pass structural validation; it does not
+records known poor answers that passed the then-current structural validation; it does not
 claim to detect arbitrary future semantic errors.
 
 ## Run and review
@@ -173,3 +173,46 @@ First run `eval:answer -- --evaluation ... --case human-review` with the existin
 six-case snapshot report and a fresh output filename. Then evaluate the six Llama
 cases with the same snapshot report (omit `--case`). Do not spend another twelve
 calls comparing models until this focused reasoning increment has been reviewed.
+
+## Evidence-role v5 acceptance review
+
+The fresh v4 human-review run (request `41012e0b-2e52-4c77-a93a-ae6e48e51694`)
+passed contracts but promoted GitHub's open question about binding constraints
+into a finding about human review. Its proposed comparison was undefined and its
+30-minute threshold did not establish which stage dominated. Assistant assessment
+rejected the answer; formal human review remains pending.
+
+`evidence_roles_v5` applies the same role checks to generated answers and the
+public validator used by evaluations and review. Public v1 fields are unchanged.
+
+| Citation use | Enforced requirement |
+| --- | --- |
+| Answered summary or interpretation claim | At least one observed passage; no open-question citations, including mixtures with observations |
+| Observation claim | Complete verbatim observed passage, as before |
+| Insufficient summary | May cite limitations or an open question to describe the evidence gap |
+| Proposed investigation | At least one observed passage; an additional open question may identify the uncertainty |
+
+Violations return HTTP 502 without an answer, using
+`finding_cites_open_question` or `observed_evidence_missing`. No automatic citation
+removal, reclassification into insufficient, or retry hides a rejected answer.
+The preserved live payload in `tests/investigate/fixtures/answer-human-review-v4.json`
+is a minimal cited-source subset with the original report hash, not a retrieval
+snapshot. Unit tests reproduce its previous acceptance and current rejection;
+Cloudflare Worker tests cover rejected mixtures and permitted explicit gaps.
+Three older calibration cases now fail role checks; their historical payloads
+are retained unchanged. Other semantically poor answers still pass these checks.
+
+An observed citation is necessary, not sufficient: the model can still make an
+unsupported assertion using an authentic observation. Likewise an insufficient
+label cannot make affirmative unsupported prose valid. Manual review must check
+each sentence. Prompt guidance requires a bounded sample of the same changes,
+comparison of delivery stages under the current workflow, explicit treatment of
+overlapping waits, and a decision based on relative measurements and quality
+checks. These semantic properties are not claimed as deterministic test coverage.
+
+After the evaluation build deploys, rerun the pinned human-review case to a fresh
+file and check both revision markers are `evidence_roles_v5`. Accept only if the
+answer preserves the unknown bottleneck and proposes a concrete same-workload
+investigation (or justifiably omits one). A 502 is a successful safety rejection,
+but remains a failed live evaluation. Only proceed to the six-case run after
+reviewing the focused result. Production remains disabled.

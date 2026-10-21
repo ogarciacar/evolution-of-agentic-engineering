@@ -1,0 +1,104 @@
+{
+  "description": "Verbatim v4 answer and cited canonical passages; subset, not a retrieval snapshot or human approval.",
+  "report_sha256": "32154a62625ac53c8384c78092896cbdfe834ea2af61174cc303c88178531418",
+  "request_id": "41012e0b-2e52-4c77-a93a-ae6e48e51694",
+  "question": "Where does human review become the bottleneck?",
+  "answer": {
+    "outcome": "answered",
+    "summary": {
+      "text": "Human review becomes the bottleneck when automated activity increases and write throughput, reference coordination, verification fan-out, governance, and human review capacity become the binding constraints on useful software delivery.",
+      "citations": [
+        {
+          "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+          "passage_id": "passage:5859f717a48c1bd9e7cbb10b3ceb42daad683d975a07d24a3872d3925fe3377c",
+          "quote": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n"
+        },
+        {
+          "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+          "passage_id": "passage:3e8d6904d348b414152aac2b7e895aced0c3b2cc4e5cd0be40245fa96e800fa3",
+          "quote": "As agent-generated repository activity grows, which combinations of write throughput, reference coordination, verification fan-out, governance, and human review capacity become the binding constraints on useful software delivery?\n"
+        }
+      ]
+    },
+    "claims": [
+      {
+        "kind": "observation",
+        "text": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n",
+        "citations": [
+          {
+            "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+            "passage_id": "passage:5859f717a48c1bd9e7cbb10b3ceb42daad683d975a07d24a3872d3925fe3377c",
+            "quote": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n"
+          }
+        ]
+      },
+      {
+        "kind": "interpretation",
+        "text": "Human review capacity is a constraint on useful software delivery as automated activity increases.",
+        "citations": [
+          {
+            "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+            "passage_id": "passage:5859f717a48c1bd9e7cbb10b3ceb42daad683d975a07d24a3872d3925fe3377c",
+            "quote": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n"
+          },
+          {
+            "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+            "passage_id": "passage:3e8d6904d348b414152aac2b7e895aced0c3b2cc4e5cd0be40245fa96e800fa3",
+            "quote": "As agent-generated repository activity grows, which combinations of write throughput, reference coordination, verification fan-out, governance, and human review capacity become the binding constraints on useful software delivery?\n"
+          }
+        ]
+      }
+    ],
+    "uncertainties": [
+      "The exact point at which human review becomes the bottleneck is unclear.",
+      "The relationship between write throughput, reference coordination, verification fan-out, governance, and human review capacity is not well understood."
+    ],
+    "next_step": {
+      "action": "Proposed trial \u2014 Scope: one team/repository. Intervention: measure time spent waiting for review, reviewing, running checks, and merging. Comparison: compare existing condition with a baseline, task selection, and fixed variables.",
+      "measure": "Metric: time spent waiting for review. Unit: minutes. Window: one week. Guardrail: existing task tests still pass and reviewer minutes per accepted change do not rise.",
+      "citations": [
+        {
+          "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+          "passage_id": "passage:5859f717a48c1bd9e7cbb10b3ceb42daad683d975a07d24a3872d3925fe3377c",
+          "quote": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n"
+        },
+        {
+          "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+          "passage_id": "passage:3e8d6904d348b414152aac2b7e895aced0c3b2cc4e5cd0be40245fa96e800fa3",
+          "quote": "As agent-generated repository activity grows, which combinations of write throughput, reference coordination, verification fan-out, governance, and human review capacity become the binding constraints on useful software delivery?\n"
+        }
+      ],
+      "decision_rule": "If average time spent waiting for review exceeds 30 minutes, investigate optimizing review process; otherwise continue monitoring and evaluating other constraints"
+    }
+  },
+  "sources": [
+    {
+      "id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+      "record_id": "2026-10-06-github-agent-scale-git-infrastructure",
+      "url": "https://agenticengineering.science/signals/2026-10-06-github-agent-scale-git-infrastructure/",
+      "title": "Agent concurrency turns repository writes into infrastructure selection pressure",
+      "original": {
+        "title": "Building Git infrastructure for agent-scale development",
+        "date": "2026-10-06",
+        "producer": "GitHub",
+        "producer_type": "organization",
+        "type": "engineering-blog",
+        "provenance": "primary",
+        "url": "https://github.blog/engineering/architecture-optimization/building-git-infrastructure-for-agent-scale-development/"
+      },
+      "snapshot_id": "ff061a1f31d1b53dcef2bfc9b7d2c49cf8d8e6e0c29c1d702123d9a2e0d4beb4",
+      "passages": [
+        {
+          "id": "passage:5859f717a48c1bd9e7cbb10b3ceb42daad683d975a07d24a3872d3925fe3377c",
+          "field": "observed.9",
+          "text": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n"
+        },
+        {
+          "id": "passage:3e8d6904d348b414152aac2b7e895aced0c3b2cc4e5cd0be40245fa96e800fa3",
+          "field": "open_question",
+          "text": "As agent-generated repository activity grows, which combinations of write throughput, reference coordination, verification fan-out, governance, and human review capacity become the binding constraints on useful software delivery?\n"
+        }
+      ]
+    }
+  ]
+}

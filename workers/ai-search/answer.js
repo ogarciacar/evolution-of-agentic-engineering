@@ -17,7 +17,7 @@ export const ANSWER_SCHEMA = object({
   next_step: { anyOf: [{ type: 'null' }, object({ action: text(700), measure: text(500), decision_rule: text(600), citations: list(citationSchema, 1, 3) })] },
 });
 // Generation uses structured decisions; the public v1 envelope retains its rendered sentence.
-export const ANSWER_CONTRACT = 'question_aligned_v4';
+export const ANSWER_CONTRACT = 'evidence_roles_v5';
 const decisionSchema = object({ threshold: text(180), if_true: text(180), if_false: text(180) });
 const refs = min => list(text(16), min, 3);
 const generatedClaim = { anyOf: [
@@ -98,16 +98,21 @@ function assertSchema(value, schema) {
 }
 export function validateAnswer(value, sources) {
   assertSchema(value, ANSWER_SCHEMA);
-  const checkCitations = (citations, observation = false) => {
+  const checkCitations = (citations, observation = false, role = 'boundary') => {
+    const fields = [];
     for (const citation of citations) {
       const source = sources.find(s => s.id === citation.source_id);
       const passage = source?.passages.find(p => p.id === citation.passage_id);
       if (!passage || !passage.text.includes(citation.quote) || (observation && !passage.field.startsWith('observed.'))) invalid('citation_invalid', 'Invalid citation');
+      fields.push(passage.field);
     }
+    // Field eligibility is deterministic; it does not prove textual entailment.
+    if (role === 'finding' && fields.includes('open_question')) invalid('finding_cites_open_question', 'Open questions cannot support findings');
+    if (role !== 'boundary' && !fields.some(field => field.startsWith('observed.'))) invalid('observed_evidence_missing', 'A finding or investigation requires observed evidence');
   };
-  checkCitations(value.summary.citations);
+  checkCitations(value.summary.citations, false, value.outcome === 'answered' ? 'finding' : 'boundary');
   value.claims.forEach(claim => {
-    checkCitations(claim.citations, claim.kind === 'observation');
+    checkCitations(claim.citations, claim.kind === 'observation', 'finding');
     if (claim.kind === 'observation' && !claim.citations.some(c => {
       const passage = sources.find(s => s.id === c.source_id)?.passages.find(p => p.id === c.passage_id);
       return passage?.text === claim.text && c.quote === passage.text;
@@ -118,7 +123,7 @@ export function validateAnswer(value, sources) {
   } else if (value.claims.length) invalid('abstention_invalid', 'Invalid abstention');
   if (value.next_step) {
     if (!value.summary.citations.length) invalid('answer_incomplete', 'An experiment needs a cited evidence boundary');
-    checkCitations(value.next_step.citations);
+    checkCitations(value.next_step.citations, false, 'investigation');
     // A structural guard, not a semantic judge of the proposed experiment.
     if (!/^if\s+.+[,;]\s*.+;\s*otherwise\s+.+[.!]?$/i.test(value.next_step.decision_rule.trim())) invalid('decision_rule_invalid', 'Decision rule requires condition and alternative actions');
   }
