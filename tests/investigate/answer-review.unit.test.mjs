@@ -62,7 +62,13 @@ it('preserves the live counterexamples: valid contracts do not imply supported a
   const baseline = JSON.parse(readFileSync(new URL('./fixtures/answer-semantic-baseline.json', import.meta.url)));
   expect(baseline.review_origin).toContain('not human release approval');
   expect(baseline.cases.map(c => c.id)).toEqual(ANSWER_CASES.map(c => c.id));
-  for (const c of baseline.cases) expect(validateAnswer(c.answer, c.sources)).toBe(c.answer);
+  // Preserve historical payloads. v5 now catches missing observed support in
+  // three cases; the other semantic failures still require actual review.
+  for (const c of baseline.cases) {
+    if (['many-agents', 'human-review', 'context'].includes(c.id))
+      expect(() => validateAnswer(c.answer, c.sources)).toThrow('requires observed evidence');
+    else expect(validateAnswer(c.answer, c.sources)).toBe(c.answer);
+  }
   expect(baseline.cases.filter(c => c.assessment.decision === 'fail')).toHaveLength(5);
   const context = baseline.cases.find(c => c.id === 'context');
   expect(context.answer.uncertainties).toContain('The sources do not compare the performance of different context management approaches.');
