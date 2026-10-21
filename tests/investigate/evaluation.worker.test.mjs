@@ -1,7 +1,35 @@
 import { expect, it, vi } from 'vitest';
 import { handleEvaluation } from '../../workers/ai-search/evaluation-worker.js';
 import { fixtureEnv } from './answer-fixtures.mjs';
+import { generatedAnswerFor } from './answer-fixtures.mjs';
+import { evaluateQuestion } from '../../workers/ai-search/evaluation-case.mjs';
 const token = 'test-evaluation-token-with-at-least-32-characters';
+it.each(['summary', 'claims[0]', 'claims[3]', 'next_step'])('E10: identifies missing observed support at %s through the Worker and report', async path => {
+  const run = vi.fn(async (_model, input) => {
+    const sources = JSON.parse(input.messages[1].content).sources;
+    const answer = generatedAnswerFor(sources);
+    const ref = sources[0].passages.find(p => p.field === 'interpretation').ref;
+    if (path.startsWith('claims')) {
+      const index = Number(path[7]);
+      answer.claims = Array.from({ length: index + 1 }, () => ({ ...answer.claims[0] }));
+      answer.claims[index] = { kind: 'interpretation', text: 'private rejected claim', citations: [ref] };
+    } else answer[path].citations = [ref];
+    answer.summary.text = 'private rejected summary';
+    return { response: answer };
+  });
+  const env = fixtureEnv(run, { EVALUATION_TOKEN: token });
+  const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+  try {
+    const transport = (url, init) => handleEvaluation(new Request(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } }), env);
+    const result = await evaluateQuestion('https://evaluation.test', 'Q', false, transport, { record_ids: ['context'] });
+    expect(result).toMatchObject({ contract: 'fail', status: 502, diagnostic: { validation_reason: 'observed_evidence_missing', validation_path: path, answer_contract: 'evidence_roles_v5', prompt_revision: 'evidence_roles_v5' } });
+    expect(result).not.toHaveProperty('data');
+    const entries = log.mock.calls.map(([entry]) => JSON.parse(entry));
+    expect(entries).toContainEqual(expect.objectContaining({ validation_path: path, request_id: result.request_id }));
+    expect(JSON.stringify([result, entries])).not.toContain('private rejected');
+    expect(run).toHaveBeenCalledOnce();
+  } finally { log.mockRestore(); }
+});
 const request = (authorization = `Bearer ${token}`) => new Request('https://evaluation.test/api/search/answer', { method: 'POST', headers: { Authorization: authorization, 'Content-Type': 'application/json' }, body: JSON.stringify({ query: 'Where should we focus?', record_ids: ['context'] }) });
 it.each([undefined, '', 'short'])('E01: missing or invalid secret blocks all work (%s)', async secret => {
   const run = vi.fn();

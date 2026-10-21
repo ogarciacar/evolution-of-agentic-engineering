@@ -4,8 +4,16 @@ import { canonicalSources, finalizeGeneratedAnswer, validateAnswer } from '../..
 import { record, generatedAnswerFor } from './answer-fixtures.mjs';
 
 const live = JSON.parse(readFileSync(new URL('./fixtures/answer-human-review-v4.json', import.meta.url)));
+it.each(['summary', 'claims[0]', 'next_step'])('attaches the component path %s to missing-observation errors', async path => {
+  const { sources } = await canonicalSources([record]);
+  const value = generatedAnswerFor(sources);
+  if (path === 'claims[0]') value.claims = [{ kind: 'interpretation', text: 'An inference.', citations: ['s1p2'] }];
+  else value[path].citations = ['s1p2'];
+  expect(() => finalizeGeneratedAnswer(value, sources)).toThrow(expect.objectContaining({ reason: 'observed_evidence_missing', validation_path: path }));
+});
 it('rejects the actual v4 human-review answer that promoted an open question into a finding', () => {
   expect(() => validateAnswer(live.answer, live.sources)).toThrow('Open questions cannot support findings');
+  expect(() => validateAnswer(live.answer, live.sources)).toThrow(expect.objectContaining({ validation_path: 'summary' }));
 });
 
 it.each(['summary', 'claim'])('rejects an open question in %s even when mixed with observed evidence', async target => {

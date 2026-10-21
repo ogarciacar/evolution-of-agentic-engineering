@@ -16,6 +16,7 @@ it.each(['summary', 'claim', 'step'])('A-v5: withholds findings or experiments s
   expect(response.status).toBe(502);
   const body = await response.json();
   expect(body).toMatchObject({ code: 'invalid_model_output', stage: 'validation', validation_reason: target === 'step' ? 'observed_evidence_missing' : 'finding_cites_open_question' });
+  expect(body.validation_path).toBe({ summary: 'summary', claim: 'claims[0]', step: 'next_step' }[target]);
   expect(body).not.toHaveProperty('answer');
   expect(run).toHaveBeenCalledOnce();
 });
@@ -219,6 +220,7 @@ it.each([
     expect(data.model_input_bytes).toBeGreaterThan(0);
     expect(data.model_output_bytes).toBeGreaterThan(0);
     expect(JSON.stringify([data, logs.mock.calls])).not.toContain('private');
+    expect(data).not.toHaveProperty('validation_path');
   } finally { logs.mockRestore(); }
 });
 it('T05: returns a cited proposed experiment without claiming the question is settled', async () => {

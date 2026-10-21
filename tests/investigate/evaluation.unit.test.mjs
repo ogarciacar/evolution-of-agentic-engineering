@@ -1,6 +1,14 @@
 import { expect, it, vi } from 'vitest';
 import { evaluateQuestion } from '../../workers/ai-search/evaluation-case.mjs';
 const retrieval = () => Response.json({ answer_available: true, evidence: { sources: [{ record_id: 'context' }] } });
+it.each(['summary', 'claims[0]', 'claims[3]', 'next_step'])('retains allowlisted validation path %s', async validation_path => {
+  const result = await evaluateQuestion('https://eae.test', 'Q', false, async () => Response.json({ validation_path }, { status: 502 }), { record_ids: ['context'] });
+  expect(result.diagnostic.validation_path).toBe(validation_path);
+});
+it.each(['claims[4]', 'claims[-1]', 'claims[00]', 'summary.private', 'private_text', '', 0, null])('drops invalid validation path %s', async validation_path => {
+  const result = await evaluateQuestion('https://eae.test', 'Q', false, async () => Response.json({ validation_reason: 'schema_invalid', validation_path }, { status: 502 }), { record_ids: ['context'] });
+  expect(result.diagnostic).toEqual({ validation_reason: 'schema_invalid' });
+});
 it('retains status, request ID, stage and timing on failed live cases without private error bodies', async () => {
   const transport = vi.fn().mockResolvedValueOnce(retrieval()).mockResolvedValueOnce(Response.json({ code: 'deadline_exceeded', stage: 'model', latency_ms: 25000, error: 'private details' }, { status: 503, headers: { 'X-Request-ID': 'test-id' } }));
   const result = await evaluateQuestion('https://eae.test', 'Q', false, transport);

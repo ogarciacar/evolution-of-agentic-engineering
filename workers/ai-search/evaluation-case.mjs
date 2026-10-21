@@ -16,6 +16,9 @@ export async function evaluateQuestion(base, question, expectedAbstention = fals
       diagnostic = Object.fromEntries(['code', 'stage', 'latency_ms', 'request_id', 'validation_reason', 'answer_contract', 'prompt_revision', 'model_key', 'provider_error_category', 'provider_error_code', 'provider_http_status', 'generation_input_sha256', 'model_latency_ms', 'model_input_bytes', 'model_output_bytes', 'max_output_tokens', 'input_tokens', 'output_tokens'].filter(k =>
         typeof body?.[k] === 'number' || (typeof body?.[k] === 'string' && /^[a-zA-Z0-9_-]{1,100}$/.test(body[k]))
       ).map(k => [k, body[k]]));
+      // Brackets are valid only in our bounded claim locations, not arbitrary text.
+      if (typeof body?.validation_path === 'string' && /^(summary|claims\[[0-3]\]|next_step)$/.test(body.validation_path))
+        diagnostic.validation_path = body.validation_path;
       throw Error(`${stage} HTTP ${status}`);
     }
     return response.json();
