@@ -22,7 +22,7 @@ it.each(['summary', 'claims[0]', 'claims[3]', 'next_step'])('E10: identifies mis
   try {
     const transport = (url, init) => handleEvaluation(new Request(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } }), env);
     const result = await evaluateQuestion('https://evaluation.test', 'Q', false, transport, { record_ids: ['context'] });
-    expect(result).toMatchObject({ contract: 'fail', status: 502, diagnostic: { validation_reason: 'observed_evidence_missing', validation_path: path, answer_contract: 'evidence_roles_v5', prompt_revision: 'evidence_roles_v5' } });
+    expect(result).toMatchObject({ contract: 'fail', status: 502, diagnostic: { validation_reason: 'observed_evidence_missing', validation_path: path, answer_contract: 'evidence_roles_v5', prompt_revision: 'local_learning_v6' } });
     expect(result).not.toHaveProperty('data');
     const entries = log.mock.calls.map(([entry]) => JSON.parse(entry));
     expect(entries).toContainEqual(expect.objectContaining({ validation_path: path, request_id: result.request_id }));
