@@ -238,3 +238,30 @@ alone cannot distinguish it from the preceding v5 build. Update the local runner
 too, then rerun only the pinned human-review case to a fresh output file. A
 missing path on another rejection reason is expected. A 502 remains a failed
 evaluation, and identifying its location does not establish semantic quality.
+
+### Measurement before intervention (prompt `local_learning_v6`)
+
+The October 22 pinned human-review run passed the v5 contract but proposed
+introducing automated evals and specialized roles together, with a 10% adoption
+threshold and no quality condition in the decision. The historical answer and
+canonical sources are preserved in `tests/investigate/fixtures/answer-human-review-v5.json`,
+with the original report digest and an assistant assessment, not human approval.
+
+The next prompt makes diagnosis versus testing one change an explicit choice.
+For an unknown bottleneck it requests observation under the current workflow,
+comparable stage timing, separate waiting and active effort, arrivals/completions,
+and overlap handling. The decision selects a further local investigation instead
+of adopting an untested remedy. Insufficiency should identify the precise missing
+comparison while acknowledging relevant reported activities.
+
+Only the prompt revision changes to `local_learning_v6`; the public schema and
+`evidence_roles_v5` validation contract remain unchanged. No lexical validator
+pretends to detect causal attribution or useful experiments. The fixture test
+proves a contract pass remains blocked by a failed next-step assessment; the
+hand-authored calibration tests prove format compatibility, not model compliance.
+
+After deploying, rerun the pinned human-review case to a fresh report. Check
+`diagnostics.prompt_revision` for `local_learning_v6`, review the complete answer
+against the rubric, and repeat the case to assess variation before evaluating all
+six cases. A single passing run does not establish reliability. Production answers
+remain disabled until the existing full semantic review gate is satisfied.

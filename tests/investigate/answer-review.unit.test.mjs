@@ -97,3 +97,17 @@ it('CLI creates a pending review, refuses overwrite and returns nonzero for inco
     expect(run('--review', output).status).toBe(0);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+it('keeps the live v5 contract pass blocked when next-step review fails', async () => {
+  const live = JSON.parse(readFileSync(new URL('./fixtures/answer-human-review-v5.json', import.meta.url)));
+  expect(validateAnswer(live.answer, live.sources)).toBe(live.answer);
+  const report = await reportFixture();
+  const result = report.results.find(r => r.question === ANSWER_CASES.find(c => c.id === 'human-review').question);
+  result.data = { answer: live.answer, sources: live.sources, diagnostics: live.diagnostics };
+  const review = completedReview(report);
+  const assessment = review.cases.find(c => c.id === 'human-review');
+  assessment.decision = 'fail';
+  assessment.ratings.next_step = { pass: false, rationale: live.assessment.reason };
+  const checked = checkReview(report, review);
+  expect(checked.status).toBe('blocked');
+  expect(checked.blockers).toContain('human-review: next_step needs a passing assessment with rationale');
+});

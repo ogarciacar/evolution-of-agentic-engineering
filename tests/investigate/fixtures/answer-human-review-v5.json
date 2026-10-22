@@ -1,0 +1,216 @@
+{
+  "review_origin": "Assistant assessment; not human release approval",
+  "report_sha256": "9ca6ce6d3c79ff0d3724b2246bf38512d42a02617849fb851c38722fc7438d98",
+  "case_id": "human-review",
+  "answer": {
+    "outcome": "insufficient",
+    "summary": {
+      "text": "The provided sources do not directly address where human review becomes the bottleneck.",
+      "citations": [
+        {
+          "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+          "passage_id": "passage:3e8d6904d348b414152aac2b7e895aced0c3b2cc4e5cd0be40245fa96e800fa3",
+          "quote": "As agent-generated repository activity grows, which combinations of write throughput, reference coordination, verification fan-out, governance, and human review capacity become the binding constraints on useful software delivery?\n"
+        },
+        {
+          "source_id": "source:c63d7cb1a0c16b93cd595ad6464b3912f85741b2d3d602a3b521c63eef4781b7",
+          "passage_id": "passage:222f4c0d0f4d0cc58d742165cbb90cd766084ee7413f71c5018f2ffd01d519a9",
+          "quote": "At large coding-agent populations, can evaluation remain representative, economical, and sufficiently automated that fitness can be selected without human verification becoming the throughput ceiling?\n"
+        },
+        {
+          "source_id": "source:2c36acc10f6168b5f5ad3d26db012fe205d850aefb9affd03281507f22b5ecf0",
+          "passage_id": "passage:bf92e40a0066b3e0aef3e6252bffbdf131dde74bd164b47d8855237ab3df615a",
+          "quote": "As structured organizational knowledge and its regression suite grow, does the specialized maintenance system preserve accuracy and expert-review efficiency across repeated software-engineering work better than less integrated agent configurations?\n"
+        }
+      ]
+    },
+    "claims": [],
+    "uncertainties": [
+      "The relationship between human review capacity and useful software delivery is unclear.",
+      "The impact of automated evals and specialized verification roles on human review burden is not established."
+    ],
+    "next_step": {
+      "action": "Proposed trial \u2014 Scope: one team/repository. Intervention: measure human review time and capacity. Comparison: compare review time and capacity before and after implementing automated evals and specialized verification roles.",
+      "measure": "Metric: review time per change. Unit: minutes. Window: one month. Guardrail: existing task tests still pass and reviewer minutes per accepted change do not rise.",
+      "citations": [
+        {
+          "source_id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+          "passage_id": "passage:5859f717a48c1bd9e7cbb10b3ceb42daad683d975a07d24a3872d3925fe3377c",
+          "quote": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n"
+        },
+        {
+          "source_id": "source:c63d7cb1a0c16b93cd595ad6464b3912f85741b2d3d602a3b521c63eef4781b7",
+          "passage_id": "passage:db1fffca3887e517815eaae25016174ee073e5916a6d0c00c9b6c1d451f0ddf6",
+          "quote": "The article ends its practical loop by instructing teams to collect a baseline, design and run an experiment, compare the results, and repeat the cycle until the desired outcome is reached.\n"
+        }
+      ],
+      "decision_rule": "If 10% reduction in review time, adopt automated evals and specialized verification roles; otherwise investigate alternative approaches to reduce human review burden"
+    }
+  },
+  "sources": [
+    {
+      "id": "source:de2dd426347eefabf69a6e27fed8eb7fd065787c76b4b571edfafa742a156ccc",
+      "record_id": "2026-10-06-github-agent-scale-git-infrastructure",
+      "url": "https://agenticengineering.science/signals/2026-10-06-github-agent-scale-git-infrastructure/",
+      "title": "Agent concurrency turns repository writes into infrastructure selection pressure",
+      "original": {
+        "title": "Building Git infrastructure for agent-scale development",
+        "date": "2026-10-06",
+        "producer": "GitHub",
+        "producer_type": "organization",
+        "type": "engineering-blog",
+        "provenance": "primary",
+        "url": "https://github.blog/engineering/architecture-optimization/building-git-infrastructure-for-agent-scale-development/"
+      },
+      "snapshot_id": "ff061a1f31d1b53dcef2bfc9b7d2c49cf8d8e6e0c29c1d702123d9a2e0d4beb4",
+      "passages": [
+        {
+          "id": "passage:5859f717a48c1bd9e7cbb10b3ceb42daad683d975a07d24a3872d3925fe3377c",
+          "field": "observed.9",
+          "text": "GitHub states that the architecture must retain existing branching, review, merge, history, branch-protection, audit, visibility, and approval controls as automated activity increases.\n"
+        },
+        {
+          "id": "passage:3e8d6904d348b414152aac2b7e895aced0c3b2cc4e5cd0be40245fa96e800fa3",
+          "field": "open_question",
+          "text": "As agent-generated repository activity grows, which combinations of write throughput, reference coordination, verification fan-out, governance, and human review capacity become the binding constraints on useful software delivery?\n"
+        }
+      ]
+    },
+    {
+      "id": "source:c63d7cb1a0c16b93cd595ad6464b3912f85741b2d3d602a3b521c63eef4781b7",
+      "record_id": "2026-09-02-teresa-torres-ai-evals",
+      "url": "https://agenticengineering.science/signals/2026-09-02-teresa-torres-ai-evals/",
+      "title": "Evals make selection pressure executable",
+      "original": {
+        "title": "AI Evals: A Hands-On Guide for Product Teams",
+        "date": "2026-09-02",
+        "producer": "Teresa Torres",
+        "producer_type": "individual",
+        "type": "engineering-blog",
+        "provenance": "primary",
+        "url": "https://www.producttalk.org/ai-evals/"
+      },
+      "snapshot_id": "c2e5f7537cb11ee66614d9f49612ee994504e2af95386e09c73acf888a714472",
+      "passages": [
+        {
+          "id": "passage:db1fffca3887e517815eaae25016174ee073e5916a6d0c00c9b6c1d451f0ddf6",
+          "field": "observed.6",
+          "text": "The article ends its practical loop by instructing teams to collect a baseline, design and run an experiment, compare the results, and repeat the cycle until the desired outcome is reached.\n"
+        },
+        {
+          "id": "passage:222f4c0d0f4d0cc58d742165cbb90cd766084ee7413f71c5018f2ffd01d519a9",
+          "field": "open_question",
+          "text": "At large coding-agent populations, can evaluation remain representative, economical, and sufficiently automated that fitness can be selected without human verification becoming the throughput ceiling?\n"
+        }
+      ]
+    },
+    {
+      "id": "source:2c36acc10f6168b5f5ad3d26db012fe205d850aefb9affd03281507f22b5ecf0",
+      "record_id": "2026-09-02-meta-organizational-second-brain",
+      "url": "https://agenticengineering.science/signals/2026-09-02-meta-organizational-second-brain/",
+      "title": "Expert corrections become regression-tested institutional memory",
+      "original": {
+        "title": "An Organizational Second Brain: Building an AI That Learns From Experts",
+        "date": "2026-09-02",
+        "producer": "Meta",
+        "producer_type": "organization",
+        "type": "engineering-blog",
+        "provenance": "primary",
+        "url": "https://engineering.fb.com/2026/09/02/ml-applications/organizational-second-brain-ai-learns-from-experts/"
+      },
+      "snapshot_id": "aad599969f2e46268000e5c8556ce3acecd5729437385cae56fbe38ca71c15c6",
+      "passages": [
+        {
+          "id": "passage:6eeb7f213582478f0f8f3a12722108296f4c5eddf869f8811457ed3bdf39d60a",
+          "field": "observed.3",
+          "text": "Human checkpoints and escalations let experts confirm, correct, or redirect intermediate reasoning, and each correction becomes input to the improvement loop.\n"
+        },
+        {
+          "id": "passage:bf92e40a0066b3e0aef3e6252bffbdf131dde74bd164b47d8855237ab3df615a",
+          "field": "open_question",
+          "text": "As structured organizational knowledge and its regression suite grow, does the specialized maintenance system preserve accuracy and expert-review efficiency across repeated software-engineering work better than less integrated agent configurations?\n"
+        }
+      ]
+    },
+    {
+      "id": "source:6a6be4319f66f833e953de54263a27859d6f8ef32262bc96463c358ddadf0086",
+      "record_id": "2026-09-23-cursor-rollouts-security-review",
+      "url": "https://agenticengineering.science/signals/2026-09-23-cursor-rollouts-security-review/",
+      "title": "Verification specializes across the change-to-production lifecycle",
+      "original": {
+        "title": "Bots for the last mile: Rollouts, Security Review",
+        "date": "2026-09-23",
+        "producer": "Cursor",
+        "producer_type": "organization",
+        "type": "engineering-blog",
+        "provenance": "primary",
+        "url": "https://cursor.com/blog/rollouts-and-security-reviewer"
+      },
+      "snapshot_id": "eb37f40521f1d1f9531c055c4dc76ce75fed9a4ab8f6fb6b80e6ed73ebe67e9a",
+      "passages": [
+        {
+          "id": "passage:27027f75d1e98ec3528cf3e7412735ef586447910e4b164fce44c82db5ea155e",
+          "field": "observed.6",
+          "text": "Cursor reports that Security Reviewer reduced average review time from 4.8 minutes to 3.8 minutes and increased comment acceptance from 45\u201350% to 60\u201370%.\n"
+        },
+        {
+          "id": "passage:15f7ef6a3ba9cf74c7054338a537d4f145d0f454fca02b220743ed0ba59089c9",
+          "field": "what_this_does_not_establish.0",
+          "text": "Cursor does not publish sample sizes, evaluation windows, workload mix, comparison design, variance, or statistical significance for the reported Security Reviewer time and acceptance changes.\n"
+        },
+        {
+          "id": "passage:e953d1d0c246db4cf3dc4e33eaa0e8b1a21e8ef58e4e31945026de5ad2a4ba55",
+          "field": "what_this_does_not_establish.1",
+          "text": "Comment acceptance does not by itself establish vulnerability recall, precision, exploit prevention, security outcomes, or reduced human review burden.\n"
+        },
+        {
+          "id": "passage:4b7e0849a8915bff2d13e5921b646b8358c441f4f0972b5c7c3e5d6fdcddf0b0",
+          "field": "what_this_does_not_establish.2",
+          "text": "Cursor publishes no Rollouts measurements for detection precision, false positives, time to detection, mean time to recovery, rollback success, production incidents prevented, or human attention required.\n"
+        },
+        {
+          "id": "passage:e48e835ad3e0d9e16e83615f5ad1c61e087104f692ce35248db2c61ed0463235",
+          "field": "what_this_does_not_establish.3",
+          "text": "The source describes capabilities and selected examples of what Rollouts does well, rather than a controlled comparison with conventional monitoring and incident-response workflows.\n"
+        },
+        {
+          "id": "passage:8cbfc7c37e0d54c3fa8ea918bb3abc6188bd9e45668c3b61f4037d81cc46457b",
+          "field": "what_this_does_not_establish.4",
+          "text": "Preparing a revert pull request for approval is not equivalent to autonomous production recovery, and available actions depend on customer configuration.\n"
+        },
+        {
+          "id": "passage:f257fd713fb1b5f1ef7ca0b4172dae7c14aef0d33ba6840cd7f18ad6fbfa1af7",
+          "field": "what_this_does_not_establish.5",
+          "text": "Feature-flag traffic control, release-train awareness, and deploy-freeze awareness are future capabilities rather than observed behavior.\n"
+        },
+        {
+          "id": "passage:9e31080b2552bbaaa04e5e8d79f2aa971071dc5ccced0f3a30e7ba060d16104e",
+          "field": "what_this_does_not_establish.6",
+          "text": "Differentiated security and rollout roles support Specialization, but the source does not establish that their cooperation outperforms useful isolated verification or that failures improve later executions.\n"
+        },
+        {
+          "id": "passage:59ba58a41a23b630e45f9b82657f444e4a6678c7efd812ee1c379b3a9583362d",
+          "field": "what_this_does_not_establish.7",
+          "text": "The claims are first-party product evidence and have not been independently replicated across other delivery systems or organizations.\n"
+        }
+      ]
+    }
+  ],
+  "diagnostics": {
+    "model_key": "llama",
+    "answer_contract": "evidence_roles_v5",
+    "prompt_revision": "evidence_roles_v5",
+    "generation_input_sha256": "da66f073c6966ae0d5e0e0d4cb5fbab99dfc0a28bb7c5e5b295cf92ab9aa4ac8",
+    "model_input_bytes": 38357,
+    "max_output_tokens": 1800,
+    "model_latency_ms": 10576,
+    "model_output_bytes": 1050,
+    "input_tokens": 6157,
+    "output_tokens": 246
+  },
+  "assessment": {
+    "decision": "fail",
+    "reason": "Measures review time but bundles automated evals and specialized roles before locating the constraint; arbitrary 10% adoption condition omits the quality guardrail."
+  },
+  "fixture_scope": "Canonical excerpts cited by the answer plus relevant Meta checkpoints and Cursor review measurement/boundaries; not the full generation input."
+}
