@@ -76,9 +76,9 @@ export function generationSources(sources) {
   }));
 }
 class AnswerValidationError extends Error {
-  constructor(reason, message) { super(message); this.reason = reason; }
+  constructor(reason, message, path) { super(message); this.reason = reason; this.validation_path = path; }
 }
-const invalid = (reason, message) => { throw new AnswerValidationError(reason, message); };
+const invalid = (reason, message, path) => { throw new AnswerValidationError(reason, message, path); };
 // Validate the model response even when Workers AI JSON mode succeeds.
 function assertSchema(value, schema) {
   if (schema.anyOf) {
@@ -98,7 +98,7 @@ function assertSchema(value, schema) {
 }
 export function validateAnswer(value, sources) {
   assertSchema(value, ANSWER_SCHEMA);
-  const checkCitations = (citations, observation = false, role = 'boundary') => {
+  const checkCitations = (citations, observation = false, role = 'boundary', path) => {
     const fields = [];
     for (const citation of citations) {
       const source = sources.find(s => s.id === citation.source_id);
@@ -107,12 +107,12 @@ export function validateAnswer(value, sources) {
       fields.push(passage.field);
     }
     // Field eligibility is deterministic; it does not prove textual entailment.
-    if (role === 'finding' && fields.includes('open_question')) invalid('finding_cites_open_question', 'Open questions cannot support findings');
-    if (role !== 'boundary' && !fields.some(field => field.startsWith('observed.'))) invalid('observed_evidence_missing', 'A finding or investigation requires observed evidence');
+    if (role === 'finding' && fields.includes('open_question')) invalid('finding_cites_open_question', 'Open questions cannot support findings', path);
+    if (role !== 'boundary' && !fields.some(field => field.startsWith('observed.'))) invalid('observed_evidence_missing', 'A finding or investigation requires observed evidence', path);
   };
-  checkCitations(value.summary.citations, false, value.outcome === 'answered' ? 'finding' : 'boundary');
-  value.claims.forEach(claim => {
-    checkCitations(claim.citations, claim.kind === 'observation', 'finding');
+  checkCitations(value.summary.citations, false, value.outcome === 'answered' ? 'finding' : 'boundary', 'summary');
+  value.claims.forEach((claim, index) => {
+    checkCitations(claim.citations, claim.kind === 'observation', 'finding', `claims[${index}]`);
     if (claim.kind === 'observation' && !claim.citations.some(c => {
       const passage = sources.find(s => s.id === c.source_id)?.passages.find(p => p.id === c.passage_id);
       return passage?.text === claim.text && c.quote === passage.text;
@@ -123,7 +123,7 @@ export function validateAnswer(value, sources) {
   } else if (value.claims.length) invalid('abstention_invalid', 'Invalid abstention');
   if (value.next_step) {
     if (!value.summary.citations.length) invalid('answer_incomplete', 'An experiment needs a cited evidence boundary');
-    checkCitations(value.next_step.citations, false, 'investigation');
+    checkCitations(value.next_step.citations, false, 'investigation', 'next_step');
     // A structural guard, not a semantic judge of the proposed experiment.
     if (!/^if\s+.+[,;]\s*.+;\s*otherwise\s+.+[.!]?$/i.test(value.next_step.decision_rule.trim())) invalid('decision_rule_invalid', 'Decision rule requires condition and alternative actions');
   }
@@ -272,7 +272,9 @@ export async function handleAnswer(request, env, model = ANSWER_MODEL) {
         answer = finalizeGeneratedAnswer(raw, sources);
       } catch (error) {
         const validation_reason = error instanceof AnswerValidationError ? error.reason : error instanceof SyntaxError ? 'json_invalid' : 'validation_error';
-        return failure('invalid_model_output', 'The generated answer did not pass evidence checks', 502, {}, { validation_reason });
+        // Paths are assigned by the validator, never copied from model output.
+        const location = error instanceof AnswerValidationError && error.validation_path ? { validation_path: error.validation_path } : {};
+        return failure('invalid_model_output', 'The generated answer did not pass evidence checks', 502, {}, { validation_reason, ...location });
       }
       console.log(JSON.stringify({ event: 'eae_answer', request_id: requestId, outcome: answer.outcome, model, records: sources.length, omitted_records: omitted, latency_ms: Date.now() - started, ...measurements() }));
       return json({ ...envelope, model, answer, diagnostics: measurements() }, 200, { 'X-Request-ID': requestId });

@@ -216,3 +216,25 @@ answer preserves the unknown bottleneck and proposes a concrete same-workload
 investigation (or justifiably omits one). A 502 is a successful safety rejection,
 but remains a failed live evaluation. Only proceed to the six-case run after
 reviewing the focused result. Production remains disabled.
+
+### Locate evidence-role failures before changing generation
+
+The fresh v5 human-review run (request `625f511b-8f97-4b41-828d-d17106426b0e`)
+confirmed both `evidence_roles_v5` revision markers and returned HTTP 502 with
+`observed_evidence_missing`. No answer was returned, so its quality and the
+specific failing component could not be reviewed.
+
+Evidence-role rejections now include `validation_path` in the HTTP error, Worker
+log and evaluation report. Values are `summary`, `claims[0]` through `claims[3]`
+(zero-based), or `next_step`. The field identifies the first failing component
+for `observed_evidence_missing` and `finding_cites_open_question`; other rejection
+types may omit it. It contains no generated text, quotes or source identifiers.
+The evaluation reader accepts only those exact locations and remains compatible
+with older responses that omit the field.
+
+This diagnostics-only change retains the v5 contract/prompt markers and identical
+generation input. Confirm the new deployment by its build commit; the markers
+alone cannot distinguish it from the preceding v5 build. Update the local runner
+too, then rerun only the pinned human-review case to a fresh output file. A
+missing path on another rejection reason is expected. A 502 remains a failed
+evaluation, and identifying its location does not establish semantic quality.

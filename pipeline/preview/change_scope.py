@@ -11,15 +11,13 @@ from typing import Iterable
 
 # Keep this intentionally focused on files that can change the published reader
 # experience, D1 evidence projection, or the deployed acceptance machinery itself.
+ROOT_ASSET_PATTERNS = ("*.html", "*.css", "*.js")
 PREVIEW_RELEVANT_PATTERNS = (
     "evidence/**",
     "model/**",
     "schema/**",
     "migrations/**",
     "functions/**",
-    "*.html",
-    "*.css",
-    "*.js",
     "_headers",
     "pipeline/build-publication.py",
     "pipeline/build-derived-artifacts.py",
@@ -37,6 +35,11 @@ PREVIEW_RELEVANT_PATTERNS = (
 
 def is_preview_relevant(path: str) -> bool:
     normalized = path.strip().replace("\\", "/")
+    # fnmatch's '*' also matches slashes; root assets need an explicit boundary.
+    if "/" not in normalized and any(
+        fnmatch.fnmatchcase(normalized, pattern) for pattern in ROOT_ASSET_PATTERNS
+    ):
+        return True
     return bool(normalized) and any(
         fnmatch.fnmatchcase(normalized, pattern) for pattern in PREVIEW_RELEVANT_PATTERNS
     )
