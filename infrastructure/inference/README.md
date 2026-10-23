@@ -53,3 +53,15 @@ Observed on an ARM64 Mac running the `linux/amd64` image under Docker Desktop em
 - The 100 completion-token budget was exhausted on reasoning (`finish_reason: length`, `content: ""`); **a non-empty final answer is not yet verified**. Do not treat these timings as Cloudflare capacity or latency estimates.
 
 Next local check: repeat completion with `max_tokens: 512`, require `choices[0].message.content` to be non-empty, and record elapsed wall time. Consider configuring Qwen non-thinking mode for short-answer serving, but verify against the chosen Kronk release before assuming any template options are supported.
+
+### Completed local final-answer check
+
+On 2026-10-23, an authenticated-independent local Docker test of `POST /v1/chat/completions` for `unsloth/Qwen3-0.6B-Q8_0` with `max_tokens: 512` returned HTTP success with non-empty `choices[0].message.content` and `finish_reason: stop`.
+
+- Answer: "Agentic engineering is a field that integrates engineering principles with human decision-making to solve complex problems."
+- Total completion tokens: **116**, of which **95** were reasoning tokens.
+- Kronk reported **25.766 tokens/s** and **304.415 ms** first-token latency.
+- The client's curl output indicated around **4.8 seconds** overall.
+- This validates local execution, **not Cloudflare container compatibility, model accuracy, public gateway authorization, or production latency**.
+
+For short-answer serving, investigate a model/template configuration that avoids substantial reasoning-token overhead. Keep answer-quality evaluation distinct from deployment readiness.
