@@ -22,7 +22,7 @@ it.each(['summary', 'claims[0]', 'claims[3]', 'next_step'])('E10: identifies mis
   try {
     const transport = (url, init) => handleEvaluation(new Request(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } }), env);
     const result = await evaluateQuestion('https://evaluation.test', 'Q', false, transport, { record_ids: ['context'] });
-    expect(result).toMatchObject({ contract: 'fail', status: 502, diagnostic: { validation_reason: 'observed_evidence_missing', validation_path: path, answer_contract: 'evidence_roles_v5', prompt_revision: 'local_learning_v6' } });
+    expect(result).toMatchObject({ contract: 'fail', status: 502, diagnostic: { validation_reason: 'observed_evidence_missing', validation_path: path, answer_contract: 'structured_diagnosis_v7', prompt_revision: 'structured_diagnosis_v7' } });
     expect(result).not.toHaveProperty('data');
     const entries = log.mock.calls.map(([entry]) => JSON.parse(entry));
     expect(entries).toContainEqual(expect.objectContaining({ validation_path: path, request_id: result.request_id }));
@@ -121,4 +121,38 @@ it('E09: provider failure diagnostics survive the evaluation report without leak
     expect(result.diagnostic).toMatchObject({ code: 'provider_error', provider_error_category: 'quota_exceeded', provider_error_code: 3036, provider_http_status: 429 });
     expect(JSON.stringify([result, log.mock.calls])).not.toContain('secret prompt');
   } finally { log.mockRestore(); }
+});
+it.each(['complete', 'missing effort', 'missing quality condition', 'absolute threshold', 'unknown stage', 'unresolved citation', 'open question only'])('E11: structured diagnosis %s through authenticated Worker and evaluation report', async kind => {
+  const { diagnosisFor } = await import('./answer-fixtures.mjs');
+  const run = vi.fn(async (_model, input) => {
+    const sources = JSON.parse(input.messages[1].content).sources;
+    const answer = generatedAnswerFor(sources, true);
+    answer.next_step = diagnosisFor();
+    const step = answer.next_step;
+    if (kind === 'missing effort') delete step.active_effort;
+    if (kind === 'missing quality condition') delete step.guardrail.acceptance;
+    if (kind === 'absolute threshold') step.decision.threshold = '30 minutes';
+    if (kind === 'unknown stage') step.decision.focus_stage = 'private stage';
+    if (kind === 'unresolved citation') step.citations = ['s9p9'];
+    if (kind === 'open question only') step.citations = [sources[0].passages.find(p => p.field === 'open_question').ref];
+    return { response: answer };
+  });
+  const env = fixtureEnv(run, { EVALUATION_TOKEN: token });
+  const transport = (url, init) => handleEvaluation(new Request(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } }), env);
+  const result = await evaluateQuestion('https://evaluation.test', 'Where is the workflow bottleneck?', false, transport, { record_ids: ['context'] });
+  if (kind === 'complete') {
+    expect(result.contract).toBe('pass');
+    expect(result.data.answer.next_step.action).toContain('Proposed diagnosis');
+    expect(result.data.answer.next_step.measure).toContain('active minutes');
+    expect(result.data.answer.next_step.decision_rule).toContain('all pass');
+    expect(result.data.diagnostics.answer_contract).toBe('structured_diagnosis_v7');
+  } else {
+    expect(result).toMatchObject({ contract: 'fail', status: 502 });
+    expect(result).not.toHaveProperty('data');
+    const reason = { 'unknown stage': 'diagnosis_stage_invalid', 'unresolved citation': 'citation_reference_unknown', 'open question only': 'observed_evidence_missing' }[kind] || 'diagnosis_incomplete';
+    expect(result.diagnostic.validation_reason).toBe(reason);
+    if (kind !== 'unresolved citation') expect(result.diagnostic.validation_path).toBe('next_step');
+    expect(JSON.stringify(result)).not.toContain('private stage');
+  }
+  expect(run).toHaveBeenCalledOnce();
 });

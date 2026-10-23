@@ -41,8 +41,22 @@ export function generatedAnswerFor(sources, insufficient = false) {
     summary: { text: insufficient ? 'These records cannot establish a cycle-time improvement.' : 'Investigate repository context within the reported limits.', citations: [insufficient ? boundary : observed] },
     claims: insufficient ? [] : [{ kind: 'observation', passage: observed }],
     uncertainties: ['This is one report, not a causal comparison.'],
-    next_step: { scope: 'Five comparable tasks in one repository', intervention: 'Use a repository guide', comparison: 'The same task class without a guide', measurement: { metric: 'Unnecessary exploration calls per task', unit: 'calls', window: 'Task start to passing tests', guardrail: 'All existing tests pass and reviewer minutes do not increase' }, citations: [observed], decision: {
+    next_step: { mode: 'test_change', scope: 'Five comparable tasks in one repository', intervention: 'Use a repository guide', comparison: 'The same task class without a guide', measurement: { metric: 'Unnecessary exploration calls per task', unit: 'calls', window: 'Task start to passing tests', guardrail: 'All existing tests pass and reviewer minutes do not increase' }, citations: [observed], decision: {
       threshold: 'exploration decreases without reducing quality', if_true: 'keep the guide', if_false: 'revise it.',
     } } };
 }
 export const generatedUncertainAnswerFor = sources => generatedAnswerFor(sources, true);
+
+export function diagnosisFor(citations = ['s1p1']) {
+  return {
+    mode: 'diagnose', scope: 'One repository', sample: { count: 20, selection: 'consecutive changes of the same task class' }, window: 'Ready for review until merge',
+    stages: [
+      { name: 'review queue', kind: 'waiting', start: 'Ready for review', end: 'First reviewer response' },
+      { name: 'checks', kind: 'processing', start: 'Checks started', end: 'Required checks completed' },
+    ],
+    active_effort: { activity: 'human review', method: 'reviewer-recorded active sessions per change' },
+    flow: { unit: 'changes', arrivals: 'ready for review', completions: 'merge' },
+    overlap: 'record_separately_do_not_sum', guardrail: { check: 'Required task tests', acceptance: 'all pass; required approvals retained' },
+    decision: { focus_stage: 'review queue', basis: 'relative_elapsed_time', if_true: 'investigate reviewer availability in this repository', if_false: 'inspect other stages or collect more comparable observations' }, citations,
+  };
+}

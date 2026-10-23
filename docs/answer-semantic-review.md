@@ -265,3 +265,43 @@ After deploying, rerun the pinned human-review case to a fresh report. Check
 against the rubric, and repeat the case to assess variation before evaluating all
 six cases. A single passing run does not establish reliability. Production answers
 remain disabled until the existing full semantic review gate is satisfied.
+
+### Structured diagnosis (`structured_diagnosis_v7`)
+
+The v6 human-review report passed the contract but returned an undefined sample,
+“existing quality checks” without an acceptance condition, and an invented
+30-minute threshold. Generation now chooses `diagnose` or `test_change` explicitly.
+The diagnosis branch requires:
+
+- A proposed integer sample size (1–100), selection rule, scope and window.
+- Two to four unique stages with start/end events, including waiting and processing.
+- An active-effort recording method and arrival/completion events in a shared unit.
+- Explicit overlap handling and separate quality check/acceptance fields.
+- An existing focus stage, a relative-time decision basis and both follow-up actions.
+
+The renderer compares median elapsed times on the same sample and incorporates
+quality conditions in the decision. Arbitrary threshold fields are rejected in
+diagnosis mode. The largest stage is only a lead for investigation: overlapping
+stages, variation and dependencies can prevent it from being the actual bottleneck.
+Sample limits bound proposal scope; they are not a claim of statistical adequacy.
+
+Acceptance coverage (authenticated evaluation Worker, mocked inference): a complete
+diagnosis returns the existing public v1 envelope; missing effort or acceptance,
+an absolute threshold, an unknown stage or invalid citations yields 502 without
+an answer. Diagnosis structure errors expose only `next_step` as the location.
+Unit coverage verifies field requirements, numeric bounds, stage relationships,
+maximum rendered lengths, and preservation of the existing experiment/abstention
+paths. These tests exercise behavior, not live model quality.
+
+Both answer contract and prompt revision are `structured_diagnosis_v7`. Public
+`action`, `measure`, `decision_rule` and citation fields remain compatible. Historical
+reports still parse, but the release checker rejects older generation markers.
+The model can still choose an inappropriate mode or populate fields with weak
+prose. Structure cannot prove semantic completeness, causal attribution, relevance,
+or entailment; the independent six-case review remains required.
+
+After deployment, rerun the pinned human-review case into
+`.artifacts/answer-human-review-v7-first.json`. Confirm both revision markers,
+review the full answer, and repeat before the six-case evaluation. Keep production
+answers disabled. If this structured version still produces weak reasoning, compare
+another model on the same pinned inputs before adding more schema or prompt rules.
