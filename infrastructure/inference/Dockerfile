@@ -1,6 +1,6 @@
 # CPU-only Kronk model server, pinned to the current tested-candidate release.
 # Verify image availability and pin by digest prior to production use.
-FROM docker.io/ardanlabs/kronk:1.33.0-cpu
+FROM docker.io/ardanlabs/kronk:v1.32.2-cpu
 
 # Pre-provision a small GGUF and Kronk-compatible CPU native libraries at build
 # time. This trades build duration/image size for reproducible container restarts.
