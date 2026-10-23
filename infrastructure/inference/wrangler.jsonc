@@ -1,0 +1,25 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "eae-inference",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-22",
+  "routes": [
+    { "pattern": "inference.agenticengineering.science", "custom_domain": true }
+  ],
+  "containers": [
+    {
+      "class_name": "KronkContainer",
+      "image": "./Dockerfile",
+      "max_instances": 1,
+      "instance_type": "standard-2"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "KRONK", "class_name": "KronkContainer" }
+    ]
+  },
+  "exports": {
+    "KronkContainer": { "type": "durable-object", "storage": "sqlite" }
+  }
+}
