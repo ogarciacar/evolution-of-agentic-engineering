@@ -13,7 +13,7 @@ Kronk's model IDs are provider-qualified; use the exact model name returned from
 
 1. Check Cloudflare account eligibility for Containers and available CPU/memory/disk quota. The first deployment requires a supported paid Workers plan.
 2. Install Node.js 22+, Docker, and an authenticated Wrangler CLI. In `infrastructure/inference`, run `npm install` (commit a generated lockfile before production deployment).
-3. Check the base image exists: `docker manifest inspect docker.io/ardanlabs/kronk:1.33.0-cpu`. Then build locally: `docker build --platform linux/amd64 -t eae-kronk:smoke .`. A build must prove the Kronk `libs --local` and `model pull --local` steps work.
+3. Check the base image exists: `docker manifest inspect docker.io/ardanlabs/kronk:v1.32.2-cpu`. Then build locally: `docker build --platform linux/amd64 -t eae-kronk:smoke .`. A build must prove the Kronk `libs --local` and `model pull --local` steps work.
 4. Run locally: `docker run --rm -p 11435:11435 eae-kronk:smoke`. Check `curl -fsS http://127.0.0.1:11435/v1/liveness`. Confirm the model list and inference from your chosen model ID.
 5. Generate a random API token. Save it **only** as a Cloudflare Worker secret: `npx wrangler secret put INFERENCE_API_TOKEN --config wrangler.jsonc`.
 6. Deploy manually from `infrastructure/inference` via `npm run deploy`. Requires Cloudflare credentials with Workers, Containers, custom-domain and registry permissions; Cloudflare must control the domain's DNS zone.
