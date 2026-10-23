@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { handleRequest } from '../../workers/ai-search/index.js';
-import { fixtureEnv, generatedUncertainAnswerFor as uncertainAnswerFor, record } from './answer-fixtures.mjs';
+import { fixtureEnv, generatedAnswerFor, generatedUncertainAnswerFor as uncertainAnswerFor, record } from './answer-fixtures.mjs';
 async function setup(page, mode = 'answer') {
   let calls = 0;
   await page.route('**/api/search?*', async route => {
@@ -12,7 +12,7 @@ async function setup(page, mode = 'answer') {
     calls++;
     if (mode === 'retry' && calls === 1) return route.fulfill({ status: 503 });
     if (mode === 'wait') return;
-    const env = fixtureEnv(mode === 'experiment' ? async (_model, input) => ({ response: uncertainAnswerFor(JSON.parse(input.messages[1].content).sources) }) : mode === 'limited' ? async () => ({ response: { outcome: 'insufficient', summary: { text: 'These records cannot establish a cycle-time improvement.', citations: [] }, claims: [], uncertainties: ['Need a comparable cycle-time measurement.'], next_step: null } }) : undefined);
+    const env = fixtureEnv(mode === 'answer-only' ? async (_model, input) => ({ response: { ...generatedAnswerFor(JSON.parse(input.messages[1].content).sources), next_step: null } }) : mode === 'experiment' ? async (_model, input) => ({ response: uncertainAnswerFor(JSON.parse(input.messages[1].content).sources) }) : mode === 'limited' ? async () => ({ response: { outcome: 'insufficient', summary: { text: 'These records cannot establish a cycle-time improvement.', citations: [] }, claims: [], uncertainties: ['Need a comparable cycle-time measurement.'], next_step: null } }) : undefined);
     const response = await handleRequest(new Request(route.request().url(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: route.request().postData() }), env);
     await route.fulfill({ status: response.status, json: await response.json() });
   });
@@ -93,4 +93,22 @@ test('T05/T14: an inconclusive answer offers an inspectable proposed experiment 
   expect(copied).toContain('cannot establish a cycle-time improvement');
   expect(copied).toContain('Proposed experiment:');
   expect(copied).toContain('Record snapshot:');
+});
+
+test('T15: evidence-only answer renders and copies without an empty experiment section', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await setup(page, 'answer-only');
+  const answer = page.locator('#ask-evidence-answer');
+  await expect(answer.getByRole('heading', { name: 'What the evidence suggests' })).toBeVisible();
+  await expect(answer.getByRole('heading', { name: 'One next step' })).toHaveCount(0);
+  await expect(page.getByRole('status')).toContainText('Check its evidence and limitations');
+  await answer.getByRole('button', { name: 'Inspect citation 1' }).first().click();
+  await expect(page.getByRole('dialog')).toContainText(record.observed[0]);
+  await page.keyboard.press('Escape');
+  await answer.getByRole('button', { name: 'Copy answer with sources' }).click();
+  await expect(page.locator('[data-copy-status]')).toContainText('Copied with sources and uncertainties.');
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toContain(record.observed[0]);
+  expect(copied).toContain('not a causal comparison');
+  expect(copied).not.toContain('Proposed experiment:');
 });

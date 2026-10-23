@@ -22,7 +22,7 @@ it.each(['summary', 'claims[0]', 'claims[3]', 'next_step'])('E10: identifies mis
   try {
     const transport = (url, init) => handleEvaluation(new Request(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } }), env);
     const result = await evaluateQuestion('https://evaluation.test', 'Q', false, transport, { record_ids: ['context'] });
-    expect(result).toMatchObject({ contract: 'fail', status: 502, diagnostic: { validation_reason: 'observed_evidence_missing', validation_path: path, answer_contract: 'structured_diagnosis_v7', prompt_revision: 'structured_diagnosis_v7' } });
+    expect(result).toMatchObject({ contract: 'fail', status: 502, diagnostic: { validation_reason: 'observed_evidence_missing', validation_path: path, answer_contract: 'evidence_first_v8', prompt_revision: 'evidence_first_v8' } });
     expect(result).not.toHaveProperty('data');
     const entries = log.mock.calls.map(([entry]) => JSON.parse(entry));
     expect(entries).toContainEqual(expect.objectContaining({ validation_path: path, request_id: result.request_id }));
@@ -145,7 +145,7 @@ it.each(['complete', 'missing effort', 'missing quality condition', 'absolute th
     expect(result.data.answer.next_step.action).toContain('Proposed diagnosis');
     expect(result.data.answer.next_step.measure).toContain('active minutes');
     expect(result.data.answer.next_step.decision_rule).toContain('all pass');
-    expect(result.data.diagnostics.answer_contract).toBe('structured_diagnosis_v7');
+    expect(result.data.diagnostics.answer_contract).toBe('evidence_first_v8');
   } else {
     expect(result).toMatchObject({ contract: 'fail', status: 502 });
     expect(result).not.toHaveProperty('data');
@@ -154,5 +154,21 @@ it.each(['complete', 'missing effort', 'missing quality condition', 'absolute th
     if (kind !== 'unresolved citation') expect(result.diagnostic.validation_path).toBe('next_step');
     expect(JSON.stringify(result)).not.toContain('private stage');
   }
+  expect(run).toHaveBeenCalledOnce();
+});
+it('E12: a cited answer without an experiment survives authenticated evaluation', async () => {
+  const run = vi.fn(async (_model, input) => {
+    const answer = generatedAnswerFor(JSON.parse(input.messages[1].content).sources);
+    answer.next_step = null;
+    return { response: answer };
+  });
+  const env = fixtureEnv(run, { EVALUATION_TOKEN: token });
+  const transport = (url, init) => handleEvaluation(new Request(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } }), env);
+  const result = await evaluateQuestion('https://evaluation.test', 'What practices are reported?', false, transport, { record_ids: ['context'] });
+  expect(result.contract).toBe('pass');
+  expect(result.data.answer).toMatchObject({ outcome: 'answered', next_step: null });
+  expect(result.data.answer.claims).toHaveLength(1);
+  expect(result.data.diagnostics).toMatchObject({ answer_contract: 'evidence_first_v8', prompt_revision: 'evidence_first_v8' });
+  expect(result.human_review.decision).toBe('unreviewed');
   expect(run).toHaveBeenCalledOnce();
 });

@@ -111,3 +111,13 @@ it('keeps the live v5 contract pass blocked when next-step review fails', async 
   expect(checked.status).toBe('blocked');
   expect(checked.blockers).toContain('human-review: next_step needs a passing assessment with rationale');
 });
+it('allows an explicitly reviewed answer without an experiment but never skips semantic review', async () => {
+  const report = await reportFixture();
+  for (const r of report.results) r.data.answer.next_step = null;
+  expect(checkReview(report, createReview(report)).status).toBe('blocked');
+  const review = completedReview(report);
+  for (const c of review.cases) c.ratings.next_step.rationale = 'Synthetic case: no experiment is warranted without local workflow context.';
+  expect(checkReview(report, review).status).toBe('reviewed_pass');
+  review.cases[0].ratings.support = { pass: false, rationale: 'Missing support for the summary.' };
+  expect(checkReview(report, review).status).toBe('blocked');
+});

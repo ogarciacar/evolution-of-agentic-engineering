@@ -85,3 +85,21 @@ it('renders and copies a proposed experiment while preserving the insufficient-e
   data.answer.next_step.measure = '';
   expect(() => normalizeAnswer(data)).toThrow('Incomplete experiment');
 });
+it('normalizes, renders and copies an answered response with no experiment', async () => {
+  const { canonicalSources } = await import('../../workers/ai-search/answer.js');
+  const { record, answerFor } = await import('./answer-fixtures.mjs');
+  const { renderAnswer, answerText, normalizeAnswer } = createRequire(import.meta.url)('../../evidence-search.js');
+  const { sources } = await canonicalSources([record]);
+  const answer = { ...answerFor(sources), next_step: null };
+  const data = normalizeAnswer({ version: 1, provenance: 'canonical_eae_records', sources, answer });
+  expect(renderAnswer(data)).toContain('What the evidence suggests');
+  expect(renderAnswer(data)).not.toContain('One next step');
+  expect(renderAnswer(data)).toContain('data-answer-copy');
+  const copy = answerText(data, 'What is reported?');
+  expect(copy).toContain(record.observed[0]);
+  expect(copy).toContain(record.source.url);
+  expect(copy).toContain(answer.uncertainties[0]);
+  expect(copy).not.toContain('Proposed experiment:');
+  answer.claims = [];
+  expect(() => normalizeAnswer(data)).toThrow('Incomplete answer');
+});

@@ -43,8 +43,8 @@ it('T03/T04: answers using canonical records and returns inspectable citations a
   expect(data.answer.next_step.measure).toBeTruthy();
   expect(data.answer.next_step.decision_rule).toBe('If exploration decreases without reducing quality, keep the guide; otherwise revise it.');
   expect(data.answer.next_step).not.toHaveProperty('decision');
-  expect(data.diagnostics.answer_contract).toBe('structured_diagnosis_v7');
-  expect(data.diagnostics.prompt_revision).toBe('structured_diagnosis_v7');
+  expect(data.diagnostics.answer_contract).toBe('evidence_first_v8');
+  expect(data.diagnostics.prompt_revision).toBe('evidence_first_v8');
   expect(run.mock.calls[0][1].response_format.json_schema.anyOf[1].properties.claims.maxItems).toBe(0);
   expect(data.sources[0].passages.map(p => p.field)).toContain('what_this_does_not_establish.0');
   expect(run).toHaveBeenCalledTimes(1);
@@ -201,7 +201,7 @@ it.each([
   ['citation_reference_unknown', a => { a.summary.citations[0] = 'unknown'; return a; }],
   ['schema_invalid', a => { a.claims[0].text = 'private paraphrase'; return a; }],
   ['decision_rule_invalid', a => { a.next_step.decision = { threshold: 'private comparison' }; return a; }],
-  ['next_step_missing', a => { a.next_step = null; return a; }],
+  ['next_step_missing', a => { delete a.next_step; return a; }],
   ['abstention_invalid', a => ({ ...a, outcome: 'insufficient' })],
 ])('T06: reports %s with measurements, never rejected model content', async (reason, mutate) => {
   const logs = vi.spyOn(console, 'log').mockImplementation(() => {});
