@@ -18,7 +18,7 @@ export const ANSWER_SCHEMA = object({
   next_step: { anyOf: [{ type: 'null' }, object({ action: text(700), measure: text(500), decision_rule: text(600), citations: list(citationSchema, 1, 3) })] },
 });
 // Generation uses structured decisions; the public v1 envelope retains its rendered sentence.
-export const ANSWER_CONTRACT = 'structured_diagnosis_v7';
+export const ANSWER_CONTRACT = 'evidence_first_v8';
 const decisionSchema = object({ threshold: text(180), if_true: text(180), if_false: text(180) });
 const refs = min => list(text(16), min, 3);
 const generatedClaim = { anyOf: [
@@ -36,11 +36,11 @@ const generatedNextStep = { anyOf: [generatedExperiment, DIAGNOSIS_SCHEMA] };
 // A relevant abstention with an experiment needs a cited boundary; an unrelated
 // abstention may have no citations but cannot propose an experiment.
 const generatedBranches = [
-  ['answered', true], ['insufficient', true], ['insufficient', false],
+  ['answered', true], ['insufficient', true], ['insufficient', false], ['answered', false],
 ].map(([outcome, hasStep]) => object({
   ...ANSWER_SCHEMA.properties,
   outcome: { type: 'string', enum: [outcome] },
-  summary: object({ text: text(1200), citations: refs(hasStep ? 1 : 0) }),
+  summary: object({ text: text(1200), citations: refs(hasStep || outcome === 'answered' ? 1 : 0) }),
   claims: list(generatedClaim, outcome === 'answered' ? 1 : 0, outcome === 'answered' ? 4 : 0),
   next_step: hasStep ? generatedNextStep : { type: 'null' },
 }));
@@ -124,7 +124,7 @@ export function validateAnswer(value, sources) {
     })) invalid('observation_not_verbatim', 'Observation must preserve a complete attributed passage');
   });
   if (value.outcome === 'answered') {
-    if (!value.summary.citations.length || !value.claims.length || !value.next_step) invalid('answer_incomplete', 'Incomplete answer');
+    if (!value.summary.citations.length || !value.claims.length) invalid('answer_incomplete', 'Incomplete answer');
   } else if (value.claims.length) invalid('abstention_invalid', 'Invalid abstention');
   if (value.next_step) {
     if (!value.summary.citations.length) invalid('answer_incomplete', 'An experiment needs a cited evidence boundary');
@@ -139,7 +139,7 @@ export function finalizeGeneratedAnswer(value, sources) {
   if (value?.outcome === 'answered') {
     if (!value.summary?.citations?.length) invalid('summary_citations_missing', 'Missing summary citations');
     if (!value.claims?.length) invalid('claims_missing', 'Missing claims');
-    if (!value.next_step) invalid('next_step_missing', 'Missing next step');
+    if (!Object.hasOwn(value, 'next_step')) invalid('next_step_missing', 'Missing next step field');
   }
   if (value?.next_step && !value.summary?.citations?.length) invalid('summary_citations_missing', 'Missing evidence boundary');
   if (value?.next_step && value.next_step.mode !== 'diagnose') {

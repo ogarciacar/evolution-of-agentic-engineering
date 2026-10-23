@@ -303,7 +303,7 @@
         if (!passage || typeof cite.quote !== "string" || !cite.quote.trim() || !passage.text.includes(cite.quote)) throw new Error("Invalid citation");
       }
     }
-    if (a.outcome === "answered" && (!a.summary.citations.length || !a.claims.length || !a.next_step?.action || !a.next_step.measure || !a.next_step.decision_rule)) throw new Error("Incomplete answer");
+    if (a.outcome === "answered" && (!a.summary.citations.length || !a.claims.length)) throw new Error("Incomplete answer");
     if (a.outcome === "insufficient" && a.claims.length) throw new Error("Invalid abstention");
     if (a.next_step && (!a.summary.citations.length || !a.next_step.citations.length
       || !["action", "measure", "decision_rule"].every(key => typeof a.next_step[key] === "string" && a.next_step[key].trim()))) throw new Error("Incomplete experiment");
@@ -443,7 +443,7 @@
         if (["complete", "preparing", "answer_limited", "answer_failed"].includes(state.phase)) {
           const total = state.results.length;
           count.textContent = total ? `${total} ${total === 1 ? "result" : "results"}` : "";
-          if (state.phase === "complete") status.textContent = state.answer ? "Answer ready. Check its evidence and proposed next step." : total ? "" : "No evidence matched this question.";
+          if (state.phase === "complete") status.textContent = state.answer ? "Answer ready. Check its evidence and limitations." : total ? "" : "No evidence matched this question.";
         }
         if (answerPanel) {
           answerPanel.innerHTML = state.answer ? renderAnswer(state.answer)

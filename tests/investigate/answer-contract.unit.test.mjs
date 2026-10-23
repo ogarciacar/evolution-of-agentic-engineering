@@ -181,3 +181,16 @@ it.each(['output quality', 'reviewer capacity', 'Review quality.'])('v4 rejects 
   value.next_step.measurement.guardrail = guardrail;
   expect(() => finalizeGeneratedAnswer(value, sources)).toThrow('guardrail must specify');
 });
+it('accepts a cited answered response without an experiment while preserving finding checks', async () => {
+  const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
+  const { sources } = await canonicalSources([record]);
+  const generated = generatedAnswerFor(sources);
+  generated.next_step = null;
+  const answer = finalizeGeneratedAnswer(generated, sources);
+  expect(answer.outcome).toBe('answered');
+  expect(answer.next_step).toBeNull();
+  for (const mutate of [a => { a.summary.citations = []; }, a => { a.claims = []; }, a => { a.summary.citations = ['s9p9']; }]) {
+    const broken = structuredClone(generated); mutate(broken);
+    expect(() => finalizeGeneratedAnswer(broken, sources)).toThrow();
+  }
+});

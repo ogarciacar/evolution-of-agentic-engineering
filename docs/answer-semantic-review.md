@@ -305,3 +305,42 @@ After deployment, rerun the pinned human-review case into
 review the full answer, and repeat before the six-case evaluation. Keep production
 answers disabled. If this structured version still produces weak reasoning, compare
 another model on the same pinned inputs before adding more schema or prompt rules.
+
+### Evidence first, optional experiment (`evidence_first_v8`)
+
+The October 23 v7 comparison used matching inputs for all six pairs. Both models
+passed three of six contracts. Passing engineering responses still included weak
+quality checks; GPT-OSS also assumed access to Cloudflare's internal workflow.
+This is the baseline for a narrower generation task, not evidence of model parity
+or production readiness.
+
+Answered responses may now return `next_step: null`, while still requiring a cited
+summary, supported claims and uncertainties. The browser accepts this state,
+retains citation inspection and copy controls, omits the experiment section and
+announces evidence/limitations instead of promising a next step. Missing fields
+are still invalid; null means an intentionally omitted next step.
+
+The prompt defaults to no experiment for descriptive/evidence questions. A proposal
+requires an explicit request for local investigation and enough supplied workflow
+context; source organizations must not be treated as the user's own workplace.
+Present proposals retain the existing diagnosis/experiment checks. No automatic
+repair discards a failed proposal to manufacture a passing answer.
+
+Both generation markers are `evidence_first_v8`. Rubric `eae_semantic_v3` explicitly
+allows justified omission, while still requiring claim support, boundaries and
+responsiveness. It does not automatically approve answers with null next steps.
+An interactive experiment-design follow-up is future work; no new button or
+follow-up endpoint is introduced by this change.
+
+After deployment, use the existing `eval:compare` command with the same six pinned
+snapshots and a new output directory. Compare evidence quality and latency with
+v7, recording optional-step behavior separately from claim support. The prompt
+and schema changed, so hashes should match between models within the v8 run,
+not between v7 and v8. Repeat promising runs before release; keep production
+answers disabled until the six-case semantic gate is satisfied.
+
+Original v7 comparison report SHA-256 digests (reports retained separately):
+
+- `comparison(3).json`: `850d132deeb296ea449b82862dc39630c103113ea7ebc95016e1a735be9294c6`
+- `llama(3).json`: `706f352c0c8b2d9fda7b57316ade5efe501ff58e70b3fbaa9073012db84239a0`
+- `gpt-oss(3).json`: `0c4e633418a72e1a89d7473b1a1c7fd06c49853425839175cffd0327cf7650b7`
