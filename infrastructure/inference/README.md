@@ -41,3 +41,15 @@ The Worker only allows authenticated GET `/v1/liveness`, GET `/v1/models`, POST 
 - [ ] Cold starts, token throughput and approximate operating cost documented
 
 References: [Kronk installation](https://github.com/ardanlabs/kronk/blob/main/.manual/chapter-02-installation.md), [model server](https://github.com/ardanlabs/kronk/blob/main/.manual/chapter-08-model-server.md), [Cloudflare Containers](https://developers.cloudflare.com/containers/get-started/).
+
+## Local validation record (2026-10-23)
+
+Observed on an ARM64 Mac running the `linux/amd64` image under Docker Desktop emulation:
+
+- Docker container launched; `GET /v1/liveness` returned `status: up`.
+- `GET /v1/models` returned `unsloth/Qwen3-0.6B-Q8_0`.
+- `POST /v1/chat/completions` returned an OpenAI-compatible completion response, establishing that inference executes.
+- Kronk-reported time to first token: **269.252 ms**, throughput **27.537 tokens/s** (single local sample, emulated CPU).
+- The 100 completion-token budget was exhausted on reasoning (`finish_reason: length`, `content: ""`); **a non-empty final answer is not yet verified**. Do not treat these timings as Cloudflare capacity or latency estimates.
+
+Next local check: repeat completion with `max_tokens: 512`, require `choices[0].message.content` to be non-empty, and record elapsed wall time. Consider configuring Qwen non-thinking mode for short-answer serving, but verify against the chosen Kronk release before assuming any template options are supported.
