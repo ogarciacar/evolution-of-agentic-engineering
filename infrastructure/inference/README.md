@@ -1,35 +1,43 @@
-# EAE inference (Cloudflare Containers + Kronk)
+# EAE inference: Cloudflare Containers + Kronk CPU
 
-Separate, opt-in Cloudflare Worker deployment for `inference.agenticengineering.science`. Does not change the Pages site or the existing AI Search Worker.
+**Target:** `inference.agenticengineering.science`  
+**Stage:** draft / not deployed. Independent of the existing Pages and AI Search deployments.
 
-## Architecture
+## Model choice
 
-Authenticated HTTPS client → Worker (allowlisted inference paths) → one Cloudflare Container running the upstream Kronk CPU image on port 11435.
+Start with `unsloth/Qwen3-0.6B-Q8_0`, recommended by Kronk for memory-constrained CPU environments. The Dockerfile downloads this GGUF plus compatible native inference libraries during image build. This removes the need for an unauthenticated model administration route and avoids re-downloading on normal container replacement. Confirm the exact OCI tag exists before deployment, then pin its digest.
 
-This is a **deployment scaffold**, not yet a verified inference service. Containers require a Cloudflare plan/account with Containers enabled. A Docker daemon is needed for the Dockerfile image build. CPU inference, cold starts, ephemeral container storage, downloaded model files, and response latency must be evaluated before production use.
+Kronk's model IDs are provider-qualified; use the exact model name returned from `GET /v1/models`. This model is a **functional CPU smoke-test candidate**, not a quality target for production answer generation.
 
-## Deploy manually
+## Environment and deployment prerequisites
 
-1. Install Docker, Node.js and Wrangler tooling. In this directory run `npm install` (commit the resulting lockfile before enabling CI deployment).
-2. Authenticate with `npx wrangler login` or set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` with permissions for Workers, Containers, and custom domains.
-3. Generate a strong random service token; store it as a Worker secret with `npx wrangler secret put INFERENCE_API_TOKEN --config wrangler.jsonc`. Never commit the token.
-4. Run `npm run deploy` from this directory. This deploys the separate Worker and attaches the custom domain (ensure Cloudflare manages the zone).
-5. Check `curl -i -H "Authorization: Bearer $INFERENCE_API_TOKEN" https://inference.agenticengineering.science/v1/liveness`.
-6. Provision a **small quantized model** through a separate, secured operator workflow before testing `/v1/chat/completions`. This PR deliberately does not expose model-admin or model-download routes publicly.
+1. Check Cloudflare account eligibility for Containers and available CPU/memory/disk quota. The first deployment requires a supported paid Workers plan.
+2. Install Node.js 22+, Docker, and an authenticated Wrangler CLI. In `infrastructure/inference`, run `npm install` (commit a generated lockfile before production deployment).
+3. Check the base image exists: `docker manifest inspect docker.io/ardanlabs/kronk:1.33.0-cpu`. Then build locally: `docker build --platform linux/amd64 -t eae-kronk:smoke .`. A build must prove the Kronk `libs --local` and `model pull --local` steps work.
+4. Run locally: `docker run --rm -p 11435:11435 eae-kronk:smoke`. Check `curl -fsS http://127.0.0.1:11435/v1/liveness`. Confirm the model list and inference from your chosen model ID.
+5. Generate a random API token. Save it **only** as a Cloudflare Worker secret: `npx wrangler secret put INFERENCE_API_TOKEN --config wrangler.jsonc`.
+6. Deploy manually from `infrastructure/inference` via `npm run deploy`. Requires Cloudflare credentials with Workers, Containers, custom-domain and registry permissions; Cloudflare must control the domain's DNS zone.
+7. Set `INFERENCE_URL=https://inference.agenticengineering.science` and `INFERENCE_API_TOKEN` in your shell, then run `bash scripts/smoke.sh`. Do not add the bearer token to command-line arguments or git.
 
-The gateway allows only GET `/v1/liveness`, GET `/v1/models`, POST `/v1/chat/completions`, POST `/v1/responses`, and POST `/v1/embeddings`. Every request requires a bearer token. The public token is removed before forwarding. All other paths, including model management and debug endpoints, are blocked.
+The Worker only allows authenticated GET `/v1/liveness`, GET `/v1/models`, POST `/v1/chat/completions`, POST `/v1/responses`, and POST `/v1/embeddings`. All model-management and debug paths are rejected. The public bearer token is removed before proxying to Kronk.
 
-## Before enabling production traffic
+## Operational concerns to verify
 
-- Pin a specific tested Kronk CPU image release/digest rather than floating `latest-cpu`.
-- Choose a model fitting the container memory/CPU budget, provision its artifacts and native libraries, and test restart behavior. Container filesystem changes are ephemeral; do not assume model persistence after replacement.
-- Decide on safe administrative model provisioning and model persistence/caching. Do not expose Kronk's administrative APIs through the public gateway.
-- Validate Cloudflare container instance sizing, cold starts, streaming responses, concurrency and per-request cost. Set account-level usage and spend limits where available.
-- Consider Cloudflare Access/service tokens, request size limits and more granular authorization before allowing third-party callers.
+- `wrangler deploy` builds an amd64 container image. Confirm the CPU image/tag and model download at build time, including actual image size.
+- Verify RAM use, inference latency (first token / completion), cold-start latency, streaming, and concurrent requests at the configured `standard-2` size.
+- Container writes at runtime are ephemeral. The baked model removes a startup download dependency, but a fresh image build still requires upstream model availability.
+- Confirm that a Kronk model load or cache write does not exceed the container disk limit.
+- Do not enable public inference without limiting abuse/cost and reviewing Cloudflare usage limits.
+- The current token check is suitable for a private pilot only; for multiple consumers, prefer separately scoped tokens, request limits, and observability.
 
-## References
+## Definition of done
 
-- https://github.com/ardanlabs/kronk
-- https://developers.cloudflare.com/containers/get-started/
-- https://developers.cloudflare.com/containers/configuration/wrangler/
-- https://developers.cloudflare.com/containers/api/container-class/
+- [ ] Dependencies installed and lockfile committed
+- [ ] `docker build --platform linux/amd64` completes and liveness works locally
+- [ ] Model appears in `/v1/models` and a small chat completion succeeds
+- [ ] Worker deploys successfully to an eligible Cloudflare account
+- [ ] Missing/wrong bearer token returns 401; admin routes return 404
+- [ ] Authenticated chat completion returns a real model response
+- [ ] Cold starts, token throughput and approximate operating cost documented
+
+References: [Kronk installation](https://github.com/ardanlabs/kronk/blob/main/.manual/chapter-02-installation.md), [model server](https://github.com/ardanlabs/kronk/blob/main/.manual/chapter-08-model-server.md), [Cloudflare Containers](https://developers.cloudflare.com/containers/get-started/).
