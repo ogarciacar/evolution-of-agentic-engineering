@@ -1,3 +1,4 @@
+import { DIAGNOSIS_SCHEMA, validateDiagnosis, renderDiagnosis } from './diagnosis.js';
 import { providerDiagnostics } from './provider-diagnostics.mjs';
 import { ANSWER_SYSTEM, ANSWER_PROMPT_REVISION } from './answer-prompt.js';
 import { getEvidenceById } from '../../functions/_lib/evidence-read-model.js';
@@ -17,19 +18,21 @@ export const ANSWER_SCHEMA = object({
   next_step: { anyOf: [{ type: 'null' }, object({ action: text(700), measure: text(500), decision_rule: text(600), citations: list(citationSchema, 1, 3) })] },
 });
 // Generation uses structured decisions; the public v1 envelope retains its rendered sentence.
-export const ANSWER_CONTRACT = 'evidence_roles_v5';
+export const ANSWER_CONTRACT = 'structured_diagnosis_v7';
 const decisionSchema = object({ threshold: text(180), if_true: text(180), if_false: text(180) });
 const refs = min => list(text(16), min, 3);
 const generatedClaim = { anyOf: [
   object({ kind: { type: 'string', enum: ['observation'] }, passage: text(16) }),
   object({ kind: { type: 'string', enum: ['interpretation'] }, text: text(1000), citations: refs(1) }),
 ] };
-const generatedNextStep = object({
+const generatedExperiment = object({
+  mode: { type: 'string', enum: ['test_change'] },
   scope: text(120), intervention: text(260), comparison: text(220),
   measurement: object({ metric: text(100), unit: text(40), window: text(120), guardrail: text(140) }),
   decision: decisionSchema,
   citations: refs(1),
 });
+const generatedNextStep = { anyOf: [generatedExperiment, DIAGNOSIS_SCHEMA] };
 // A relevant abstention with an experiment needs a cited boundary; an unrelated
 // abstention may have no citations but cannot propose an experiment.
 const generatedBranches = [
@@ -88,6 +91,8 @@ function assertSchema(value, schema) {
   if (schema.type === 'null') { if (value !== null) invalid('schema_invalid', 'Expected null'); return; }
   if (schema.type === 'string') {
     if (typeof value !== 'string' || !value.trim() || value.length < (schema.minLength || 0) || value.length > (schema.maxLength || Infinity) || (schema.enum && !schema.enum.includes(value))) invalid('schema_invalid', 'Invalid text');
+  } else if (schema.type === 'integer') {
+    if (!Number.isInteger(value) || value < schema.minimum || value > schema.maximum) invalid('schema_invalid', 'Invalid integer');
   } else if (schema.type === 'array') {
     if (!Array.isArray(value) || value.length < schema.minItems || value.length > schema.maxItems) invalid('schema_invalid', 'Invalid list');
     value.forEach(item => assertSchema(item, schema.items));
@@ -137,9 +142,14 @@ export function finalizeGeneratedAnswer(value, sources) {
     if (!value.next_step) invalid('next_step_missing', 'Missing next step');
   }
   if (value?.next_step && !value.summary?.citations?.length) invalid('summary_citations_missing', 'Missing evidence boundary');
-  if (value?.next_step) {
+  if (value?.next_step && value.next_step.mode !== 'diagnose') {
     try { assertSchema(value.next_step.decision, decisionSchema); }
     catch { invalid('decision_rule_invalid', 'Decision requires a threshold and both actions'); }
+  }
+  if (value?.next_step?.mode === 'diagnose') {
+    try { assertSchema(value.next_step, DIAGNOSIS_SCHEMA); }
+    catch { invalid('diagnosis_incomplete', 'Diagnosis fields are missing or invalid', 'next_step'); }
+    validateDiagnosis(value.next_step, invalid);
   }
   assertSchema(value, GENERATION_SCHEMA);
   const passages = new Map();
@@ -158,7 +168,7 @@ export function finalizeGeneratedAnswer(value, sources) {
     return { kind: 'observation', text: cited.quote, citations: [cited] };
   });
   const step = value.next_step;
-  if (step) {
+  if (step && step.mode !== 'diagnose') {
     // Reject known empty placeholders, not arbitrary natural-language semantics.
     const bare = value => value.trim().toLowerCase().replace(/[.!]+$/, '').trim();
     if (['baseline', 'comparison group', 'baseline or comparison group', 'control', 'control group'].includes(bare(step.comparison)))
@@ -169,13 +179,14 @@ export function finalizeGeneratedAnswer(value, sources) {
   const inline = text => text.trim().replace(/\s+/g, ' ');
   const fragment = text => inline(text).replace(/\.+$/, '');
   // Check generated prose only: canonical quotes must remain untouched.
+  const strings = value => typeof value === 'string' ? [value] : value && typeof value === 'object' ? Object.entries(value).filter(([k]) => k !== 'citations').flatMap(([, v]) => strings(v)) : [];
   const prose = [value.summary.text, ...value.uncertainties,
     ...value.claims.filter(c => c.kind === 'interpretation').map(c => c.text),
-    ...(step ? [step.scope, step.intervention, step.comparison, ...Object.values(step.measurement), ...Object.values(step.decision)] : [])];
+    ...strings(step)];
   if (prose.some(t => /\bs\d+p\d+\b/i.test(t))) invalid('reference_in_prose', 'Internal reference in generated prose');
-  const threshold = step ? fragment(step.decision.threshold).replace(/^if\s+/i, '') : '';
-  if (step && (!threshold || /\b(if|then|otherwise)\b|;/i.test(threshold))) invalid('decision_threshold_invalid', 'Threshold must not contain decision branches');
-  const answer = { ...value, claims, summary: { ...value.summary, citations: value.summary.citations.map(citation) }, next_step: step ? {
+  const threshold = step && step.mode !== 'diagnose' ? fragment(step.decision.threshold).replace(/^if\s+/i, '') : '';
+  if (step && step.mode !== 'diagnose' && (!threshold || /\b(if|then|otherwise)\b|;/i.test(threshold))) invalid('decision_threshold_invalid', 'Threshold must not contain decision branches');
+  const answer = { ...value, claims, summary: { ...value.summary, citations: value.summary.citations.map(citation) }, next_step: step?.mode === 'diagnose' ? { ...renderDiagnosis(step), citations: step.citations.map(citation) } : step ? {
     action: `Proposed trial — Scope: ${fragment(step.scope)}. Intervention: ${fragment(step.intervention)}. Comparison: ${fragment(step.comparison)}.`,
     measure: `Metric: ${fragment(step.measurement.metric)}. Unit: ${fragment(step.measurement.unit)}. Window: ${fragment(step.measurement.window)}. Guardrail: ${fragment(step.measurement.guardrail)}.`,
     citations: step.citations.map(citation),

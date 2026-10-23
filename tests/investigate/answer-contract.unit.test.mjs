@@ -84,7 +84,7 @@ it('encodes mutually exclusive outcome requirements in the generation schema', a
   expect(answered.outcome.enum).toEqual(['answered']);
   expect(answered.claims.minItems).toBe(1);
   expect(answered.summary.properties.citations.minItems).toBe(1);
-  expect(answered.next_step.required).toContain('decision');
+  expect(answered.next_step.anyOf[0].required).toContain('decision');
   expect(insufficient.outcome.enum).toEqual(['insufficient']);
   expect(insufficient.claims.maxItems).toBe(0);
   const { sources } = await canonicalSources([record]);
@@ -113,7 +113,7 @@ it('renders required experiment fields within the existing public limits', async
   const { generatedAnswerFor } = await import('./answer-fixtures.mjs');
   const { sources } = await canonicalSources([record]);
   const generated = generatedAnswerFor(sources);
-  const schema = GENERATION_SCHEMA.anyOf[0].properties.next_step;
+  const schema = GENERATION_SCHEMA.anyOf[0].properties.next_step.anyOf[0];
   for (const field of ['scope', 'intervention', 'comparison']) generated.next_step[field] = 'x'.repeat(schema.properties[field].maxLength);
   for (const [field, spec] of Object.entries(schema.properties.measurement.properties)) generated.next_step.measurement[field] = 'x'.repeat(spec.maxLength);
   const answer = finalizeGeneratedAnswer(generated, sources);
@@ -155,7 +155,7 @@ it('v4 encodes cited experiments in both outcomes while preserving unrelated abs
   expect(answered.summary.properties.citations.minItems).toBe(1);
   expect(investigation.outcome.enum).toEqual(['insufficient']);
   expect(investigation.summary.properties.citations.minItems).toBe(1);
-  expect(investigation.next_step.required).toContain('comparison');
+  expect(investigation.next_step.anyOf[0].required).toContain('comparison');
   expect(unrelated.next_step.type).toBe('null');
   expect(unrelated.summary.properties.citations.minItems).toBe(0);
   const { sources } = await canonicalSources([record]);
