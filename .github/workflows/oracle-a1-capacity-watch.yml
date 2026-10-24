@@ -1,0 +1,88 @@
+name: Oracle A1 capacity watch
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: oracle-a1-capacity-watch
+  cancel-in-progress: true
+
+jobs:
+  check-capacity:
+    runs-on: ubuntu-latest
+    env:
+      OCI_CLI_REGION: eu-amsterdam-1
+      OCI_TENANCY_OCID: ${{ secrets.ORACLE_TENANCY_OCID }}
+      OCI_USER_OCID: ${{ secrets.ORACLE_USER_OCID }}
+      OCI_FINGERPRINT: ${{ secrets.ORACLE_API_FINGERPRINT }}
+      OCI_PRIVATE_KEY: ${{ secrets.ORACLE_API_PRIVATE_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Fail closed if credentials are not configured
+        run: |
+          for name in OCI_TENANCY_OCID OCI_USER_OCID OCI_FINGERPRINT OCI_PRIVATE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing Oracle secret for ${name}; capacity was not checked"
+              exit 1
+            fi
+          done
+      - name: Install OCI CLI
+        run: python -m pip install --user oci-cli
+      - name: Configure Oracle API-key authentication
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.oci"
+          chmod 700 "$HOME/.oci"
+          printf '%s\n' "$OCI_PRIVATE_KEY" > "$HOME/.oci/key.pem"
+          chmod 600 "$HOME/.oci/key.pem"
+          cat > "$HOME/.oci/config" <<EOF
+          [DEFAULT]
+          user=$OCI_USER_OCID
+          fingerprint=$OCI_FINGERPRINT
+          tenancy=$OCI_TENANCY_OCID
+          region=$OCI_CLI_REGION
+          key_file=$HOME/.oci/key.pem
+          EOF
+          chmod 600 "$HOME/.oci/config"
+      - name: Report 1 OCPU / 6 GB A1 capacity across fault domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/shapes.json" <<'EOF'
+          [{
+            "instanceShape": "VM.Standard.A1.Flex",
+            "instanceShapeConfig": { "ocpus": 1, "memoryInGBs": 6 }
+          }]
+          EOF
+          AD="$(oci iam availability-domain list --compartment-id "$OCI_TENANCY_OCID" --query 'data[0].name' --raw-output)"
+          test -n "$AD" && test "$AD" != null
+          oci compute compute-capacity-report create \
+            --compartment-id "$OCI_TENANCY_OCID" \
+            --availability-domain "$AD" \
+            --shape-availabilities "file://$RUNNER_TEMP/shapes.json" \
+            --output json > "$RUNNER_TEMP/capacity.json"
+          jq '{time: .data."time-created", shapes: .data."shape-availabilities"}' "$RUNNER_TEMP/capacity.json"
+          if jq -e '[.data."shape-availabilities"[] | select(."instance-shape" == "VM.Standard.A1.Flex" and ."availability-status" == "AVAILABLE" and (."available-count" // 0) > 0)] | length > 0' "$RUNNER_TEMP/capacity.json" >/dev/null; then
+            echo 'AVAILABLE=true' >> "$GITHUB_ENV"
+          else
+            echo 'AVAILABLE=false' >> "$GITHUB_ENV"
+          fi
+      - name: Notify by opening a single GitHub issue
+        if: env.AVAILABLE == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          title="Oracle Amsterdam A1 capacity may be available"
+          if gh issue list --state all --limit 100 --json title --jq '.[].title' | grep -Fxq "$title"; then
+            echo 'Capacity was reported, but notification issue already exists.'
+            exit 0
+          fi
+          gh issue create --title "$title" --body "OCI Compute Capacity Report indicates at least one VM.Standard.A1.Flex instance with 1 OCPU and 6 GB RAM may be available in eu-amsterdam-1. This is a point-in-time report, not a reservation or a guarantee of Always Free eligibility. Try provisioning `eae-inference` promptly under your existing Always Free limits. Workflow: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
