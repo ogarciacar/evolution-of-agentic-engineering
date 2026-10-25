@@ -34,7 +34,9 @@ jobs:
             fi
           done
       - name: Install OCI CLI
-        run: python -m pip install --user oci-cli
+        run: |
+          python -m pip install --user oci-cli
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Configure Oracle API-key authentication
         shell: bash
         run: |
@@ -52,14 +54,14 @@ jobs:
           key_file=$HOME/.oci/key.pem
           EOF
           chmod 600 "$HOME/.oci/config"
-      - name: Report 1 OCPU / 6 GB A1 capacity across fault domains
+      - name: Report 2 OCPUs / 12 GB A1 capacity across fault domains
         shell: bash
         run: |
           set -euo pipefail
           cat > "$RUNNER_TEMP/shapes.json" <<'EOF'
           [{
             "instanceShape": "VM.Standard.A1.Flex",
-            "instanceShapeConfig": { "ocpus": 1, "memoryInGBs": 6 }
+            "instanceShapeConfig": { "ocpus": 2, "memoryInGBs": 12 }
           }]
           EOF
           AD="$(oci iam availability-domain list --compartment-id "$OCI_TENANCY_OCID" --query 'data[0].name' --raw-output)"
@@ -80,9 +82,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          title="Oracle Amsterdam A1 capacity may be available"
+          title="Oracle Amsterdam A1 2-OCPU 12-GB capacity may be available"
           if gh issue list --state all --limit 100 --json title --jq '.[].title' | grep -Fxq "$title"; then
             echo 'Capacity was reported, but notification issue already exists.'
             exit 0
           fi
-          gh issue create --title "$title" --body "OCI Compute Capacity Report indicates at least one VM.Standard.A1.Flex instance with 1 OCPU and 6 GB RAM may be available in eu-amsterdam-1. This is a point-in-time report, not a reservation or a guarantee of Always Free eligibility. Try provisioning `eae-inference` promptly under your existing Always Free limits. Workflow: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body="OCI Compute Capacity Report indicates at least one VM.Standard.A1.Flex instance with 2 OCPUs and 12 GB RAM may be available in eu-amsterdam-1. This is a point-in-time report, not a reservation or a guarantee of Always Free eligibility. Try provisioning eae-inference promptly under your existing Always Free limits. Workflow: ${run_url}"
+          gh issue create --title "$title" --body "$body"
