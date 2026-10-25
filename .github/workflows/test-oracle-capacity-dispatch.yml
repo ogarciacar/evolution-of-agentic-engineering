@@ -1,0 +1,25 @@
+name: CI · Oracle capacity dispatch
+
+on:
+  pull_request:
+    paths:
+      - "workers/oracle-capacity-dispatch/**"
+      - ".github/workflows/test-oracle-capacity-dispatch.yml"
+  push:
+    branches: [main]
+    paths:
+      - "workers/oracle-capacity-dispatch/**"
+      - ".github/workflows/test-oracle-capacity-dispatch.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - run: node --test workers/oracle-capacity-dispatch/src/index.test.mjs
