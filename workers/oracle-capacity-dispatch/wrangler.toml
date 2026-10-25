@@ -1,0 +1,10 @@
+name = "eae-oracle-capacity-dispatch"
+main = "src/index.mjs"
+compatibility_date = "2026-10-25"
+
+# Scheduled-only Worker. No public workers.dev URL or HTTP route.
+workers_dev = false
+
+[triggers]
+# Deliberately offset from GitHub's existing :17 cron while validating.
+crons = ["37 * * * *"]
