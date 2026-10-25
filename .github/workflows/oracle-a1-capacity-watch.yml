@@ -4,6 +4,14 @@ on:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
+    inputs:
+      dispatch_origin:
+        description: "Caller (manual or Cloudflare Cron)"
+        required: false
+        type: string
+        default: manual
+
+run-name: Oracle A1 capacity watch (${{ inputs.dispatch_origin || github.event_name }})
 
 permissions:
   contents: read
