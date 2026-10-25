@@ -2,7 +2,7 @@
 
 Workflow: `.github/workflows/oracle-a1-capacity-watch.yml`.
 
-**Scope:** Once per hour, use Oracle's authenticated **Compute Capacity Report** API to check `VM.Standard.A1.Flex` with **1 OCPU / 6 GiB RAM** in home region `eu-amsterdam-1`. No instance is created or reserved. If available_count > 0 and status is AVAILABLE, open one GitHub issue to notify maintainers (GitHub issue notifications must be enabled). All other states and API errors do not claim capacity.
+**Scope:** Once per hour, use Oracle's authenticated **Compute Capacity Report** API to check `VM.Standard.A1.Flex` with **2 OCPUs / 12 GiB RAM** in home region `eu-amsterdam-1`. No instance is created or reserved. If available_count > 0 and status is AVAILABLE, open one GitHub issue to notify maintainers (GitHub issue notifications must be enabled). All other states and API errors do not claim capacity.
 
 **Important:** GitHub scheduled workflows only run from the default branch. Until this PR is merged and credentials are added, monitoring is NOT active. Scheduled runs may be delayed or skipped by GitHub.
 
@@ -25,7 +25,7 @@ Workflow: `.github/workflows/oracle-a1-capacity-watch.yml`.
 - The workflow does **not** create/terminate/modify VMs or modify network configuration.
 - Only `eu-amsterdam-1` is checked. The capacity report indicates physical host availability, not Always Free quota or a guarantee of successful VM creation.
 - The issue is intentionally created only once; close or delete it to review the result but further alerts require manually removing the prior issue because this workflow deduplicates across all issue states.
-- A 1 OCPU / 6 GiB model host is being monitored, not the earlier 2 OCPU / 12 GiB configuration.
+- The watch checks the full **2 OCPU / 12 GiB** Always Free A1 target and matches the already-saved Oracle stack.
 - Capacity reports are a point-in-time signal and can be stale by the time a provisioning request is made.
 
 Oracle reference: https://docs.oracle.com/en-us/iaas/tools/oci-cli/latest/oci_cli_docs/cmdref/compute/compute-capacity-report/create.html
