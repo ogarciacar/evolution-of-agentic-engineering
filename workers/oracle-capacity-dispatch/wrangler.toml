@@ -8,3 +8,10 @@ workers_dev = false
 [triggers]
 # Deliberately offset from GitHub's existing :17 cron while validating.
 crons = ["37 * * * *"]
+
+# Retain Cron invocation and GitHub dispatch outcome logs in Workers Observability.
+[observability]
+enabled = true
+
+[observability.logs]
+invocation_logs = true
