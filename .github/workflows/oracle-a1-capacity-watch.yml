@@ -1,0 +1,117 @@
+name: Oracle A1 capacity watch
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: oracle-a1-capacity-watch
+  cancel-in-progress: true
+
+jobs:
+  check-capacity:
+    runs-on: ubuntu-latest
+    env:
+      OCI_CLI_REGION: eu-amsterdam-1
+      OCI_TENANCY_OCID: ${{ secrets.ORACLE_TENANCY_OCID }}
+      OCI_USER_OCID: ${{ secrets.ORACLE_USER_OCID }}
+      OCI_FINGERPRINT: ${{ secrets.ORACLE_API_FINGERPRINT }}
+      OCI_PRIVATE_KEY: ${{ secrets.ORACLE_API_PRIVATE_KEY }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Verify required credentials are present
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in OCI_TENANCY_OCID OCI_USER_OCID OCI_FINGERPRINT OCI_PRIVATE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing Oracle credential: $name"
+              exit 1
+            fi
+          done
+
+      - name: Install OCI CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --user oci-cli
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Configure Oracle API signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.oci"
+          chmod 700 "$HOME/.oci"
+          printf '%s\n' "$OCI_PRIVATE_KEY" > "$HOME/.oci/key.pem"
+          chmod 600 "$HOME/.oci/key.pem"
+          cat > "$HOME/.oci/config" <<EOF
+          [DEFAULT]
+          user=$OCI_USER_OCID
+          fingerprint=$OCI_FINGERPRINT
+          tenancy=$OCI_TENANCY_OCID
+          region=$OCI_CLI_REGION
+          key_file=$HOME/.oci/key.pem
+          EOF
+          chmod 600 "$HOME/.oci/config"
+
+      - name: Check A1 capacity (2 OCPUs / 12 GiB)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/shapes.json" <<'EOF'
+          [
+            {
+              "instanceShape": "VM.Standard.A1.Flex",
+              "instanceShapeConfig": { "ocpus": 2, "memoryInGBs": 12 }
+            }
+          ]
+          EOF
+
+          AD="$(oci iam availability-domain list \
+            --compartment-id "$OCI_TENANCY_OCID" \
+            --query 'data[0].name' --raw-output)"
+          test -n "$AD" && test "$AD" != "null"
+
+          oci compute compute-capacity-report create \
+            --compartment-id "$OCI_TENANCY_OCID" \
+            --availability-domain "$AD" \
+            --shape-availabilities "file://$RUNNER_TEMP/shapes.json" \
+            --output json > "$RUNNER_TEMP/capacity.json"
+
+          jq -e '.data."shape-availabilities" | type == "array"' "$RUNNER_TEMP/capacity.json" > /dev/null
+          jq '{checked_at: .data."time-created", availability: [.data."shape-availabilities"[] | {shape: ."instance-shape", status: ."availability-status", available_count: ."available-count", config: ."instance-shape-config"}]}' "$RUNNER_TEMP/capacity.json"
+
+          # Oracle may return an AVAILABLE status with available-count: null,
+          # rather than an exact count. Treat that as a possible availability
+          # signal, never as a reservation or guaranteed allocation.
+          if jq -e '[.data."shape-availabilities"[] |
+            select(."instance-shape" == "VM.Standard.A1.Flex") |
+            select(."instance-shape-config".ocpus == 2 and ."instance-shape-config"."memory-in-gbs" == 12) |
+            select(."availability-status" == "AVAILABLE") |
+            select(."available-count" == null or ."available-count" > 0)
+          ] | length > 0' "$RUNNER_TEMP/capacity.json" > /dev/null; then
+            echo 'A1_CAPACITY_REPORTED=true' >> "$GITHUB_ENV"
+          else
+            echo 'No matching availability reported for 2 OCPUs / 12 GiB.'
+          fi
+
+      - name: Open a single GitHub issue on positive report
+        if: env.A1_CAPACITY_REPORTED == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          title="Oracle Amsterdam A1 2-OCPU 12-GB capacity may be available"
+          if gh issue list --state all --limit 100 --json title --jq '.[].title' | grep -Fxq "$title"; then
+            echo 'An existing availability notification issue was found; no duplicate created.'
+            exit 0
+          fi
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body="Oracle's Compute Capacity Report returned AVAILABLE for VM.Standard.A1.Flex with 2 OCPUs and 12 GiB in eu-amsterdam-1. This is a transient capacity signal, NOT a reservation, billing guarantee, or guaranteed provisioning success. The saved stack is eae-inference-oracle-a1. Please check Oracle Console and apply it if capacity remains available. Workflow run: ${run_url}"
+          gh issue create --title "$title" --body "$body" --assignee "$GITHUB_REPOSITORY_OWNER"
