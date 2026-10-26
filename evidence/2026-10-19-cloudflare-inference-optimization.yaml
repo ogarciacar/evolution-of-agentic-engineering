@@ -1,0 +1,227 @@
+source:
+  title: "Cutting our inference bill by 68% by being obsessive about optimization"
+  producer: "Cloudflare"
+  producer_type: organization
+  date: "2026-10-19"
+  url: "https://blog.cloudflare.com/obsessive-inference-optimization/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Cheaper agent review preserved some verification outcomes while degrading another"
+  summary: >
+    Cloudflare reports reducing the average cost of its production multi-agent
+    code review from $2.43 to $0.77 and median latency from 4 minutes 9 seconds
+    to 1 minute 32 seconds through prompt-cache reuse, fewer wasted calls,
+    conditional reviewer execution, and workload-specific model and effort
+    selection. Code-quality findings became more actionable without a measured
+    loss of important findings, while important performance findings fell by
+    about 64%, showing that economic optimization did not preserve every
+    specialist's verification capability equally.
+
+observed:
+  - >
+    Cloudflare reports that average review cost rose from $1.22 in March to
+    $2.32 in August 2026. Moving every reviewer to Anthropic models increased
+    cost per job from $1.38 to $2.03 because those models performed better on
+    Cloudflare's internal evaluation workload.
+  - >
+    Before optimization, review spending consisted of approximately 23% output
+    tokens, 43% cache writes, and 34% cache reads. The code-quality reviewer
+    averaged 16.6 model calls, 72,000 cache-write tokens, and 1.08 million
+    cache-read tokens per review.
+  - >
+    Although overall cache hit rate rose from 85.7% in April to 97% in
+    September, tokens per review more than tripled from 0.91 million to 2.99
+    million, so the higher hit rate did not prevent total cost growth.
+  - >
+    Cloudflare found that only 14% to 26% of the first requests in reviewer
+    sessions reused a cached prefix because repository-specific environment
+    information appeared before the cache breakpoint.
+  - >
+    Separating the stable agent prompt and tool definitions from repository-
+    specific context raised first-request cache reuse to between 91% and 99.5%
+    across repositories.
+  - >
+    Moving the internal-standards reference index into the initial prompt
+    removed three file-reading turns. Calls per standards-review run fell from
+    15.9 to 9.6 and cost fell from $1.12 to $0.72.
+  - >
+    Cloudflare removed tools that sub-reviewers could not successfully invoke.
+    Before removal, 57% to 76% of sessions attempted a prohibited final-comment
+    tool call and then spent another model call recovering.
+  - >
+    Reviewers were instructed to read shared context and patches in parallel,
+    up to 150 KB in the first response, rather than repeatedly reading one file
+    per turn.
+  - >
+    For repeat reviews of the same merge request, Cloudflare conditionally
+    skipped reviewers with no relevant new work. On full-tier re-reviews,
+    AGENTS.md review was skipped 56% of the time, performance review 23%, and
+    documentation review 13%.
+  - >
+    Code-quality, security, and performance reviewers were changed to share an
+    identical initial prompt prefix containing tools, common rules, and all
+    patches. One reviewer writes the cache entry and the others wait briefly to
+    reuse it.
+  - >
+    Cloudflare attributes $0.65 of a $1.67 cost reduction to code changes and
+    $1.06 to model and reasoning-effort changes, while stating that these
+    sequential before-and-after comparisons are not a statistically controlled
+    experiment.
+  - >
+    In a randomized comparison, switching Sonnet reviewers from version 5 to
+    5.5 reduced cost per run by 62% for code quality, 58% for performance, and
+    47% for security. The models had the same per-token price, so the savings
+    came from fewer tokens.
+  - >
+    Code-quality review at high effort cost 61% more than medium effort and
+    produced 58% more critical and warning findings after one day. Cloudflare
+    retained high effort because subsequent quality analysis indicated that the
+    additional findings were valuable.
+  - >
+    After optimization, average review cost was $0.77 rather than $2.43, a 68%
+    reduction. Median review latency fell from 4 minutes 9 seconds to 1 minute
+    32 seconds, and 99th-percentile latency fell from 15 minutes 20 seconds to 4
+    minutes 41 seconds.
+  - >
+    The proportion of reviews taking more than five minutes fell from 37.9% in
+    the four weeks before September 14 to 0.7% after the changes.
+  - >
+    Authors acted on 59% of serious code-quality findings after optimization,
+    compared with 34% before. Findings leading to changes remained approximately
+    stable at 132 versus 145 per 1,000 reviews, within Cloudflare's stated margin
+    of error.
+  - >
+    Two models from different providers evaluated a blinded sample of 657
+    findings, with disagreements adjudicated by a third model. Important findings
+    per review were approximately stable at 0.28 before and 0.30 after, while
+    overstated critical or warning findings fell from 0.46 to 0.14 per review.
+  - >
+    Reviewer-specific results differed. Important performance findings fell by
+    about 64% at medium effort. Important security findings fell by about one
+    quarter, though Cloudflare reports that result was not statistically
+    significant.
+  - >
+    Reviews ending without a verdict fell from 0.79% to 0.27%, and security-
+    reviewer retries fell from 3.5% to 0.04%.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The measurements come from Cloudflare's production multi-agent code-review
+    system, which covers repositories on its standard CI path. The quality study
+    includes 657 findings, but individual reviewer-period groups contain only 35
+    to 66 findings and the post-change quality window was approximately one day.
+    Many optimizations were released sequentially, while only some model and
+    effort comparisons were randomized.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Execution, Verification, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  Cloudflare makes the internal configuration of a persistent agentic capability
+  subject to Selection. Prompt ordering, cache boundaries, available tools,
+  parallel retrieval, conditional reviewer execution, model version, and
+  reasoning effort all alter the system's cost, latency, reliability, and
+  verification outcomes. The results reject a one-dimensional fitness measure:
+  lower inference cost and faster completion can coexist with less noise and
+  stable code-quality detection, yet also with materially weaker performance
+  review. The viable configuration must therefore be selected per specialist
+  workload against the intended outcome, rather than applying one globally
+  cheaper model or effort level.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Refines C02 by demonstrating production selection among harness, model, and
+    effort variants under multiple constraints. Economic and execution gains are
+    not automatically engineering-fitness gains: code-quality review retained
+    important findings at high effort, whereas performance review lost important
+    findings at medium effort. Verification effectiveness must remain inside the
+    fitness function, measured separately for each differentiated capability.
+
+what_this_does_not_establish:
+  - >
+    Cloudflare reports on its own review system, models, prompts, repositories,
+    pricing, and engineering practices; the findings are not independently
+    replicated or directly generalizable to other agent workloads.
+  - >
+    Approximately 40% of savings came from code and harness changes and the rest
+    from model and effort changes, but most interventions were introduced
+    sequentially. Cloudflare explicitly states that the attribution is not a
+    statistically controlled experiment.
+  - >
+    The $2.43 and $0.77 values depend on provider prices, token accounting,
+    caching behavior, review-tier mix, and Cloudflare's workload; they do not
+    establish a universal per-review cost or savings rate.
+  - >
+    A higher rate of authors modifying flagged lines shows that a finding
+    influenced the next push, not that the finding was correct or prevented a
+    defect.
+  - >
+    The blinded quality assessment used models as judges rather than independent
+    human expert adjudication. The groups contain 35 to 66 findings each, and
+    the post-change window was approximately one day.
+  - >
+    Stable important code-quality findings do not establish stable security,
+    performance, release, documentation, or end-to-end production outcomes.
+  - >
+    The 64% reduction in important performance findings is a detected-review
+    outcome; the source does not quantify missed production regressions or their
+    operational impact.
+  - >
+    Faster and cheaper reviews do not independently establish higher developer
+    productivity, software quality, deployment safety, or business value.
+  - >
+    The article evaluates variants inside an already specialized multi-agent
+    reviewer. It does not compare cooperation with useful isolated review or
+    establish a new higher-order object under C03 or C04.
+
+open_question: >
+  For each specialized engineering agent, which model, reasoning effort,
+  context, and tool configuration minimizes total operating cost while
+  preserving the specific system-level failures that capability exists to
+  detect?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: measure-agent-cost-by-token-class
+    use_case: "Identify why the cost of a high-volume agent workflow changes over time."
+    problem: "Aggregate cache-hit rates can appear healthy while total cache reads, cache writes, output tokens, and model calls continue growing."
+    reported_practice: "Measure output, cache-write, and cache-read cost separately, together with calls and tokens per completed workflow."
+    selection_conditions: [observability, economics]
+  - id: share-stable-prompt-prefixes-across-agent-runs
+    use_case: "Reuse common tools and instructions across reviewers, repositories, and concurrent specialist agents."
+    problem: "Repository-specific values placed before a cache boundary prevent otherwise identical prompts from reusing cached prefixes."
+    reported_practice: "Place stable tool definitions, shared rules, and instructions before repository-specific context and coordinate concurrent reviewers so one writes the shared prefix while others reuse it."
+    selection_conditions: [context, execution, economics]
+  - id: remove-unusable-agent-tools
+    use_case: "Reduce wasted calls in a specialized agent whose permitted actions are narrower than the overall harness."
+    problem: "Agents repeatedly attempt visible but prohibited tools and then spend another model call recovering from rejection."
+    reported_practice: "Expose only tools the specialist is authorized and expected to use, reducing tool-schema context and failed-action recovery."
+    selection_conditions: [context, execution, economics]
+  - id: skip-unchanged-specialist-reviewers
+    use_case: "Re-review an updated change with several specialized review agents."
+    problem: "Running every reviewer again wastes inference when the new patch does not affect that specialist's concern."
+    reported_practice: "Classify whether a re-review contains relevant new work and conditionally skip specialists with nothing new to inspect."
+    selection_conditions: [execution, verification, economics]
+  - id: select-model-and-effort-per-verification-specialty
+    use_case: "Control the cost of differentiated code-quality, performance, and security reviewers."
+    problem: "A cheaper model or lower effort can preserve one review outcome while materially degrading another specialist's important findings."
+    reported_practice: "Randomize model and effort variants within each specialty and retain higher effort where acted-on or independently judged important findings justify the added cost."
+    selection_conditions: [verification, observability, economics]
+  - id: evaluate-agent-review-signal-not-finding-volume
+    use_case: "Determine whether fewer automated review comments represent improved precision or lost detection."
+    problem: "Raw finding counts cannot distinguish removed noise and inflated severity from missed important defects."
+    reported_practice: "Track whether authors act on findings and conduct blinded importance and severity assessment, while reporting sample size and uncertainty."
+    selection_conditions: [verification, observability]
+
+assessment:
+  assisted_by_ai: true
