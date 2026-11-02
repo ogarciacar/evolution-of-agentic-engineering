@@ -1,0 +1,186 @@
+source:
+  title: "The bridge to agent-scale Git infrastructure"
+  producer: "GitHub"
+  producer_type: organization
+  date: "2026-10-21"
+  url: "https://github.blog/engineering/architecture-optimization/the-bridge-to-agent-scale-git-infrastructure/"
+  type: engineering-blog
+  provenance: primary
+
+presentation:
+  headline: "Per-reference coordination raises write capacity for concurrent branches"
+  summary: >
+    GitHub reports that cross-region latency and repository-wide write
+    serialization prevented its busiest repositories from joining an Azure
+    migration already covering 99.99999% of repositories. Narrowing
+    serialization from the whole repository to each reference produced three to
+    four times higher throughput for writes to different references in internal
+    tests, while object-backed virtual replicas create a path to scale read
+    compute separately from the write quorum.
+
+observed:
+  - >
+    GitHub reports that 99.99999% of its repositories now have a copy in Azure.
+    Most repositories have two of five replicas there, and Azure serves about
+    half of Git traffic.
+  - >
+    The remaining 0.00001% are among GitHub's busiest repositories. A replica in
+    the target Azure region is about 1,000 miles from GitHub's data centers,
+    adding approximately 25 milliseconds per network round trip, while a write
+    requires multiple round trips.
+  - >
+    In the current Spokes architecture, a quorum needs only a majority to commit
+    a write but waits for every healthy replica, up to a timeout, before moving
+    on. The slowest healthy replica therefore determines write latency.
+  - >
+    Each write also holds a repository-wide lock until it commits. This permits
+    only one write in flight, so latency from a distant healthy replica lowers
+    the repository's write-throughput ceiling and causes a queue under load.
+  - >
+    GitHub observes that consistency ordering is generally required per Git
+    reference, whereas updates to different references usually do not depend on
+    each other. Agents and developers commonly push to their own branches.
+  - >
+    GitHub is changing the quorum's serialization scope from the whole
+    repository to individual references. Writes contending on one reference
+    remain ordered, while writes to different references can proceed
+    concurrently despite each experiencing cross-region latency.
+  - >
+    In internal tests using realistic traffic, writes to different references
+    consistently achieved three to four times higher throughput at lower
+    latency with per-reference serialization.
+  - >
+    GitHub reports that most repositories receive between 100 and 1,000 reads
+    for every write. Existing replicas serve both reads and writes, causing the
+    workloads to compete for resources and preventing independent scaling.
+  - >
+    GitHub is introducing a virtual write replica that participates in the
+    quorum, streams accepted writes to Azure Blob Storage, serves no reads, and
+    makes acknowledgment conditional on durability in object storage.
+  - >
+    The virtual write replica coalesces transactions on different references
+    into one set of object-storage network operations. GitHub states that
+    per-reference serialization prevents the added object-storage latency from
+    becoming a repository-wide throughput bottleneck.
+  - >
+    Virtual read replicas can warm caches from object storage and accept read
+    traffic without joining the write quorum. In internal tests, GitHub's load
+    generator reached its own limit before finding the virtual read replicas'
+    ceiling.
+  - >
+    GitHub identifies limitations in this intermediate design: background
+    reconciliation initially makes virtual read replicas unsuitable for some
+    read workloads, and the full-copy write quorum remains the next constraint
+    on write throughput.
+  - >
+    GitHub reports that Spokes routes, balances, repairs, and rebalances
+    repository data while serving well over 100 billion internal repository
+    operations per day.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The migration covers a copy of 99.99999% of GitHub repositories, Azure serves
+    about half of Git traffic, and Spokes handles more than 100 billion internal
+    repository operations daily. The throughput and read-scale results are
+    internal tests rather than published production experiments, and the source
+    does not disclose absolute throughput, latency distributions, workload
+    parameters, or independent replication.
+
+mapping:
+  stages: [Selection]
+  conditions: [Execution, Coordination, Observability, Economics]
+
+claims:
+  - id: C02
+    relationship: SUPPORTS
+
+interpretation: >
+  This follow-up supplies concrete evidence for the coordination pressure
+  identified in GitHub's October 6 architecture account. When developers and
+  agents write concurrently to independent branches, repository-wide ordering
+  makes unrelated work compete for one serialized path. Cross-region durability
+  then turns latency into a throughput limit. Moving the agreement boundary to
+  the smallest state that requires ordering—the individual reference—allows
+  independent writes to progress concurrently without discarding consistency on
+  shared references. Separating read compute, write coordination, and durable
+  object storage further shows infrastructure capabilities being selected and
+  scaled according to their distinct workload constraints.
+
+model_implication:
+  verdict: "SUPPORTS"
+  explanation: >
+    Supports C02 with a measured infrastructure adaptation to concurrent branch
+    activity: per-reference serialization delivered three to four times higher
+    throughput for independent writes in GitHub's internal testing. The result
+    strengthens Selection evidence that viable agent-scale substrates minimize
+    unnecessary coordination while retaining narrow consistency boundaries. It
+    does not establish C03 because the advantage comes from infrastructure
+    coordination among repository operations, not evidence that cooperating
+    agentic engineering objects outperform useful isolated agents.
+
+what_this_does_not_establish:
+  - >
+    GitHub attributes the timing and shape of its infrastructure work to rapidly
+    growing agent traffic, but this source does not publish the proportion of
+    Git operations produced by agents or isolate agents as the cause of the
+    measured bottleneck.
+  - >
+    The three-to-four-times throughput result is an internal test described as
+    realistic traffic. GitHub does not publish the benchmark configuration,
+    absolute throughput, latency distribution, repository characteristics, or
+    independent replication.
+  - >
+    The virtual read-replica result is bounded by the load generator reaching
+    its own limit; it does not measure the replicas' actual ceiling or establish
+    an unbounded scaling property.
+  - >
+    Per-reference concurrency benefits workloads whose writes target different
+    references. Writes contending on the same branch or other reference must
+    still serialize.
+  - >
+    The remaining repositories represent only 0.00001% by count but are among
+    the busiest; the source does not quantify their share of traffic or provide
+    a repository count.
+  - >
+    GitHub describes an intermediate migration step. Some virtual read workloads
+    still require inline reconciliation, and the write quorum remains a stated
+    bounding factor.
+  - >
+    Higher repository-operation throughput does not by itself establish better
+    software quality, productivity, delivery outcomes, or business value.
+  - >
+    The source does not compare cooperating agents with isolated agents or show
+    differentiated persistent agent roles, so it does not establish C03 or C04.
+
+open_question: >
+  As concurrent agent branches increase, when does contention move from
+  repository-wide coordination to shared references, verification systems, or
+  merge serialization, and which constraint then determines useful throughput?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: serialize-repository-writes-per-reference
+    use_case: "Accept concurrent pushes to independent developer and agent branches across regions."
+    problem: "A repository-wide lock makes unrelated reference updates share one queue, so cross-region latency sets the entire repository's write-throughput ceiling."
+    reported_practice: "Order writes per reference, preserving consistency for contending updates while allowing writes to different references to remain in flight concurrently."
+    selection_conditions: [execution, coordination]
+  - id: separate-read-scale-from-write-quorum
+    use_case: "Scale a repository workload with hundreds of reads per write."
+    problem: "Serving reads and writes from the same full replicas makes read capacity compete with writes and adds durable participants to the coordinated architecture."
+    reported_practice: "Use object storage as durable state and add ephemeral virtual read replicas that warm caches and serve reads without joining the write quorum."
+    selection_conditions: [execution, economics]
+  - id: make-object-storage-a-quorum-member
+    use_case: "Move repository durability to object storage without acknowledging writes before they are durable."
+    problem: "Asynchronous object persistence could separate write acknowledgment from durable storage, while synchronous persistence adds network latency."
+    reported_practice: "Represent object storage through a write-only virtual replica in the quorum and combine disjoint-reference transactions into shared network operations."
+    selection_conditions: [execution, coordination, observability]
+  - id: report-infrastructure-benchmark-boundaries
+    use_case: "Evaluate whether a new repository architecture removes the intended bottleneck."
+    problem: "Relative throughput gains and load-generator saturation can be mistaken for production capacity or an absolute system ceiling."
+    reported_practice: "Distinguish internal realistic-traffic tests, limiting components, incomplete workload coverage, and the next known architectural constraint."
+    selection_conditions: [observability]
+
+assessment:
+  assisted_by_ai: true
