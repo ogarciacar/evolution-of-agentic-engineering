@@ -1,0 +1,132 @@
+source:
+  title: "PROBE: Frontier Coding Agents Find Different Bugs Than Maintainers Fix"
+  producer: "Paina et al."
+  producer_type: authors
+  date: "2026-10-26"
+  url: "https://arxiv.org/abs/2610.35987"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Valid agent findings and maintainer-prioritized bugs are different verification targets"
+  summary: >
+    PROBE compares repository-wide agent audits with 2,457 bugs maintainers fixed
+    across 20 repositories over the following 18 months. All evaluated agents
+    recover less than 21% of that reference set and match it with less than 9%
+    precision, yet human and model evaluation judges about 85% of sampled agent
+    findings valid. Correct defect detection therefore does not establish that an
+    agent selected the defects maintainers consider important enough to fix.
+
+observed:
+  - >
+    The benchmark snapshots 20 Python, JavaScript, and TypeScript repositories
+    and collects 2,457 bugs already present in those snapshots that maintainers
+    fixed during the following 18 months.
+  - >
+    Agents audit the snapshot without later repository history or network access.
+    The harness divides 4,468 files into 740 focused passes while retaining
+    repository context and call-graph snippets.
+  - >
+    Across frontier-model configurations, recall against the maintainer-fixed
+    reference remains below 21% and precision remains below 9%.
+  - >
+    Stronger models raise recall from approximately 8% to 17% without improving
+    precision. Higher effort mainly increases the number of reported findings.
+  - >
+    The highest-recall full-benchmark run reports 8,285 findings, recovers 20.8%
+    of reference bugs, and has 6.7% precision against that reference.
+  - >
+    An unmatched finding is not necessarily false because the reference contains
+    only bugs maintainers happened to fix within the observation window.
+  - >
+    Human and model evaluators judge approximately 85% of assessed findings
+    valid. Blind manual grading agrees with the model panel on 93% of the 131
+    cases where both reach a conclusive judgment.
+  - >
+    Agent bug-type distributions resemble one another but differ substantially
+    from the maintainer-fixed distribution. Agents overrepresent arithmetic,
+    comparison, degenerate-value, regex, and state-restoration problems.
+  - >
+    Repeated agent runs converge more strongly on similar bug categories than on
+    the distribution maintainers later repair.
+  - >
+    The authors release the benchmark method, reference bugs, harness, matching
+    procedure, and leaderboard.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    PROBE includes 2,457 later-fixed bugs from 20 repositories and whole-repository
+    audits across multiple frontier models. Most configurations have one run for
+    cost reasons, the historical fix set is necessarily incomplete, and sampled
+    validity judgments cannot establish the validity of every unmatched finding.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Verification, Observability, Economics, Learning]
+
+claims:
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  PROBE separates verification validity from engineering relevance. An agent can
+  identify a real defect yet fail to identify the defects an organization will
+  prioritize under its operational, user, risk, and maintenance constraints.
+  Conversely, low precision against an incomplete historical reference must not
+  be mislabeled hallucination. Selection therefore needs at least two outcomes:
+  whether a finding is technically valid and whether it deserves scarce repair
+  and review attention. Increasing reasoning effort or finding volume does not
+  solve this prioritization gap when the discovered bug distribution remains
+  misaligned with maintainer action.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Refines C02 by showing that correctness alone is not the complete fitness
+    function for proactive verification. Agents find many plausible real bugs,
+    but recover few maintainer-fixed bugs and systematically search a different
+    bug distribution. Selection must incorporate relevance, severity, exposure,
+    and organizational priority rather than maximizing valid finding volume.
+
+what_this_does_not_establish:
+  - "The paper is an arXiv preprint and does not establish completed peer review or independent replication."
+  - "The maintainer-fixed set is a partial reference: unfixed, privately reported, duplicated, or later-fixed bugs are absent."
+  - "A maintainer fixing a bug does not provide a perfect ranking of severity or value; priorities depend on reports, ownership, visibility, and available capacity."
+  - "The approximately 85% validity rate comes from sampled findings, excludes inconclusive judgments, and partly relies on model evaluators."
+  - "Most model configurations use one full run, limiting estimates of run-to-run variance."
+  - "The repositories cover three languages and open-source maintenance contexts, not every production codebase or organizational priority system."
+  - "More findings and higher recall can increase human triage cost; the study does not measure net maintenance value or reviewer burden."
+  - "The study evaluates audit configurations, not cooperating persistent agents or specialized higher-order systems, so it does not establish C03 or C04."
+
+open_question: >
+  Which repository, operational, user-impact, and maintainer-feedback signals let
+  an audit agent rank technically valid findings by the probability that fixing
+  them will produce meaningful engineering value?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: separate-bug-validity-from-maintenance-relevance
+    use_case: "Evaluate proactive bug findings from a coding agent."
+    problem: "Matching only historical fixes labels valid but unprioritized findings as false, while validity alone ignores whether a finding merits attention."
+    reported_practice: "Report technical validity and overlap with maintainer-fixed bugs as separate measures."
+    selection_conditions: [verification, observability]
+  - id: evaluate-repository-audits-against-future-fixes
+    use_case: "Test whether an agent can proactively find defects maintainers later repair."
+    problem: "Known benchmark bugs can leak through history or prompts, while synthetic defects may not reflect maintenance priorities."
+    reported_practice: "Freeze repositories, hide future history and network access, then compare findings with bugs fixed during a defined future window."
+    selection_conditions: [context, verification]
+  - id: classify-agent-and-maintainer-bug-distributions
+    use_case: "Understand why valid agent findings overlap weakly with maintainer fixes."
+    problem: "Aggregate precision cannot reveal systematic differences in the kinds of defects agents and maintainers select."
+    reported_practice: "Compare bug-category distributions and repeated runs to identify persistent over- and under-selection."
+    selection_conditions: [observability, learning]
+  - id: budget-human-attention-for-audit-volume
+    use_case: "Deploy a whole-repository audit agent that can return thousands of findings."
+    problem: "Increasing recall by increasing report volume can overwhelm triage without improving relevance."
+    reported_practice: "Track findings, recall, reference overlap, validity, and evaluation cost together rather than optimizing recall alone."
+    selection_conditions: [verification, economics]
+
+assessment:
+  assisted_by_ai: true
