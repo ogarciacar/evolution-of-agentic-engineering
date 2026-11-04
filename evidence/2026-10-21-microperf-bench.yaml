@@ -1,0 +1,187 @@
+source:
+  title: "Benchmarking Coding Agents for System-Level Performance Optimization"
+  producer: "Zhang et al."
+  producer_type: authors
+  date: "2026-10-21"
+  url: "https://arxiv.org/abs/2610.29695"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Functionally correct agent patches often fail to improve the system bottleneck"
+  summary: >
+    MicroPerf-Bench evaluates coding agents on end-to-end performance
+    optimization across 65 injected microservice anti-pattern instances. Across
+    1,755 runs, the strongest of nine model-and-scaffold configurations recovered
+    only 42.0% of the injected degradation on average. The dominant zero-score
+    outcome was not broken code but a functionally correct, rule-compliant change
+    that produced no end-to-end performance gain, separating implementation
+    correctness from system-level engineering effectiveness.
+
+observed:
+  - >
+    The authors construct 65 optimization instances across seven open-source
+    microservice systems and nine performance anti-patterns. Each instance has a
+    containerized execution environment, functional tests, and a mixed-workload
+    performance evaluation.
+  - >
+    Rather than relying on naturally occurring fixes, the benchmark injects
+    empirically grounded anti-patterns into working systems, verifies that
+    functionality remains intact, and measures the resulting end-to-end
+    degradation against the strongest original version.
+  - >
+    The evaluated anti-patterns include cross-service problems such as chatty
+    communication, nano-service decomposition, hub topologies, shared-database
+    serialization, and cache misuse.
+  - >
+    The evaluation crosses three coding-agent scaffolds—OpenCode, OpenHands, and
+    Claude Code—with three base models—GLM-5.2, Qwen3.7-Max, and
+    DeepSeek-V4-Pro—for nine configurations.
+  - >
+    Each baseline configuration is run three times on every instance, producing
+    1,755 runs. Agents receive the same optimization objective, permitted-change
+    scope, functional correctness gates, and fairness constraints.
+  - >
+    Scores measure how much of the injected end-to-end performance degradation a
+    patch recovers while retaining functionality and respecting constraints.
+    Adding hardware, disabling tracing, or weakening transaction safety does not
+    count as a valid optimization.
+  - >
+    Average recovery ranges from 23.4% for Claude Code with DeepSeek-V4-Pro to
+    42.0% for OpenHands with GLM-5.2. The mean across configurations is 34.8%,
+    and 16.7% of runs fully recover the injected degradation.
+  - >
+    The model choice has a statistically significant effect in the authors'
+    analysis: GLM-5.2 exceeds DeepSeek-V4-Pro by 12.7 score points with a
+    reported p-value of 0.001. Differences among the three scaffolds are not
+    statistically significant at the reported thresholds.
+  - >
+    Among 982 zero-score trials, 48.7% produce no performance gain despite
+    satisfying functional and fairness constraints, 20.5% fail functional
+    correctness, 15.3% violate fairness constraints, and 11.3% fail to build.
+  - >
+    Failure modes vary by system. Robot Shop and Pitstop zero-score trials are
+    dominated by no-gain outcomes, while PetClinic and Social Network produce
+    more functional-correctness failures.
+  - >
+    The authors identify system-level bottleneck localization as the central
+    challenge: a locally plausible code change can compile and preserve behavior
+    without changing the service interaction that determines end-to-end latency.
+  - >
+    In an exploratory augmentation, a profiling tool gives agents workload
+    execution, performance profiles, and distributed traces. Claude Code with
+    Qwen3.7-Max scores 47.7 in one run across the 65 instances, compared with a
+    three-run baseline mean of 39.4 and the best baseline configuration's 42.0.
+  - >
+    The authors release the benchmark environments, instances, workload scripts,
+    agent integrations, and evaluation data.
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The study reports 1,755 baseline runs over 65 controlled instances, seven
+    microservice systems, nine anti-patterns, three scaffolds, and three models.
+    This provides repeated execution-grounded evidence, but the tasks use
+    deliberately injected anti-patterns and fixed workloads. The profiling
+    augmentation is exploratory and has only one run per instance rather than
+    the three baseline repetitions.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Execution, Verification, Observability, Learning]
+
+claims:
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  MicroPerf-Bench refines Selection by separating several outcomes that a
+  function-level or repository-level benchmark can collapse into one notion of
+  success. A patch may build, pass functional checks, respect operational
+  constraints, and still have zero fitness for the stated optimization goal
+  because it changes the wrong component or misses an interaction-level
+  bottleneck. End-to-end workload measurement is therefore part of Verification,
+  while profiles and distributed traces are Context that can guide agents toward
+  the causally relevant part of the system. Model, scaffold, target system, and
+  observability configuration are selectable variants, but useful optimization
+  must be judged by verified system effects rather than plausible edits.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Refines C02 by showing that functional correctness and constraint compliance
+    are necessary but insufficient fitness criteria for performance engineering.
+    The most common zero-score result is a valid change with no end-to-end gain.
+    Selection must therefore include the intended system-level outcome and the
+    information needed to localize its bottleneck. The exploratory profiling
+    result suggests observability may improve this fitness, but its single-run
+    design is not strong enough to establish the size or reliability of the
+    effect.
+
+what_this_does_not_establish:
+  - >
+    The paper is an arXiv preprint and does not establish completed peer review
+    or independent replication.
+  - >
+    Benchmark instances contain injected anti-patterns rather than naturally
+    occurring production regressions. Their distribution and recognizability may
+    differ from real performance incidents and accumulated architectural debt.
+  - >
+    Seven open-source systems and nine anti-pattern categories do not represent
+    every language, architecture, workload, deployment environment, or source of
+    performance degradation.
+  - >
+    Fixed mixed workloads make scoring reproducible but do not establish that a
+    patch improves other traffic distributions, production tail latency,
+    throughput, resource use, or cost.
+  - >
+    The evaluated model and scaffold set does not include every frontier model or
+    production agent harness, and relative rankings may change with prompts,
+    tools, budgets, or later versions.
+  - >
+    Three repetitions per baseline cell expose some run variance but remain a
+    limited basis for estimating rare failures or stable per-system performance.
+  - >
+    The profiling augmentation has one run across the instances. Comparing its
+    47.7 score with a three-run baseline mean does not establish a replicated
+    causal improvement or isolate which profiling capability mattered.
+  - >
+    Recovering injected performance loss is a benchmark outcome; it does not
+    measure engineering time saved, operational risk, maintainability, or
+    business value.
+  - >
+    The study evaluates individual coding-agent configurations, not cooperation
+    among multiple persistent agents or differentiated agent roles, so it does
+    not establish C03 or C04.
+
+open_question: >
+  Which runtime signals and system representations let coding agents reliably
+  localize cross-service bottlenecks and verify improvements across workloads
+  without exploiting the measurement setup or weakening operational guarantees?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: verify-agent-optimization-end-to-end
+    use_case: "Evaluate an agent patch intended to improve a distributed system's performance."
+    problem: "A patch can compile and pass functional tests while changing code that does not control the end-to-end bottleneck."
+    reported_practice: "Rebuild the complete system, run representative mixed workloads, and score the measured recovery of end-to-end degradation rather than local code plausibility."
+    selection_conditions: [execution, verification, observability]
+  - id: gate-performance-gains-on-correctness-and-fairness
+    use_case: "Prevent an optimization agent from obtaining speedups by removing required work or operational safeguards."
+    problem: "Raw latency improvements can come from adding resources, disabling tracing, weakening transactions, or breaking behavior."
+    reported_practice: "Apply functional tests and explicit fairness constraints before crediting measured performance recovery."
+    selection_conditions: [verification, execution]
+  - id: provide-distributed-performance-context
+    use_case: "Help a coding agent diagnose latency emerging from interactions among microservices."
+    problem: "Repository code alone may not reveal which service, dependency, or request path controls an end-to-end workload."
+    reported_practice: "Expose repeatable workload execution, performance profiles, and distributed traces as agent tools, then compare verified outcomes with and without that context."
+    selection_conditions: [context, observability, learning]
+  - id: classify-agent-optimization-failures
+    use_case: "Understand why a performance-engineering agent receives no credit."
+    problem: "A zero score can hide distinct causes including no measurable gain, broken functionality, forbidden shortcuts, or build failure."
+    reported_practice: "Classify zero-score trials by failure stage and report the distribution per system so tool, model, and environment changes target the actual constraint."
+    selection_conditions: [verification, observability, learning]
+
+assessment:
+  assisted_by_ai: true
