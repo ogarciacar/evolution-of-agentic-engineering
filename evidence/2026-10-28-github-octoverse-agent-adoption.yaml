@@ -1,0 +1,158 @@
+source:
+  title: "Octoverse: Commits, pushes, reach new highs in 2026 as developers build with agents"
+  producer: "GitHub"
+  producer_type: organization
+  date: "2026-10-28"
+  url: "https://github.blog/news-insights/octoverse/octoverse-commits-pushes-reach-new-highs-in-2026-as-developers-build-with-agents/"
+  type: report
+  provenance: primary
+
+presentation:
+  headline: "Agent-started pull requests reached ecosystem scale while review remained the selection point"
+  summary: >
+    GitHub reports that more than 40% of pull requests began with a detectable
+    agent's first draft in September 2026, up from 17% in March and representing
+    110 million pull requests that month. Agent-started changes were more often
+    multi-file and merged within two weeks at a higher rate than changes without
+    detected agent involvement, but the telemetry measures activity and timing,
+    not correctness, productivity, or value.
+
+observed:
+  - >
+    More than 40% of pull requests on GitHub started with a detectable coding
+    agent's first draft in September 2026, up from 17% in March.
+  - >
+    GitHub reports 110 million agent-started pull requests in September, about
+    six times the March volume.
+  - >
+    Approximately 87% of agent-started pull requests changed multiple files,
+    compared with 79% of pull requests without detected agent involvement.
+  - >
+    The share of agent-started pull requests merged within two weeks rose from
+    83% in February to 90% in September. The comparison group remained around
+    86% in both months.
+  - >
+    Among repositories created during the Octoverse year, the average repository
+    with an agent configuration file recorded eight times as many commits as the
+    average new repository without one.
+  - >
+    GitHub reports 34.3 billion commits, 17.9 billion pushes, 45.4 billion
+    Actions jobs, and 1.3 billion merged pull requests during the 12 months ending
+    September 30, 2026.
+  - >
+    Among GitHub Copilot monthly active users, 55% used agentic features, up from
+    35% a year earlier. Copilot cloud-agent use grew 230% year over year, compared
+    with 85% growth for agent chat.
+  - >
+    In September, 61% of Copilot users who explicitly selected models used more
+    than one model. Paid users used 47 distinct models, and no model handled more
+    than 25% of qualifying requests.
+  - >
+    GitHub reports that AI-assisted code review and GitHub Advanced Security use
+    each grew more than 90% year over year, while push protection performed 5.8
+    billion secret scans.
+  - >
+    GitHub defines an agent signal as detectable telemetry and explicitly calls
+    it a floor because not all agent use can be observed.
+
+scale:
+  label: "Scale signal"
+  summary: >
+    The report covers public and private GitHub repositories from October 1,
+    2025 through September 30, 2026 unless otherwise noted. It provides unusually
+    broad platform telemetry, including 110 million detected agent-started pull
+    requests in September, but it is first-party observational data and does not
+    identify all detectable agents or measure downstream software outcomes.
+
+mapping:
+  stages: [Apparition, Selection]
+  transition:
+    from: Apparition
+    to: Selection
+  conditions: [Execution, Verification, Coordination, Observability, Economics]
+
+claims:
+  - id: C01
+    relationship: SUPPORTS
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  The telemetry supports Apparition at ecosystem scale: agent-originated drafts
+  are no longer a marginal workflow on GitHub. It refines Selection because the
+  growing unit is not autonomous delivery but a proposed change entering review,
+  security, CI, and merge systems. More agent-started work and faster merging
+  increase the importance of selecting which changes deserve attention and which
+  verification outcomes justify integration. The report also shows active
+  selection among models, but none of the activity measures proves that more
+  code or quicker merging produces better engineering outcomes.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Supports C01 with direct platform evidence that agents initiated more than
+    40% of pull requests in one month. Refines C02 by locating the remaining
+    human and system selection boundary at review and merge: agents generate the
+    draft, while people and verification systems decide whether it works and
+    belongs. Merge timing is an execution signal, not evidence of correctness or
+    value, so Selection must be evaluated with outcome measures beyond activity.
+
+what_this_does_not_establish:
+  - >
+    GitHub detects only some agent use and does not enumerate every included
+    agent, so the reported share is a lower bound with an unspecified detection
+    boundary.
+  - >
+    An agent-started pull request means its first draft came from an agent; it
+    does not establish how much subsequent work was performed by humans or agents.
+  - >
+    A pull request merged within two weeks is not evidence that it was correct,
+    valuable, defect-free, unreverted, or cheaper to review.
+  - >
+    The agent and comparison groups are observational rather than randomized and
+    can differ in repository, task, author, organization, and change complexity.
+  - >
+    The eight-times commit comparison does not show that agent configuration
+    files caused higher activity. Repositories without such files may use AI,
+    and repository populations may differ systematically.
+  - >
+    Commits, pushes, Actions jobs, merged pull requests, and changed-file counts
+    measure activity rather than productivity, software quality, or business value.
+  - >
+    GitHub's own products contribute to the measured ecosystem, and the report is
+    not an independently audited census of software development outside GitHub.
+  - >
+    The evidence does not compare cooperating agents with isolated agents or
+    establish persistent differentiated roles, so it does not support C03 or C04.
+
+open_question: >
+  As agent-started changes become a large share of incoming work, which outcome
+  measures and review mechanisms distinguish useful throughput from accelerated
+  production of low-value or risky changes?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: measure-agent-origin-at-change-entry
+    use_case: "Track how agentic workflows enter a software delivery system."
+    problem: "Commit totals and self-reported tool use cannot identify where an agent first contributes a reviewable change."
+    reported_practice: "Record detectable agent involvement at the first pull-request draft and publish the detection boundary as a lower bound."
+    selection_conditions: [observability]
+  - id: separate-agent-throughput-from-outcomes
+    use_case: "Evaluate rapidly growing agent-started pull-request volume."
+    problem: "Merge rate, time to merge, commit volume, and changed-file counts can rise without showing correctness or engineering value."
+    reported_practice: "Treat activity and merge timing as workflow measures that require separate quality, rework, defect, and value outcomes."
+    selection_conditions: [verification, observability]
+  - id: preserve-review-as-agent-selection-boundary
+    use_case: "Integrate agent-generated drafts into established delivery workflows."
+    problem: "High generation volume can exceed the attention available to decide whether changes work and belong."
+    reported_practice: "Route agent drafts through pull-request review, security scanning, CI, and explicit merge decisions rather than treating generation as delivery."
+    selection_conditions: [verification, coordination]
+  - id: observe-model-selection-in-use
+    use_case: "Design a platform where developers use several models for different engineering work."
+    problem: "A single default model obscures task-dependent choices in capability, speed, and cost."
+    reported_practice: "Measure explicit model selection separately from automatic routing and track how users retain multiple model classes in rotation."
+    selection_conditions: [execution, observability, economics]
+
+assessment:
+  assisted_by_ai: true
