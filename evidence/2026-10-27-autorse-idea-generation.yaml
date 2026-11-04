@@ -1,0 +1,99 @@
+source:
+  title: "AutoRSE: Evaluating LLM Agents as Recommendation Engineers for Self-Evolving Recommender Systems"
+  producer: "Tian et al."
+  producer_type: authors
+  date: "2026-10-27"
+  url: "https://arxiv.org/abs/2610.37228"
+  type: paper
+  provenance: primary
+
+presentation:
+  headline: "Agents optimize established approaches more reliably than they generate better ones"
+  summary: >
+    AutoRSE evaluates recommendation-engineering agents across six industrial-grade
+    tasks. Agents improve baselines in 35 of 42 settings by 16.1% on average, but
+    trajectory analysis attributes most gains to tuning, training strategies, and
+    ensembling rather than algorithmic innovation. Supplying research or expert
+    ideas produces 13.35% greater gains than agent-generated ideas, exposing idea
+    generation as a distinct Learning bottleneck.
+
+observed:
+  - "AutoRSE covers six recommendation tasks, three frontier models, three agent harnesses, and seven supported model-harness combinations."
+  - "Each task provides an initial codebase, dataset, objective, verifier, one H200 GPU, and a fixed 12-hour budget; each setting has three independent runs."
+  - "Agents improve the baseline in 35 of 42 evaluated settings and on five of six tasks, with 16.1% average relative improvement."
+  - "Average gains differ sharply by task family: 29.2% for generative recommendation and 3.1% for click-through-rate prediction."
+  - "Trajectory analysis classifies 91.7% of agent experiments as engineering-level optimization, dominated by hyperparameter tuning, training strategies, and model ensembling."
+  - "Genuine algorithmic changes are rare, while algorithmic novelty correlates positively with performance improvement at a reported Pearson correlation of 0.79."
+  - "In idea-injection experiments, agents receiving ideas from frontier research or human experts achieve 13.35% greater average score gains than agents relying on self-generated ideas."
+  - "Agents operate without open Internet access or hidden test labels and must submit outputs to task-specific verification."
+  - "The authors release the evaluation framework and implementation."
+
+scale:
+  label: "Evidence boundary"
+  summary: >
+    The study evaluates 42 settings with three runs each across six expensive
+    recommendation tasks. It provides trajectory-level evidence under controlled
+    compute budgets, but covers one engineering domain and uses offline benchmark
+    metrics rather than production recommendation outcomes.
+
+mapping:
+  stages: [Selection]
+  conditions: [Context, Execution, Verification, Learning, Economics]
+
+claims:
+  - id: C02
+    relationship: REFINES
+
+interpretation: >
+  AutoRSE separates executing optimization search from generating valuable new
+  approaches. Current agents can repeatedly tune, train, combine, and implement
+  existing methods, yet rarely originate the algorithmic ideas associated with
+  larger gains. External research and expert ideas become high-value Context that
+  the agent can execute against. Selection must therefore evaluate ideation and
+  implementation separately: improved benchmark scores do not imply autonomous
+  Learning has produced a better conceptual approach.
+
+model_implication:
+  verdict: "REFINES"
+  explanation: >
+    Refines C02 by identifying idea generation as a distinct constraint after
+    execution and optimization become effective. The 13.35% advantage from
+    injected ideas suggests that selecting and supplying higher-quality hypotheses
+    can matter more than further autonomous search within familiar strategies.
+
+what_this_does_not_establish:
+  - "The paper is an arXiv preprint and does not establish completed peer review or independent replication."
+  - "Six recommendation tasks do not establish a general limit on invention across software engineering or scientific research."
+  - "The tasks use reproduced baselines, fixed compute budgets, and offline metrics rather than production traffic or business outcomes."
+  - "The 16.1% mean hides large variation between generative recommendation and mature click-through-rate tasks."
+  - "Novelty classifications and idea quality depend on the authors' taxonomy and selected research or expert ideas."
+  - "Injected ideas may provide both conceptual quality and additional task-specific context; the study does not isolate every mechanism behind the gain."
+  - "Three runs per setting provide limited evidence about rare failures and long-run stability."
+  - "The study does not compare cooperating persistent agents or establish differentiated higher-order roles under C03 or C04."
+
+open_question: >
+  Which feedback, research-retrieval, and hypothesis-selection mechanisms let
+  engineering agents generate genuinely better approaches rather than repeatedly
+  optimizing established ones?
+
+practice_assessment:
+  status: assessed
+practice_observations:
+  - id: separate-agent-optimization-from-innovation
+    use_case: "Evaluate an agent that autonomously improves an engineering system."
+    problem: "A higher final score can come from tuning and ensembling without producing a better underlying approach."
+    reported_practice: "Classify trajectory experiments by optimization type and score algorithmic novelty separately from final performance."
+    selection_conditions: [learning, verification, observability]
+  - id: inject-expert-ideas-before-agent-execution
+    use_case: "Use agents where high-quality hypotheses exist in research or expert knowledge."
+    problem: "Agents may implement and test ideas effectively while generating weak ideas themselves."
+    reported_practice: "Provide curated research or expert ideas, then let the agent implement, optimize, and verify them under the same budget."
+    selection_conditions: [context, execution, learning]
+  - id: evaluate-agents-under-fixed-engineering-budgets
+    use_case: "Compare model-harness configurations on expensive iterative optimization tasks."
+    problem: "Unbounded compute and unequal environments confound whether an agent configuration is more effective."
+    reported_practice: "Hold task assets, hardware, time budget, verifier, and run count constant across supported configurations."
+    selection_conditions: [execution, verification, economics]
+
+assessment:
+  assisted_by_ai: true
